@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('allocated_at');
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->index(['rent_payment_id', 'rent_invoice_id']);
         });
