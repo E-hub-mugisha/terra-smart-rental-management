@@ -1,988 +1,628 @@
 @extends('layouts.app')
 
 @section('title', 'Property Managers')
+
 @section('page_heading', 'Property Managers')
+
 @section('page_subtitle', 'Manage manager accounts, employment details and access status.')
 
 @push('styles')
 <style>
-    .manager-page {
-        --manager-orange: var(--terra-orange, #D05208);
-        --manager-navy: var(--terra-navy, #19265d);
-        --manager-muted: var(--terra-muted, #748094);
-        --manager-border: var(--terra-border, #e7eaf0);
-        color: var(--manager-navy);
-    }
-
-    .manager-hero {
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        padding: 25px 28px;
-        margin-bottom: 22px;
-        border: 1px solid var(--manager-border);
-        border-radius: 17px;
-        background: linear-gradient(120deg, #fff 0%, #fff9f5 100%);
-    }
-
-    .manager-hero::after {
-        content: "";
-        position: absolute;
-        top: -95px;
-        right: -50px;
-        width: 210px;
-        height: 210px;
-        border-radius: 50%;
-        background: rgba(208, 82, 8, .055);
-        pointer-events: none;
-    }
-
-    .manager-eyebrow {
-        margin-bottom: 9px;
-        color: var(--manager-orange);
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 1.4px;
-        text-transform: uppercase;
-    }
-
-    .manager-page-title {
-        margin: 0 0 8px;
-        color: var(--manager-navy);
-        font-size: clamp(23px, 3vw, 29px);
-        font-weight: 800;
-        letter-spacing: -.6px;
-    }
-
-    .manager-page-description {
-        margin: 0;
-        color: var(--manager-muted);
-        font-size: 13px;
-        line-height: 1.7;
-    }
-
-    .manager-hero-icon {
-        z-index: 1;
-        display: grid;
-        place-items: center;
-        flex-shrink: 0;
-        width: 65px;
-        height: 65px;
-        border-radius: 18px;
-        background: #fff0e5;
-        color: var(--manager-orange);
-        font-size: 27px;
-    }
-
-    .manager-primary-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        min-height: 43px;
-        padding: 11px 17px;
-        border: 1px solid var(--manager-orange);
-        border-radius: 9px;
-        background: var(--manager-orange);
-        color: #fff;
-        font-size: 12px;
-        font-weight: 700;
-        text-decoration: none;
-        transition: all .2s ease;
-    }
-
-    .manager-primary-btn:hover {
-        border-color: #b84607;
-        background: #b84607;
-        color: #fff;
-        transform: translateY(-1px);
-    }
-
-    .manager-stats {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 15px;
-        margin-bottom: 22px;
-    }
-
-    .manager-stat-card {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        min-width: 0;
-        padding: 21px;
-        border: 1px solid var(--manager-border);
-        border-radius: 14px;
-        background: #fff;
-        box-shadow: 0 3px 15px rgba(25, 38, 93, .025);
-    }
-
-    .manager-stat-icon {
-        display: grid;
-        place-items: center;
-        flex-shrink: 0;
-        width: 47px;
-        height: 47px;
-        border-radius: 13px;
-        font-size: 20px;
-    }
-
-    .manager-stat-icon.orange {
-        background: #fff0e5;
-        color: #D05208;
-    }
-
-    .manager-stat-icon.green {
-        background: #e9f7ef;
-        color: #16845b;
-    }
-
-    .manager-stat-icon.navy {
-        background: #edf0fa;
-        color: #19265d;
-    }
-
-    .manager-stat-label {
-        margin-bottom: 5px;
-        color: var(--manager-muted);
-        font-size: 11px;
-    }
-
-    .manager-stat-value {
-        color: var(--manager-navy);
-        font-size: 25px;
-        font-weight: 800;
-        line-height: 1.2;
-        letter-spacing: -.5px;
-    }
-
-    .manager-stat-caption {
-        margin-top: 4px;
-        color: var(--manager-muted);
-        font-size: 10px;
-    }
-
-    .manager-panel {
-        margin-bottom: 22px;
-        overflow: visible;
-        border: 1px solid var(--manager-border);
-        border-radius: 15px;
-        background: #fff;
-        box-shadow: 0 3px 15px rgba(25, 38, 93, .025);
-    }
-
-    .manager-filter-body {
-        padding: 21px;
-    }
-
-    .manager-form-label {
-        display: block;
-        margin-bottom: 8px;
-        color: var(--manager-navy);
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .manager-page .form-control,
-    .manager-page .form-select,
-    .manager-page .input-group-text {
-        min-height: 43px;
-        border-color: var(--manager-border);
-        border-radius: 9px;
-        color: var(--manager-navy);
-        font-size: 12px;
-        box-shadow: none;
-    }
-
-    .manager-page .input-group-text {
-        display: flex;
-        align-items: center;
-        padding: 0 13px;
-        background: #fff;
-        color: var(--manager-muted);
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-
-    .manager-page .input-group .form-control {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-    }
-
-    .manager-page .form-control:focus,
-    .manager-page .form-select:focus {
-        border-color: var(--manager-orange);
-        box-shadow: 0 0 0 3px rgba(208, 82, 8, .08);
-    }
-
-    .manager-filter-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        width: 100%;
-        min-height: 43px;
-        padding: 10px 15px;
-        border: 1px solid var(--manager-navy);
-        border-radius: 9px;
-        background: var(--manager-navy);
-        color: #fff;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .manager-filter-btn:hover {
-        background: #111c49;
-        color: #fff;
-    }
-
-    .manager-reset-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        width: 43px;
-        height: 43px;
-        border: 1px solid var(--manager-border);
-        border-radius: 9px;
-        background: #fff;
-        color: var(--manager-muted);
-        text-decoration: none;
-    }
-
-    .manager-reset-btn:hover {
-        border-color: var(--manager-orange);
-        color: var(--manager-orange);
-    }
-
-    .manager-directory {
-        overflow: visible;
-        border: 1px solid var(--manager-border);
-        border-radius: 15px;
-        background: #fff;
-        box-shadow: 0 3px 15px rgba(25, 38, 93, .025);
-    }
-
-    .manager-directory-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 14px;
-        padding: 21px 23px;
-        border-bottom: 1px solid var(--manager-border);
-    }
-
-    .manager-directory-title {
-        margin: 0 0 5px;
-        color: var(--manager-navy);
-        font-size: 15px;
-        font-weight: 800;
-    }
-
-    .manager-directory-description {
-        margin: 0;
-        color: var(--manager-muted);
-        font-size: 11px;
-    }
-
-    .manager-result-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 8px 12px;
-        border-radius: 30px;
-        background: #fff0e5;
-        color: var(--manager-orange);
-        font-size: 11px;
-        font-weight: 800;
-    }
-
-    .manager-table-wrap {
-        overflow-x: auto;
-        border-radius: 0 0 15px 15px;
-    }
-
-    .manager-table {
-        width: 100%;
-        min-width: 850px;
-        margin: 0;
-        vertical-align: middle;
-    }
-
-    .manager-table thead th {
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--manager-border);
-        background: #f8f9fc;
-        color: #7a8497;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: .45px;
-        white-space: nowrap;
-    }
-
-    .manager-table thead th:first-child,
-    .manager-table tbody td:first-child {
-        padding-left: 23px;
-    }
-
-    .manager-table thead th:last-child,
-    .manager-table tbody td:last-child {
-        padding-right: 23px;
-    }
-
-    .manager-table tbody td {
-        padding: 16px;
-        border-bottom: 1px solid #f0f2f6;
-        color: var(--manager-navy);
-        font-size: 12px;
-    }
-
-    .manager-table tbody tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .manager-table tbody tr {
-        transition: background .15s ease;
-    }
-
-    .manager-table tbody tr:hover {
-        background: #fcfcfe;
-    }
-
-    .manager-person {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-width: 230px;
-    }
-
-    .manager-avatar {
-        display: grid;
-        place-items: center;
-        flex-shrink: 0;
-        width: 43px;
-        height: 43px;
-        border: 1px solid #e2e7f5;
-        border-radius: 13px;
-        background: #edf0fa;
-        color: var(--manager-navy);
-        font-size: 14px;
-        font-weight: 800;
-    }
-
-    .manager-person-name {
-        display: inline-block;
-        max-width: 240px;
-        overflow-wrap: anywhere;
-        margin-bottom: 4px;
-        color: var(--manager-navy);
-        font-size: 12px;
-        font-weight: 800;
-        text-decoration: none;
-    }
-
-    .manager-person-name:hover {
-        color: var(--manager-orange);
-    }
-
-    .manager-person-email {
-        max-width: 240px;
-        overflow-wrap: anywhere;
-        margin-bottom: 4px;
-        color: var(--manager-muted);
-        font-size: 10px;
-    }
-
-    .manager-person-phone {
-        color: var(--manager-muted);
-        font-size: 10px;
-    }
-
-    .manager-number {
-        display: inline-block;
-        padding: 6px 8px;
-        border: 1px solid var(--manager-border);
-        border-radius: 7px;
-        background: #fafbfc;
-        color: var(--manager-navy);
-        font-size: 10px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .manager-job-title {
-        color: var(--manager-navy);
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .manager-employment {
-        color: var(--manager-muted);
-        font-size: 11px;
-    }
-
-    .manager-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 7px 10px;
-        border-radius: 25px;
-        font-size: 10px;
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .manager-status.active {
-        background: #e9f7ef;
-        color: #167544;
-    }
-
-    .manager-status.inactive {
-        background: #eef0f3;
-        color: #596273;
-    }
-
-    .manager-status.unknown {
-        background: #fff5d9;
-        color: #946200;
-    }
-
-    .manager-action-btn {
-        display: inline-grid;
-        place-items: center;
-        width: 35px;
-        height: 35px;
-        border: 1px solid var(--manager-border);
-        border-radius: 9px;
-        background: #fff;
-        color: var(--manager-navy);
-    }
-
-    .manager-action-btn:hover,
-    .manager-action-btn[aria-expanded="true"] {
-        border-color: #f0c9af;
-        background: #fff7f0;
-        color: var(--manager-orange);
-    }
-
-    .manager-directory .dropdown-menu {
-        z-index: 1050;
-        min-width: 185px;
-        padding: 6px;
-        border: 1px solid var(--manager-border);
-        border-radius: 11px;
-        box-shadow: 0 12px 32px rgba(25, 38, 93, .12);
-    }
-
-    .manager-directory .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px;
-        border-radius: 7px;
-        font-size: 11px;
-    }
-
-    .manager-directory .dropdown-item:hover {
-        background: #f7f8fb;
-    }
-
-    .manager-empty {
-        padding: 55px 20px;
-        text-align: center;
-    }
-
-    .manager-empty-icon {
-        display: grid;
-        place-items: center;
-        width: 65px;
-        height: 65px;
-        margin: 0 auto 17px;
-        border-radius: 19px;
-        background: #fff0e5;
-        color: var(--manager-orange);
-        font-size: 26px;
-    }
-
-    .manager-empty-title {
-        margin: 0 0 8px;
-        color: var(--manager-navy);
-        font-size: 15px;
-        font-weight: 800;
-    }
-
-    .manager-empty-description {
-        max-width: 370px;
-        margin: 0 auto 18px;
-        color: var(--manager-muted);
-        font-size: 12px;
-        line-height: 1.7;
-    }
-
-    .manager-pagination {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 15px;
-        padding: 17px 23px;
-        border-top: 1px solid var(--manager-border);
-    }
-
-    .manager-pagination-info {
-        color: var(--manager-muted);
-        font-size: 11px;
-    }
-
-    .manager-pagination .pagination {
-        margin: 0;
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-
-    .manager-pagination .page-link {
-        border-color: var(--manager-border);
-        border-radius: 7px;
-        color: var(--manager-navy);
-        font-size: 11px;
-    }
-
-    .manager-pagination .page-item.active .page-link {
-        border-color: var(--manager-navy);
-        background: var(--manager-navy);
-        color: #fff;
-    }
-
-    @media (max-width: 991.98px) {
-        .manager-stats {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .manager-stats> :last-child {
-            grid-column: 1 / -1;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .manager-hero {
-            align-items: flex-start;
-            padding: 20px;
-        }
-
-        .manager-hero-icon {
-            display: none;
-        }
-
-        .manager-hero-content {
-            width: 100%;
-        }
-
-        .manager-hero-content .manager-primary-btn {
-            width: 100%;
-            margin-top: 17px;
-        }
-
-        .manager-stats {
-            grid-template-columns: minmax(0, 1fr);
-            gap: 10px;
-        }
-
-        .manager-stats> :last-child {
-            grid-column: auto;
-        }
-
-        .manager-stat-card {
-            padding: 17px;
-        }
-
-        .manager-filter-body {
-            padding: 17px;
-        }
-
-        .manager-directory-header {
-            padding: 18px;
-        }
-
-        .manager-pagination {
-            padding: 16px;
-        }
+    .managers-page {
+        --mgr-orange: var(--terra-orange, #D05208);
+        --mgr-orange-dark: #AD4307;
+        --mgr-orange-soft: #FFF0E7;
+        --mgr-navy: var(--terra-navy, #19265D);
+        --mgr-border: var(--terra-border, #E7EAF1);
+        --mgr-muted: var(--terra-muted, #778197);
+        color: #263047;
+    }
+
+    /* Heading */
+    .managers-page .page-intro {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        gap: 20px; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .managers-page .breadcrumb-line {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+        margin-bottom: 11px; color: var(--mgr-muted); font-size: 11px;
+    }
+    .managers-page .breadcrumb-line a { color: var(--mgr-muted); text-decoration: none; }
+    .managers-page .breadcrumb-line a:hover { color: var(--mgr-orange); }
+    .managers-page .breadcrumb-line i { font-size: 9px; color: #AAB1BF; }
+    .managers-page .page-title {
+        margin: 0; color: var(--mgr-navy); font-size: clamp(23px, 2vw, 29px);
+        line-height: 1.25; letter-spacing: -.8px; font-weight: 800;
+    }
+    .managers-page .page-description { margin: 8px 0 0; color: var(--mgr-muted); font-size: 12px; line-height: 1.7; }
+
+    .managers-page .btn-mgr-primary {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        min-height: 42px; padding: 11px 16px; border: 1px solid var(--mgr-orange);
+        border-radius: 10px; background: var(--mgr-orange); color: #fff;
+        font-size: 12px; font-weight: 700; text-decoration: none;
+        transition: .2s ease; white-space: nowrap;
+    }
+    .managers-page .btn-mgr-primary:hover {
+        background: var(--mgr-orange-dark); border-color: var(--mgr-orange-dark);
+        color: #fff; transform: translateY(-1px);
+    }
+
+    /* Stat cards */
+    .managers-page .mgr-stat-card {
+        display: block; position: relative; height: 100%; min-height: 112px; padding: 18px;
+        background: #fff; border: 1px solid var(--mgr-border); border-radius: 14px;
+        box-shadow: 0 5px 20px rgba(25, 38, 93, .035); color: inherit; text-decoration: none;
+        transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+    .managers-page a.mgr-stat-card:hover {
+        transform: translateY(-2px); border-color: #D9DEEA;
+        box-shadow: 0 9px 24px rgba(25, 38, 93, .08); color: inherit;
+    }
+    .managers-page .mgr-stat-card.is-active { border-color: var(--mgr-orange); box-shadow: 0 0 0 3px rgba(208, 82, 8, .08); }
+    .managers-page .mgr-stat-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .managers-page .mgr-stat-label { color: var(--mgr-muted); font-size: 11px; font-weight: 600; }
+    .managers-page .mgr-stat-icon {
+        display: flex; align-items: center; justify-content: center;
+        width: 37px; height: 37px; flex-shrink: 0; border-radius: 11px; font-size: 17px;
+    }
+    .managers-page .stat-orange { background: #FFF0E7; color: #D05208; }
+    .managers-page .stat-green  { background: #E8F7EF; color: #16845B; }
+    .managers-page .stat-gray   { background: #F0F1F5; color: #737C8D; }
+    .managers-page .stat-navy   { background: #EDF0FB; color: #19265D; }
+    .managers-page .mgr-stat-number {
+        margin-top: 10px; color: var(--mgr-navy); font-size: 27px;
+        line-height: 1.1; font-weight: 800; letter-spacing: -.8px;
+    }
+    .managers-page .mgr-stat-footnote { margin-top: 6px; color: var(--mgr-muted); font-size: 10px; }
+
+    /* Filter card */
+    .managers-page .mgr-filter-card {
+        padding: 18px; background: #fff; border: 1px solid var(--mgr-border);
+        border-radius: 14px; box-shadow: 0 5px 20px rgba(25, 38, 93, .035);
+    }
+    .managers-page .form-label { display: block; margin-bottom: 7px; color: #4B556B; font-size: 11px; font-weight: 700; }
+    .managers-page .form-control, .managers-page .form-select, .managers-page .input-group-text {
+        min-height: 42px; border-color: #E1E5ED; font-size: 12px; box-shadow: none;
+    }
+    .managers-page .form-control, .managers-page .form-select { color: #30394D; border-radius: 9px; }
+    .managers-page .input-group .input-group-text {
+        border-radius: 9px 0 0 9px; background: #FAFBFD; color: #7D8799; padding: 0 13px;
+    }
+    .managers-page .input-group .form-control { border-radius: 0 9px 9px 0; }
+    .managers-page .form-control:focus, .managers-page .form-select:focus {
+        border-color: #E8A47E; box-shadow: 0 0 0 3px rgba(208, 82, 8, .08);
+    }
+    .managers-page .btn-filter {
+        min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+        border: 1px solid var(--mgr-orange); border-radius: 9px; padding: 10px 14px;
+        background: var(--mgr-orange); color: #fff; font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .managers-page .btn-filter:hover { background: var(--mgr-orange-dark); color: #fff; }
+    .managers-page .btn-reset {
+        width: 42px; min-width: 42px; height: 42px; display: inline-flex; align-items: center;
+        justify-content: center; border: 1px solid #E1E5ED; border-radius: 9px; background: #fff;
+        color: #657086; font-size: 15px; text-decoration: none;
+    }
+    .managers-page .btn-reset:hover { border-color: #E8A47E; color: var(--mgr-orange); background: #FFF8F3; }
+
+    .managers-page .status-pills { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+    .managers-page .status-pill {
+        display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+        border: 1px solid #E1E5ED; border-radius: 20px; background: #fff; color: #4B556B;
+        font-size: 11px; font-weight: 700; text-decoration: none;
+    }
+    .managers-page .status-pill:hover { background: #F5F7FB; color: var(--mgr-navy); }
+    .managers-page .status-pill.active { background: var(--mgr-navy); border-color: var(--mgr-navy); color: #fff; }
+    .managers-page .status-pill .pill-count {
+        background: #EEF1F7; color: #5B6880; border-radius: 10px; padding: 0 7px; font-size: 10px; font-weight: 800;
+    }
+    .managers-page .status-pill.active .pill-count { background: rgba(255, 255, 255, .2); color: #fff; }
+
+    /* Directory */
+    .managers-page .mgr-directory {
+        overflow: hidden; background: #fff; border: 1px solid var(--mgr-border);
+        border-radius: 15px; box-shadow: 0 5px 24px rgba(25, 38, 93, .04);
+    }
+    .managers-page .directory-header {
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+        gap: 15px; padding: 18px 22px; border-bottom: 1px solid var(--mgr-border);
+    }
+    .managers-page .directory-title {
+        display: flex; align-items: center; gap: 11px; margin: 0; color: var(--mgr-navy);
+        font-size: 15px; font-weight: 800; letter-spacing: -.2px;
+    }
+    .managers-page .directory-title-icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 37px; height: 37px; border-radius: 11px; background: #EDF0FB;
+        color: var(--mgr-navy); font-size: 17px;
+    }
+    .managers-page .directory-subtitle { margin: 5px 0 0 48px; color: var(--mgr-muted); font-size: 11px; }
+    .managers-page .directory-total {
+        display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px;
+        border: 1px solid #F1D7C8; border-radius: 8px; background: #FFF7F2;
+        color: #A7460E; font-size: 11px; font-weight: 700;
+    }
+
+    .managers-page .mgr-table-wrap { width: 100%; overflow-x: auto; }
+    .managers-page .mgr-table { width: 100%; min-width: 900px; margin: 0; border-collapse: separate; border-spacing: 0; }
+    .managers-page .mgr-table thead th {
+        padding: 13px 17px; border-bottom: 1px solid var(--mgr-border); background: #F8F9FC;
+        color: #7B8498; font-size: 10px; font-weight: 800; text-transform: uppercase;
+        letter-spacing: .55px; white-space: nowrap;
+    }
+    .managers-page .mgr-table tbody td {
+        padding: 14px 17px; border-bottom: 1px solid #EEF0F5; color: #4D586D;
+        font-size: 11px; vertical-align: middle;
+    }
+    .managers-page .mgr-table tbody tr:last-child td { border-bottom: 0; }
+    .managers-page .mgr-table tbody tr { transition: background .15s ease; }
+    .managers-page .mgr-table tbody tr:hover { background: #FCFCFE; }
+
+    .managers-page .mgr-profile { display: flex; align-items: center; gap: 11px; min-width: 230px; }
+    .managers-page .mgr-avatar {
+        width: 42px; height: 42px; flex-shrink: 0; display: inline-flex; align-items: center;
+        justify-content: center; border-radius: 12px; background: #EDF0FB;
+        color: var(--mgr-navy); font-size: 12px; font-weight: 800; border: 1px solid #DDE2F3;
+    }
+    .managers-page .mgr-name {
+        color: var(--mgr-navy); font-size: 12px; font-weight: 800; line-height: 1.4;
+        overflow-wrap: anywhere; text-decoration: none; display: inline-block;
+    }
+    .managers-page a.mgr-name:hover { color: var(--mgr-orange); text-decoration: underline; }
+    .managers-page .mgr-meta { margin-top: 3px; color: var(--mgr-muted); font-size: 10px; line-height: 1.5; }
+    .managers-page .mgr-number {
+        display: inline-block; margin-top: 5px; padding: 2px 7px; border: 1px solid #E8EBF3;
+        border-radius: 5px; background: #F8F9FC; color: var(--mgr-navy);
+        font-size: 9.5px; font-weight: 800; white-space: nowrap;
+    }
+
+    .managers-page .contact-line {
+        display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px;
+        max-width: 235px; overflow-wrap: anywhere; line-height: 1.5;
+    }
+    .managers-page .contact-line:last-child { margin-bottom: 0; }
+    .managers-page .contact-line i { width: 13px; margin-top: 1px; color: #9099AB; flex-shrink: 0; }
+
+    .managers-page .job-title { color: var(--mgr-navy); font-size: 11px; font-weight: 700; }
+    .managers-page .employment-chip {
+        display: inline-block; margin-top: 5px; padding: 3px 8px; border-radius: 6px;
+        background: #F3F5FA; color: #5B6880; font-size: 10px; font-weight: 700;
+    }
+
+    .managers-page .property-count {
+        display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px;
+        border-radius: 7px; background: #F3F5FA; color: var(--mgr-navy);
+        font-size: 10.5px; font-weight: 800; white-space: nowrap;
+    }
+    .managers-page .property-count i { color: #8792A7; font-size: 12px; }
+
+    .managers-page .mgr-status {
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 6px 9px; border-radius: 7px; font-size: 10px; font-weight: 800; white-space: nowrap;
+    }
+    .managers-page .mgr-status::before {
+        content: ""; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: currentColor;
+    }
+    .managers-page .mgr-status.active { background: #E8F7EF; color: #16845B; }
+    .managers-page .mgr-status.inactive { background: #F0F1F5; color: #737C8D; }
+    .managers-page .mgr-status.unknown { background: #FFF4DF; color: #9A6810; }
+
+    /* Actions dropdown (small font) */
+    .managers-page .mgr-action-btn {
+        width: 33px; height: 33px; display: inline-flex; align-items: center; justify-content: center;
+        border: 1px solid #E3E7EF; border-radius: 8px; background: #fff; color: var(--mgr-navy);
+        font-size: 14px; transition: all .18s ease;
+    }
+    .managers-page .mgr-action-btn:hover, .managers-page .mgr-action-btn[aria-expanded="true"] {
+        color: var(--mgr-orange); background: #FFF5EF; border-color: #F1C4AA;
+    }
+    .managers-page .action-menu {
+        min-width: 200px; padding: 6px; border: 1px solid var(--mgr-border);
+        border-radius: 12px; box-shadow: 0 10px 30px rgba(25, 38, 93, .12); font-size: 11px;
+    }
+    .managers-page .action-menu .dropdown-item {
+        display: flex; align-items: center; gap: 9px; width: 100%; padding: 7px 10px;
+        border: 0; border-radius: 8px; background: transparent; color: #35425B;
+        font-size: 11px; font-weight: 600; text-align: left;
+    }
+    .managers-page .action-menu .dropdown-item i { font-size: 13px; color: #7B879C; }
+    .managers-page .action-menu .dropdown-item:hover, .managers-page .action-menu .dropdown-item:focus {
+        background: #F3F5FA; color: var(--mgr-navy);
+    }
+    .managers-page .action-menu .item-primary, .managers-page .action-menu .item-primary i { color: var(--mgr-orange-dark); }
+    .managers-page .action-menu .item-primary:hover { background: var(--mgr-orange-soft); color: var(--mgr-orange-dark); }
+    .managers-page .action-menu .item-danger, .managers-page .action-menu .item-danger i { color: #B42318; }
+    .managers-page .action-menu .item-danger:hover { background: #FFF0EF; color: #B42318; }
+    .managers-page .action-menu .dropdown-divider { margin: 5px 4px; border-color: #EDF0F5; }
+    .managers-page .action-menu form { margin: 0; }
+
+    /* Empty + footer */
+    .managers-page .empty-state { padding: 55px 20px; text-align: center; }
+    .managers-page .empty-icon {
+        display: flex; align-items: center; justify-content: center; width: 62px; height: 62px;
+        margin: 0 auto 17px; border-radius: 18px; background: var(--mgr-orange-soft);
+        color: var(--mgr-orange); font-size: 25px;
+    }
+    .managers-page .empty-state h3 { color: var(--mgr-navy); font-size: 15px; font-weight: 800; }
+    .managers-page .empty-state p { max-width: 370px; margin: 8px auto 18px; color: var(--mgr-muted); font-size: 12px; line-height: 1.7; }
+
+    .managers-page .directory-footer {
+        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+        gap: 12px; padding: 15px 20px; border-top: 1px solid var(--mgr-border); background: #FCFCFE;
+    }
+    .managers-page .pagination-summary { color: var(--mgr-muted); font-size: 11px; }
+    .managers-page .pagination { margin: 0; gap: 4px; }
+    .managers-page .pagination .page-link {
+        min-width: 32px; min-height: 32px; display: flex; align-items: center; justify-content: center;
+        border: 1px solid #E3E7EF; border-radius: 7px !important; color: var(--mgr-navy);
+        font-size: 11px; box-shadow: none;
+    }
+    .managers-page .pagination .page-item.active .page-link { border-color: var(--mgr-orange); background: var(--mgr-orange); color: #fff; }
+    .managers-page .pagination .page-item.disabled .page-link { color: #B5BBC8; background: #F8F9FC; }
+
+    @media (max-width: 767.98px) {
+        .managers-page .page-intro { align-items: stretch; }
+        .managers-page .page-intro > div:last-child, .managers-page .page-intro .btn-mgr-primary { width: 100%; }
+        .managers-page .mgr-stat-card { min-height: 104px; padding: 15px; }
+        .managers-page .mgr-stat-number { font-size: 24px; }
+        .managers-page .mgr-filter-card { padding: 15px; }
+        .managers-page .directory-header { padding: 16px; }
+        .managers-page .directory-footer { padding: 14px; }
+        .managers-page .directory-footer .pagination { width: 100%; flex-wrap: wrap; }
     }
 </style>
 @endpush
 
 @section('content')
-<div class="manager-page">
+<div class="managers-page">
 
     @php
-    $managerCollection = $managers->getCollection();
+        /*
+         * Platform-wide figures come straight from the database, so they stay
+         * correct across pagination and filters.
+         */
+        $statusCounts = \Illuminate\Support\Facades\DB::table('property_managers')
+            ->whereNull('deleted_at')
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
 
-    $activeManagersOnPage = $managerCollection->filter(
-    fn ($manager) => strtolower($manager->status ?? '') === 'active'
-    )->count();
+        $allManagersCount = $statusCounts->sum();
 
-    $inactiveManagersOnPage = $managerCollection->filter(
-    fn ($manager) => strtolower($manager->status ?? '') === 'inactive'
-    )->count();
+        $assignedPropertiesTotal = \Illuminate\Support\Facades\DB::table('property_manager_assignments')
+            ->where('status', 'active')
+            ->distinct()
+            ->count('property_id');
 
-    $hasManagerFilters = request()->filled('search')
-    || request()->filled('status');
+        // Active property assignments for the managers on this page (single query).
+        $assignmentCounts = \Illuminate\Support\Facades\DB::table('property_manager_assignments')
+            ->whereIn('property_manager_id', $managers->getCollection()->pluck('id')->all())
+            ->where('status', 'active')
+            ->selectRaw('property_manager_id, COUNT(*) as total')
+            ->groupBy('property_manager_id')
+            ->pluck('total', 'property_manager_id');
+
+        $activeStatus = request('status', '');
+        $hasFilters   = request()->filled('search') || request()->filled('status');
     @endphp
 
-    {{-- Page header --}}
-    <section class="manager-hero">
-        <div class="manager-hero-content">
-            <div class="manager-eyebrow">Terra Smart Rental Management</div>
+    {{-- Page heading --}}
+    <div class="page-intro">
+        <div>
+            <div class="breadcrumb-line">
+                <a href="{{ \Illuminate\Support\Facades\Route::has('dashboard') ? route('dashboard') : url('/') }}">Dashboard</a>
+                <i class="bi bi-chevron-right"></i>
+                <span>Administration</span>
+                <i class="bi bi-chevron-right"></i>
+                <span>Property Managers</span>
+            </div>
 
-            <h1 class="manager-page-title">Property Managers</h1>
-
-            <p class="manager-page-description">
-                Manage manager accounts, employment details and access status
-                from one central directory.
+            <h1 class="page-title">Property Managers</h1>
+            <p class="page-description">
+                Manage manager accounts, employment details, property assignments and access status.
             </p>
+        </div>
 
-            <a href="{{ route('admin.managers.create') }}"
-                class="manager-primary-btn mt-3">
-                <i class="bi bi-person-plus"></i>
-                Add property manager
+        <div class="d-flex align-items-start">
+            <a href="{{ route('admin.managers.create') }}" class="btn-mgr-primary">
+                <i class="bi bi-person-plus"></i> Add property manager
+            </a>
+        </div>
+    </div>
+
+    {{-- Summary cards --}}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <a href="{{ route('admin.managers.index') }}"
+               class="mgr-stat-card {{ !$hasFilters ? 'is-active' : '' }}">
+                <div class="mgr-stat-top">
+                    <span class="mgr-stat-label">Total managers</span>
+                    <span class="mgr-stat-icon stat-orange"><i class="bi bi-people"></i></span>
+                </div>
+                <div class="mgr-stat-number">{{ number_format($allManagersCount) }}</div>
+                <div class="mgr-stat-footnote">All registered managers</div>
             </a>
         </div>
 
-        <div class="manager-hero-icon" aria-hidden="true">
-            <i class="bi bi-people"></i>
-        </div>
-    </section>
-
-    {{-- Summary cards --}}
-    <section class="manager-stats">
-        <div class="manager-stat-card">
-            <div class="manager-stat-icon orange">
-                <i class="bi bi-people"></i>
-            </div>
-
-            <div>
-                <div class="manager-stat-label">Total managers</div>
-                <div class="manager-stat-value">
-                    {{ number_format($managers->total()) }}
+        <div class="col-6 col-xl-3">
+            <a href="{{ route('admin.managers.index', ['status' => 'active']) }}"
+               class="mgr-stat-card {{ $activeStatus === 'active' ? 'is-active' : '' }}">
+                <div class="mgr-stat-top">
+                    <span class="mgr-stat-label">Active managers</span>
+                    <span class="mgr-stat-icon stat-green"><i class="bi bi-person-check"></i></span>
                 </div>
-                <div class="manager-stat-caption">Matching your current filters</div>
-            </div>
+                <div class="mgr-stat-number">{{ number_format($statusCounts['active'] ?? 0) }}</div>
+                <div class="mgr-stat-footnote">Click to filter active managers</div>
+            </a>
         </div>
 
-        <div class="manager-stat-card">
-            <div class="manager-stat-icon green">
-                <i class="bi bi-person-check"></i>
-            </div>
-
-            <div>
-                <div class="manager-stat-label">Active on this page</div>
-                <div class="manager-stat-value">
-                    {{ number_format($activeManagersOnPage) }}
+        <div class="col-6 col-xl-3">
+            <a href="{{ route('admin.managers.index', ['status' => 'inactive']) }}"
+               class="mgr-stat-card {{ $activeStatus === 'inactive' ? 'is-active' : '' }}">
+                <div class="mgr-stat-top">
+                    <span class="mgr-stat-label">Inactive managers</span>
+                    <span class="mgr-stat-icon stat-gray"><i class="bi bi-person-dash"></i></span>
                 </div>
-                <div class="manager-stat-caption">Currently active manager records</div>
-            </div>
+                <div class="mgr-stat-number">{{ number_format($statusCounts['inactive'] ?? 0) }}</div>
+                <div class="mgr-stat-footnote">Click to filter inactive managers</div>
+            </a>
         </div>
 
-        <div class="manager-stat-card">
-            <div class="manager-stat-icon navy">
-                <i class="bi bi-person-dash"></i>
-            </div>
-
-            <div>
-                <div class="manager-stat-label">Inactive on this page</div>
-                <div class="manager-stat-value">
-                    {{ number_format($inactiveManagersOnPage) }}
+        <div class="col-6 col-xl-3">
+            <div class="mgr-stat-card">
+                <div class="mgr-stat-top">
+                    <span class="mgr-stat-label">Managed properties</span>
+                    <span class="mgr-stat-icon stat-navy"><i class="bi bi-buildings"></i></span>
                 </div>
-                <div class="manager-stat-caption">Currently inactive manager records</div>
+                <div class="mgr-stat-number">{{ number_format($assignedPropertiesTotal) }}</div>
+                <div class="mgr-stat-footnote">Properties with an active manager</div>
             </div>
         </div>
-    </section>
+    </div>
 
     {{-- Search and filters --}}
-    <section class="manager-panel">
-        <div class="manager-filter-body">
-            <form method="GET" action="{{ route('admin.managers.index') }}">
-                <div class="row g-3 align-items-end">
-
-                    <div class="col-12 col-lg-7">
-                        <label for="manager-search" class="manager-form-label">
-                            Search managers
-                        </label>
-
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="bi bi-search"></i>
-                            </span>
-
-                            <input
-                                id="manager-search"
-                                type="search"
-                                name="search"
-                                class="form-control"
-                                value="{{ request('search') }}"
-                                placeholder="Name, email, manager number or phone">
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-3">
-                        <label for="manager-status" class="manager-form-label">
-                            Account status
-                        </label>
-
-                        <select id="manager-status" name="status" class="form-select">
-                            <option value="">All statuses</option>
-                            <option value="active" @selected(request('status')==='active' )>
-                                Active
-                            </option>
-                            <option value="inactive" @selected(request('status')==='inactive' )>
-                                Inactive
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-2">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="manager-filter-btn">
-                                <i class="bi bi-funnel"></i>
-                                Apply filters
-                            </button>
-
-                            <a href="{{ route('admin.managers.index') }}"
-                                class="manager-reset-btn"
-                                title="Reset filters"
-                                aria-label="Reset filters">
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                            </a>
-                        </div>
-                    </div>
-
+    <form method="GET" action="{{ route('admin.managers.index') }}" class="mgr-filter-card mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-lg-6">
+                <label for="managerSearch" class="form-label">Search managers</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input id="managerSearch" type="search" name="search" class="form-control"
+                           value="{{ request('search') }}"
+                           placeholder="Name, email, manager number or phone">
                 </div>
-            </form>
-        </div>
-    </section>
-
-    {{-- Manager directory --}}
-    <section class="manager-directory">
-
-        <div class="manager-directory-header">
-            <div>
-                <h2 class="manager-directory-title">Manager directory</h2>
-                <p class="manager-directory-description">
-                    View manager profiles, employment information and account status.
-                </p>
             </div>
 
-            <span class="manager-result-badge">
-                <i class="bi bi-list-ul"></i>
-                {{ number_format($managers->total()) }}
-                {{ $managers->total() === 1 ? 'result' : 'results' }}
-            </span>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <label for="managerStatus" class="form-label">Account status</label>
+                <select id="managerStatus" name="status" class="form-select">
+                    <option value="">All account statuses</option>
+                    <option value="active" @selected(request('status') === 'active')>Active</option>
+                    <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn-filter flex-grow-1">
+                        <i class="bi bi-funnel"></i> Apply filters
+                    </button>
+                    <a href="{{ route('admin.managers.index') }}" class="btn-reset"
+                       title="Reset filters" aria-label="Reset filters">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <div class="manager-table-wrap">
-            <table class="table manager-table">
+        <div class="status-pills">
+            <a href="{{ route('admin.managers.index', array_filter(['search' => request('search')])) }}"
+               class="status-pill {{ $activeStatus === '' ? 'active' : '' }}">
+                All <span class="pill-count">{{ number_format($allManagersCount) }}</span>
+            </a>
+            <a href="{{ route('admin.managers.index', array_filter(['search' => request('search'), 'status' => 'active'])) }}"
+               class="status-pill {{ $activeStatus === 'active' ? 'active' : '' }}">
+                Active <span class="pill-count">{{ number_format($statusCounts['active'] ?? 0) }}</span>
+            </a>
+            <a href="{{ route('admin.managers.index', array_filter(['search' => request('search'), 'status' => 'inactive'])) }}"
+               class="status-pill {{ $activeStatus === 'inactive' ? 'active' : '' }}">
+                Inactive <span class="pill-count">{{ number_format($statusCounts['inactive'] ?? 0) }}</span>
+            </a>
+
+            @if($hasFilters)
+                <span class="text-secondary ms-2" style="font-size:11px;">
+                    @if(request()->filled('search')) Search: <strong>{{ request('search') }}</strong> @endif
+                </span>
+                <a href="{{ route('admin.managers.index') }}" class="text-decoration-none"
+                   style="font-size:11px;color:var(--mgr-orange);">Clear all</a>
+            @endif
+        </div>
+    </form>
+
+    {{-- Manager directory --}}
+    <section class="mgr-directory">
+
+        <div class="directory-header">
+            <div>
+                <h2 class="directory-title">
+                    <span class="directory-title-icon"><i class="bi bi-person-badge"></i></span>
+                    Manager directory
+                </h2>
+                <p class="directory-subtitle">Manager profiles, employment information and account status</p>
+            </div>
+
+            <div class="directory-total">
+                <i class="bi bi-people"></i>
+                {{ number_format($managers->total()) }} {{ $managers->total() === 1 ? 'manager' : 'managers' }}
+            </div>
+        </div>
+
+        <div class="mgr-table-wrap">
+            <table class="mgr-table">
                 <thead>
                     <tr>
-                        <th>MANAGER</th>
-                        <th>MANAGER NO.</th>
-                        <th>POSITION</th>
-                        <th>EMPLOYMENT</th>
-                        <th>STATUS</th>
-                        <th class="text-end">ACTIONS</th>
+                        <th>Manager</th>
+                        <th>Contact information</th>
+                        <th>Position</th>
+                        <th>Properties</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     @forelse($managers as $manager)
-                    @php
-                    $managerName = $manager->user?->name
-                    ?? 'User account unavailable';
+                        @php
+                            $managerName = $manager->user?->name ?? 'User account unavailable';
 
-                    $managerInitials = collect(
-                    preg_split('/\s+/', trim($managerName))
-                    )
-                    ->filter()
-                    ->take(2)
-                    ->map(fn ($part) => strtoupper(substr($part, 0, 1)))
-                    ->implode('');
+                            $managerInitials = collect(preg_split('/\s+/', trim($managerName)))
+                                ->filter()->take(2)
+                                ->map(fn ($part) => strtoupper(mb_substr($part, 0, 1)))
+                                ->implode('');
 
-                    $managerStatus = strtolower($manager->status ?? 'inactive');
+                            $managerStatus = strtolower($manager->status ?? 'inactive');
+                            $statusClass = in_array($managerStatus, ['active', 'inactive'], true)
+                                ? $managerStatus : 'unknown';
 
-                    $managerStatusClass = in_array(
-                    $managerStatus,
-                    ['active', 'inactive'],
-                    true
-                    ) ? $managerStatus : 'unknown';
-                    @endphp
+                            $employment = $manager->employment_type
+                                ? ucwords(str_replace('_', ' ', $manager->employment_type))
+                                : 'Not specified';
 
-                    <tr>
-                        {{-- Manager identity --}}
-                        <td>
-                            <div class="manager-person">
-                                <div class="manager-avatar">
-                                    {{ $managerInitials ?: 'M' }}
-                                </div>
+                            $assignedTotal = $assignmentCounts[$manager->id] ?? 0;
+                        @endphp
 
-                                <div>
-                                    <a href="{{ route('admin.managers.show', $manager) }}"
-                                        class="manager-person-name">
-                                        {{ $managerName }}
-                                    </a>
+                        <tr>
+                            {{-- Manager --}}
+                            <td>
+                                <div class="mgr-profile">
+                                    <div class="mgr-avatar">{{ $managerInitials ?: 'M' }}</div>
 
-                                    <div class="manager-person-email">
-                                        {{ $manager->user?->email ?? 'No email available' }}
-                                    </div>
-
-                                    <div class="manager-person-phone">
-                                        <i class="bi bi-telephone me-1"></i>
-                                        {{ $manager->phone ?: 'No phone recorded' }}
+                                    <div>
+                                        <a href="{{ route('admin.managers.show', $manager) }}" class="mgr-name">
+                                            {{ $managerName }}
+                                        </a>
+                                        <div class="mgr-meta">Property manager</div>
+                                        <span class="mgr-number">{{ $manager->manager_number ?: 'Not assigned' }}</span>
                                     </div>
                                 </div>
-                            </div>
-                        </td>
+                            </td>
 
-                        {{-- Manager number --}}
-                        <td>
-                            <span class="manager-number">
-                                {{ $manager->manager_number ?: 'Not assigned' }}
-                            </span>
-                        </td>
+                            {{-- Contact --}}
+                            <td>
+                                <div class="contact-line">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>{{ $manager->user?->email ?? 'No email available' }}</span>
+                                </div>
+                                <div class="contact-line">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>{{ $manager->phone ?: 'No phone recorded' }}</span>
+                                </div>
+                            </td>
 
-                        {{-- Position --}}
-                        <td>
-                            <span class="manager-job-title">
-                                {{ $manager->job_title ?: 'Property Manager' }}
-                            </span>
-                        </td>
+                            {{-- Position --}}
+                            <td>
+                                <div class="job-title">{{ $manager->job_title ?: 'Property Manager' }}</div>
+                                <span class="employment-chip">{{ $employment }}</span>
+                            </td>
 
-                        {{-- Employment type --}}
-                        <td>
-                            <span class="manager-employment">
-                                {{ $manager->employment_type
-                                        ? ucwords(str_replace('_', ' ', $manager->employment_type))
-                                        : 'Not specified' }}
-                            </span>
-                        </td>
+                            {{-- Properties --}}
+                            <td>
+                                <span class="property-count">
+                                    <i class="bi bi-buildings"></i>
+                                    {{ $assignedTotal }} {{ $assignedTotal === 1 ? 'property' : 'properties' }}
+                                </span>
+                            </td>
 
-                        {{-- Account status --}}
-                        <td>
-                            <span class="manager-status {{ $managerStatusClass }}">
-                                @if($managerStatus === 'active')
-                                <i class="bi bi-check-circle"></i>
-                                @elseif($managerStatus === 'inactive')
-                                <i class="bi bi-pause-circle"></i>
-                                @else
-                                <i class="bi bi-question-circle"></i>
-                                @endif
+                            {{-- Status --}}
+                            <td>
+                                <span class="mgr-status {{ $statusClass }}">{{ ucfirst($managerStatus) }}</span>
+                            </td>
 
-                                {{ ucfirst($managerStatus) }}
-                            </span>
-                        </td>
+                            {{-- Actions --}}
+                            <td class="text-end">
+                                <div class="dropdown">
+                                    <button type="button" class="mgr-action-btn"
+                                            data-bs-toggle="dropdown"
+                                            data-bs-popper-config='{"strategy":"fixed"}'
+                                            aria-expanded="false"
+                                            aria-label="Actions for {{ $managerName }}">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
 
-                        {{-- Actions --}}
-                        <td class="text-end">
-                            <div class="dropdown">
-                                <button
-                                    class="manager-action-btn"
-                                    type="button"
-                                    data-bs-toggle="dropdown"
-                                    data-bs-boundary="viewport"
-                                    aria-expanded="false"
-                                    aria-label="Actions for {{ $managerName }}">
-                                    <i class="bi bi-three-dots"></i>
-                                </button>
+                                    <ul class="dropdown-menu dropdown-menu-end action-menu">
+                                        <li>
+                                            <a class="dropdown-item item-primary"
+                                               href="{{ route('admin.managers.show', $manager) }}">
+                                                <i class="bi bi-person-lines-fill"></i> View manager profile
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item"
+                                               href="{{ route('admin.managers.edit', $manager) }}">
+                                                <i class="bi bi-pencil-square"></i> Edit manager
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <form method="POST"
+                                                  action="{{ route('admin.managers.resend-credentials', $manager) }}"
+                                                  onsubmit="return confirm('Generate a new password and email it to this manager?')">
+                                                @csrf
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="bi bi-envelope-arrow-up"></i> Resend credentials
+                                                </button>
+                                            </form>
+                                        </li>
 
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item"
-                                            href="{{ route('admin.managers.show', $manager) }}">
-                                            <i class="bi bi-eye"></i>
-                                            View profile
-                                        </a>
-                                    </li>
+                                        @if($managerStatus === 'active')
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="POST"
+                                                      action="{{ route('admin.managers.destroy', $manager) }}"
+                                                      onsubmit="return confirm('Deactivate this manager account?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item item-danger">
+                                                        <i class="bi bi-person-dash"></i> Deactivate manager
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        @endif
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
 
-                                    <form method="POST" action="{{ route('admin.managers.resend-credentials', $manager) }}"
-                                        onsubmit="return confirm('Generate a new password and email it to this manager?')">
-                                        @csrf
-                                        <button class="btn btn-sm btn-outline-secondary">Resend credentials</button>
-                                    </form>
-
-                                    <li>
-                                        <a class="dropdown-item"
-                                            href="{{ route('admin.managers.edit', $manager) }}">
-                                            <i class="bi bi-pencil-square"></i>
-                                            Edit manager
-                                        </a>
-                                    </li>
-
-                                    @if($managerStatus === 'active')
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-
-                                    <li>
-                                        <form
-                                            method="POST"
-                                            action="{{ route('admin.managers.destroy', $manager) }}"
-                                            onsubmit="return confirm('Deactivate this manager account?')">
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="submit"
-                                                class="dropdown-item text-danger">
-                                                <i class="bi bi-person-dash"></i>
-                                                Deactivate manager
-                                            </button>
-                                        </form>
-                                    </li>
-                                    @endif
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
                     @empty
-                    <tr>
-                        <td colspan="6">
-                            <div class="manager-empty">
-                                <div class="manager-empty-icon">
-                                    <i class="bi bi-people"></i>
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <div class="empty-icon"><i class="bi bi-people"></i></div>
+                                    <h3>{{ $hasFilters ? 'No matching managers' : 'No managers registered yet' }}</h3>
+                                    <p>
+                                        @if($hasFilters)
+                                            No manager accounts match your current search. Try changing your filters.
+                                        @else
+                                            Start by registering a property manager to help oversee rental operations.
+                                        @endif
+                                    </p>
+
+                                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                                        @if($hasFilters)
+                                            <a href="{{ route('admin.managers.index') }}"
+                                               class="btn btn-outline-secondary btn-sm px-3 py-2">
+                                                <i class="bi bi-arrow-counterclockwise me-1"></i> Clear filters
+                                            </a>
+                                        @endif
+
+                                        <a href="{{ route('admin.managers.create') }}" class="btn-mgr-primary">
+                                            <i class="bi bi-person-plus"></i>
+                                            {{ $hasFilters ? 'Add property manager' : 'Add first manager' }}
+                                        </a>
+                                    </div>
                                 </div>
-
-                                <h3 class="manager-empty-title">
-                                    {{ $hasManagerFilters
-                                            ? 'No matching managers'
-                                            : 'No managers registered yet' }}
-                                </h3>
-
-                                <p class="manager-empty-description">
-                                    @if($hasManagerFilters)
-                                    No manager accounts match your current
-                                    search criteria. Try changing your filters.
-                                    @else
-                                    Start by registering a property manager
-                                    to help oversee rental operations.
-                                    @endif
-                                </p>
-
-                                @if($hasManagerFilters)
-                                <a href="{{ route('admin.managers.index') }}"
-                                    class="manager-primary-btn">
-                                    <i class="bi bi-arrow-counterclockwise"></i>
-                                    Clear filters
-                                </a>
-                                @else
-                                <a href="{{ route('admin.managers.create') }}"
-                                    class="manager-primary-btn">
-                                    <i class="bi bi-person-plus"></i>
-                                    Add first manager
-                                </a>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -990,17 +630,16 @@
 
         {{-- Pagination --}}
         @if($managers->hasPages())
-        <div class="manager-pagination">
-            <div class="manager-pagination-info">
-                Showing
-                <strong>{{ $managers->firstItem() }}</strong>–<strong>{{ $managers->lastItem() }}</strong>
-                of <strong>{{ number_format($managers->total()) }}</strong> managers
-            </div>
+            <div class="directory-footer">
+                <div class="pagination-summary">
+                    Showing
+                    <strong>{{ $managers->firstItem() ?? 0 }}</strong> to
+                    <strong>{{ $managers->lastItem() ?? 0 }}</strong> of
+                    <strong>{{ $managers->total() }}</strong> managers
+                </div>
 
-            <div>
-                {{ $managers->withQueryString()->links('pagination::bootstrap-5') }}
+                <div>{{ $managers->withQueryString()->links('pagination::bootstrap-5') }}</div>
             </div>
-        </div>
         @endif
 
     </section>

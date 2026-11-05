@@ -155,6 +155,10 @@ Route::middleware('auth')->group(function () {
         ->name('admin.')
         ->middleware('role:admin')
         ->group(function () {
+
+            Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])
+                ->name('dashboard');
+
             Route::get('/users', [UserController::class, 'index'])
                 ->name('users.index');
 
@@ -208,10 +212,22 @@ Route::middleware('auth')->group(function () {
                 [TenantApplicationController::class, 'index']
             )->name('tenant-applications.index');
 
+            Route::get('/tenant-applications/create', [
+                TenantApplicationController::class,
+                'create'
+            ])->name('tenant-applications.create');
+
             Route::get(
                 'tenant-applications/{tenantApplication}',
                 [TenantApplicationController::class, 'show']
             )->name('tenant-applications.show');
+
+
+
+            Route::post('/tenant-applications', [
+                TenantApplicationController::class,
+                'store'
+            ])->name('tenant-applications.store');
 
             Route::post(
                 'tenant-applications/{tenantApplication}/approve',
