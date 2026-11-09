@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Profile | Terra Smart Rental Management')
+@section('title', 'My Profile')
 
 @section('content')
 <div class="container-fluid py-4 tenant-profile">

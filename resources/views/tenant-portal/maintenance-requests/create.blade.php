@@ -1,7 +1,7 @@
 
 @extends('layouts.app')
 
-@section('title', 'Report Maintenance | Terra')
+@section('title', 'Report Maintenance')
 
 @section('content')
 <div class="container py-4">
