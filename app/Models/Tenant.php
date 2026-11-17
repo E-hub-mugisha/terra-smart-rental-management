@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Tenant extends Model
@@ -19,6 +20,11 @@ class Tenant extends Model
         'phone',
         'alternative_phone',
         'address',
+        'id_type',
+        'id_number',
+        'occupants',
+        'kyc_status',
+        'kyc_verified_at',
         'emergency_contact_name',
         'emergency_contact_phone',
         'status',
@@ -31,7 +37,45 @@ class Tenant extends Model
     {
         return [
             'user_id' => 'integer',
+            'occupants' => 'integer',
+            'kyc_verified_at' => 'datetime',
         ];
+    }
+
+    public const ID_TYPES = [
+        'national_id' => 'Rwandan National ID',
+        'passport' => 'Passport',
+        'refugee_id' => 'Refugee ID',
+    ];
+
+    public const KYC_LABELS = [
+        'unverified' => 'Not submitted',
+        'pending' => 'Awaiting verification',
+        'verified' => 'Verified',
+        'rejected' => 'Rejected — resubmit',
+    ];
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable')->latest();
+    }
+
+    /** Recompute KYC status from the tenant's identity documents. */
+    public function refreshKycStatus(): void
+    {
+        $ids = $this->documents()->whereIn('category', Document::KYC_ID_CATEGORIES)->get();
+
+        $status = match (true) {
+            $ids->contains('status', 'verified') => 'verified',
+            $ids->contains('status', 'pending') => 'pending',
+            $ids->contains('status', 'rejected') => 'rejected',
+            default => 'unverified',
+        };
+
+        $this->update([
+            'kyc_status' => $status,
+            'kyc_verified_at' => $status === 'verified' ? ($this->kyc_verified_at ?? now()) : null,
+        ]);
     }
 
     public function user(): BelongsTo

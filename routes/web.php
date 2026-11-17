@@ -19,15 +19,25 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicTenantApplicationController;
+use App\Http\Controllers\PublicPropertyController;
 use App\Http\Controllers\RentalUnitController;
 use App\Http\Controllers\TenantPortal\MaintenanceRequestController as TenantMaintenanceRequestController;
 use App\Http\Controllers\PropertyManager\MaintenanceRequestController as ManagerMaintenanceRequestController;
 use App\Http\Controllers\TenantPortal\RentalController;
 use App\Http\Controllers\TenantPortal\ProfileController as TenantProfileController;
 use App\Http\Controllers\TenantPortal\DashboardController as TenantDashboardController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Public property pages (property → building → units)
+Route::get('/properties', [PublicPropertyController::class, 'index'])
+    ->name('listings.index');
+
+Route::get('/properties/{property}', [PublicPropertyController::class, 'show'])
+    ->whereNumber('property')
+    ->name('listings.show');
 
 // Public rental listings
 Route::get('/rentals', [RentalUnitController::class, 'index'])
@@ -251,6 +261,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/leases/{lease}', [LeaseLifecycleController::class, 'show'])
                 ->name('leases.show');
 
+            Route::post('/leases/{lease}/send-to-tenant', [LeaseLifecycleController::class, 'sendToTenant'])
+                ->name('leases.send-to-tenant');
+
+            Route::post('/leases/{lease}/recall', [LeaseLifecycleController::class, 'recall'])
+                ->name('leases.recall');
+
             Route::post(
                 '/leases/{lease}/generate-required-invoices',
                 [LeaseLifecycleController::class, 'generateRequiredInvoices']
@@ -471,6 +487,12 @@ Route::middleware(['auth'])
         Route::patch('/leases/{lease}/send-for-signature', [App\Http\Controllers\PropertyManager\LeaseController::class, 'sendForSignature'])
             ->name('leases.send-for-signature');
 
+        Route::patch('/leases/{lease}/recall', [App\Http\Controllers\PropertyManager\LeaseController::class, 'recall'])
+            ->name('leases.recall');
+
+        Route::patch('/leases/{lease}/confirm-move-in', [App\Http\Controllers\PropertyManager\LeaseController::class, 'confirmMoveIn'])
+            ->name('leases.confirm-move-in');
+
         Route::patch('/leases/{lease}/activate', [App\Http\Controllers\PropertyManager\LeaseController::class, 'activate'])
             ->name('leases.activate');
 
@@ -539,3 +561,176 @@ Route::middleware(['auth'])
         Route::patch('/maintenance-requests/{maintenanceRequest}/status', [ManagerMaintenanceRequestController::class, 'updateStatus'])
             ->name('maintenance-requests.status');
     });
+
+// route to run seeder for testing purposes
+Route::get('/run-seeder', function () {
+    Artisan::call('db:seed', [
+        '--class' => 'Database\\Seeders\\TestSeeder',
+        '--force' => true,
+    ]);
+    return 'Seeder executed successfully.';
+});
+
+// Messaging & notifications (brief §12–13) — shared by every signed-in role.
+Route::middleware('auth')->group(function () {
+    Route::controller(App\Http\Controllers\MessageController::class)
+        ->prefix('messages')
+        ->name('messages.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/new', 'create')->name('create');
+            Route::post('/', 'store')->middleware('throttle:20,1')->name('store');
+            Route::get('/attachments/{attachment}', 'attachment')->name('attachments.show');
+            Route::get('/{conversation}', 'show')->name('show');
+            Route::get('/{conversation}/poll', 'poll')->middleware('throttle:120,1')->name('poll');
+            Route::post('/{conversation}/reply', 'reply')->middleware('throttle:40,1')->name('reply');
+            Route::patch('/{conversation}/archive', 'archive')->name('archive');
+        });
+
+    Route::controller(App\Http\Controllers\NotificationController::class)
+        ->prefix('notifications')
+        ->name('notifications.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/read-all', 'readAll')->name('read-all');
+            Route::put('/preferences', 'updatePreferences')->name('preferences');
+            Route::get('/{id}/open', 'open')->name('open');
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+});
+
+// Move-in / move-out inspections & deposit settlement (brief §16) — staff and tenants.
+Route::middleware('auth')
+    ->controller(App\Http\Controllers\InspectionController::class)
+    ->prefix('inspections')
+    ->name('inspections.')
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::get('/media/{media}', 'media')->name('media.show');
+        Route::get('/{inspection}', 'show')->name('show');
+        Route::get('/{inspection}/edit', 'edit')->name('edit');
+        Route::put('/{inspection}', 'update')->name('update');
+        Route::post('/{inspection}/media', 'uploadMedia')->middleware('throttle:30,1')->name('media.store');
+        Route::delete('/{inspection}/media/{media}', 'destroyMedia')->name('media.destroy');
+        Route::post('/{inspection}/submit', 'submit')->name('submit');
+        Route::post('/{inspection}/respond', 'respond')->name('respond');
+        Route::post('/{inspection}/settle-deposit', 'settleDeposit')->name('settle');
+        Route::get('/{inspection}/report', 'report')->name('report');
+    });
+
+// Online rent payment, receipts and ledger (brief §9–11).
+Route::post('/payments/callback/{provider}', [App\Http\Controllers\OnlinePaymentController::class, 'callback'])
+    ->middleware('throttle:120,1')
+    ->name('payments.callback');
+Route::get('/receipts/shared/{payment}', [App\Http\Controllers\ReceiptController::class, 'shared'])
+    ->middleware('signed')
+    ->name('receipts.shared');
+
+Route::middleware('auth')->group(function () {
+    Route::controller(App\Http\Controllers\OnlinePaymentController::class)->group(function () {
+        Route::get('/pay/invoices/{invoice}', 'create')->name('payments.online.create');
+        Route::post('/pay/invoices/{invoice}', 'store')->middleware('throttle:10,1')->name('payments.online.store');
+        Route::get('/pay/{intent}', 'show')->name('payments.online.show');
+        Route::get('/pay/{intent}/status', 'status')->middleware('throttle:60,1')->name('payments.online.status');
+        Route::post('/pay/{intent}/sandbox', 'sandboxDecision')->name('payments.online.sandbox');
+    });
+
+    Route::get('/receipts/{payment}', [App\Http\Controllers\ReceiptController::class, 'show'])->name('receipts.show');
+    Route::get('/ledger/leases/{lease}', [App\Http\Controllers\LedgerController::class, 'show'])->name('ledger.show');
+
+    // Documents & tenant KYC (brief §6, MVP #14).
+    Route::controller(App\Http\Controllers\DocumentController::class)->prefix('documents')->name('documents.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->middleware('throttle:30,1')->name('store');
+        Route::put('/identity', 'updateIdentity')->name('identity');
+        Route::get('/{document}', 'download')->name('download');
+        Route::post('/{document}/review', 'review')->name('review');
+        Route::delete('/{document}', 'destroy')->name('destroy');
+    });
+
+    // Lease renewal & move-out notice.
+    Route::post('/leases/{lease}/requests', [App\Http\Controllers\LeaseRequestController::class, 'store'])->name('lease-requests.store');
+    Route::post('/lease-requests/{leaseRequest}/respond', [App\Http\Controllers\LeaseRequestController::class, 'respond'])->name('lease-requests.respond');
+
+    // Audit trail (admins only).
+    Route::get('/admin/audit-logs', [App\Http\Controllers\Admin\AuditLogController::class, 'index'])
+        ->middleware('role:admin')
+        ->name('admin.audit-logs.index');
+});
+
+// ---- Batch 2: contracts, service providers, finance, agents, reports ----
+Route::middleware('auth')->group(function () {
+    // Lease contract builder (brief §8).
+    Route::controller(App\Http\Controllers\LeaseContractController::class)->prefix('leases/{lease}/contract')->name('contracts.')->group(function () {
+        Route::get('/', 'show')->name('show');
+        Route::get('/edit', 'edit')->name('edit');
+        Route::post('/generate', 'generate')->name('generate');
+        Route::put('/', 'update')->name('update');
+        Route::post('/finalize', 'finalize')->name('finalize');
+    });
+    Route::resource('lease-templates', App\Http\Controllers\LeaseTemplateController::class)->except('show');
+
+    // Service provider network & maintenance work-flow (brief §14–15).
+    Route::get('/service-providers', [App\Http\Controllers\ServiceProviderController::class, 'index'])->name('service-providers.index');
+    Route::post('/service-providers', [App\Http\Controllers\ServiceProviderController::class, 'store'])->name('service-providers.store');
+    Route::put('/service-providers/{serviceProvider}', [App\Http\Controllers\ServiceProviderController::class, 'update'])->name('service-providers.update');
+    Route::post('/service-providers/{serviceProvider}/verify', [App\Http\Controllers\ServiceProviderController::class, 'verify'])->name('service-providers.verify');
+    Route::post('/maintenance/{maintenanceRequest}/assign', [App\Http\Controllers\MaintenanceWorkController::class, 'assign'])->name('maintenance.assign');
+    Route::post('/maintenance/{maintenanceRequest}/tenant-confirm', [App\Http\Controllers\MaintenanceWorkController::class, 'tenantConfirm'])->name('maintenance.tenant-confirm');
+
+    Route::middleware('role:technician')->prefix('service-provider')->name('service-provider.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\MaintenanceWorkController::class, 'technicianIndex'])->name('dashboard');
+        Route::get('/jobs', [App\Http\Controllers\MaintenanceWorkController::class, 'technicianIndex'])->name('maintenance.index');
+        Route::get('/jobs/{maintenanceRequest}', [App\Http\Controllers\MaintenanceWorkController::class, 'technicianShow'])->name('maintenance.show');
+        Route::patch('/jobs/{maintenanceRequest}', [App\Http\Controllers\MaintenanceWorkController::class, 'technicianUpdate'])->name('maintenance.update');
+    });
+
+    // Finance workspace for accountants (brief §4F).
+    Route::controller(App\Http\Controllers\FinanceController::class)->prefix('finance')->name('finance.')->group(function () {
+        Route::get('/', 'dashboard')->name('dashboard');
+        Route::get('/payments', 'payments')->name('payments.index');
+        Route::get('/invoices', 'invoices')->name('rent-invoices.index');
+        Route::get('/expenses', 'expenses')->name('expenses.index');
+    });
+    Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/{report}', [App\Http\Controllers\ReportController::class, 'show'])->name('reports.show');
+    Route::get('/finance/reports', fn () => redirect()->route('reports.index'))->name('finance.reports.index');
+
+    // Agent workspace (brief §4D).
+    Route::controller(App\Http\Controllers\AgentController::class)->prefix('agent')->name('agent.')->group(function () {
+        Route::get('/', 'dashboard')->name('dashboard');
+        Route::get('/properties', 'properties')->name('properties.index');
+        Route::get('/applications', 'applications')->name('applications.index');
+        Route::get('/commissions', 'commissions')->name('commissions.index');
+    });
+
+    // Accountant / agent assignments and commissions.
+    Route::controller(App\Http\Controllers\PropertyRoleController::class)->prefix('property-roles')->name('property-roles.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::delete('/{propertyRole}', 'destroy')->name('destroy');
+        Route::post('/commissions', 'storeCommission')->name('commissions.store');
+        Route::patch('/commissions/{commission}', 'updateCommission')->name('commissions.update');
+    });
+});
+
+// ---- Batch 3: security, language, maps, API docs ----
+Route::middleware('guest')->controller(App\Http\Controllers\Auth\TwoFactorController::class)->group(function () {
+    Route::get('/two-factor', 'challenge')->name('two-factor.challenge');
+    Route::post('/two-factor', 'verify')->middleware('throttle:10,1')->name('two-factor.verify');
+    Route::post('/two-factor/resend', 'resend')->middleware('throttle:3,1')->name('two-factor.resend');
+});
+Route::post('/locale', [App\Http\Controllers\AccountSecurityController::class, 'locale'])->name('locale.update');
+Route::get('/properties-map', [App\Http\Controllers\MapController::class, 'public'])->name('listings.map');
+Route::view('/api/docs', 'api.docs')->name('api.docs');
+
+Route::middleware('auth')->group(function () {
+    Route::controller(App\Http\Controllers\AccountSecurityController::class)->prefix('account/security')->name('account.security')->group(function () {
+        Route::get('/', 'show');
+        Route::put('/two-factor', 'twoFactor')->name('.two-factor');
+        Route::post('/tokens', 'createToken')->middleware('throttle:10,1')->name('.tokens.store');
+        Route::delete('/tokens/{token}', 'revokeToken')->name('.tokens.destroy');
+    });
+    Route::get('/portfolio/map', [App\Http\Controllers\MapController::class, 'portfolio'])->name('portfolio.map');
+});

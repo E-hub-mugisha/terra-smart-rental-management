@@ -374,9 +374,13 @@ class PropertyStructureController extends Controller
             'currency' => ['required', Rule::in(['RWF', 'USD', 'EUR'])],
             'status' => [
                 'required',
-                Rule::in(['available', 'occupied', 'reserved', 'maintenance', 'inactive']),
+                Rule::in(array_keys(Unit::STATUSES)),
             ],
             'description' => ['nullable', 'string'],
+            'features' => ['nullable', 'string', 'max:3000'],
+            'electricity_meter' => ['nullable', 'string', 'max:60'],
+            'water_meter' => ['nullable', 'string', 'max:60'],
+            'inventory' => ['nullable', 'string', 'max:5000'],
             'images' => ['nullable', 'array', 'max:20'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);

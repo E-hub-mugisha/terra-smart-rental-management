@@ -64,7 +64,7 @@
 .tp-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--mute); font-size: .8rem; }
 .tp-crumbs a { color: var(--mute); text-decoration: none; }
 .tp-crumbs a:hover { color: var(--o); }
-.tp-crumbs i { font-size: 9px; }
+.tp-crumbs i { font-size: 10px; }
 .tp-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
 .tp-title { margin: 0 0 6px; color: var(--navy); font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -.035em; }
 .tp-sub { margin: 0; max-width: 620px; color: var(--mute); line-height: 1.6; }

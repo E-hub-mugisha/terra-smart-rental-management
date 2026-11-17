@@ -48,6 +48,26 @@ class Lease extends Model
         ];
     }
 
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class)->latest('id');
+    }
+
+    public function contract(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(LeaseContract::class);
+    }
+
+    public function requests(): HasMany
+    {
+        return $this->hasMany(LeaseRequest::class)->latest('id');
+    }
+
+    public function documents(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable')->latest();
+    }
+
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class, 'tenant_id');

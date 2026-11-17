@@ -5,6 +5,7 @@ namespace App\Http\Controllers\TenantPortal;
 use App\Http\Controllers\Controller;
 use App\Models\Lease;
 use App\Models\Tenant;
+use App\Services\LeaseLifecycle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -45,7 +46,7 @@ class TenantLeaseController extends Controller
     }
 
     /**
-     * Accept a lease awaiting tenant acceptance.
+     * Accept a lease that staff have sent (pending_tenant_acceptance → pending_activation).
      */
     public function accept(Request $request, Lease $lease)
     {
@@ -56,39 +57,17 @@ class TenantLeaseController extends Controller
             404
         );
 
-        $validated = $request->validate([
+        $request->validate([
             'accept_terms' => ['required', 'accepted'],
         ]);
 
-        DB::transaction(function () use ($lease) {
-            $lockedLease = Lease::query()
-                ->whereKey($lease->id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if ($lockedLease->status !== 'draft') {
-                throw ValidationException::withMessages([
-                    'lease' => 'This lease is not currently awaiting your acceptance.',
-                ]);
-            }
-
-            if ($lockedLease->tenant_accepted_at !== null) {
-                throw ValidationException::withMessages([
-                    'lease' => 'You have already accepted this lease.',
-                ]);
-            }
-
-            $lockedLease->update([
-                'tenant_accepted_at' => now(),
-                'status' => 'pending_activation',
-            ]);
-        });
+        app(LeaseLifecycle::class)->accept($lease, $tenant);
 
         return redirect()
             ->route('tenant-portal.leases.show', $lease)
             ->with(
                 'success',
-                'You have accepted the lease. The property manager must confirm the move-in conditions and required payments before activation.'
+                'You have accepted the lease. Next, pay the deposit and first rent; the property manager then confirms your move-in and activates the lease.'
             );
     }
 }

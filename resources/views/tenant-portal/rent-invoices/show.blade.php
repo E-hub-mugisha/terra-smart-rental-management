@@ -58,6 +58,10 @@ if ($balance <= 0) {
                     @if (\Illuminate\Support\Facades\Route::has('tenant-portal.payments.index'))
                     <a href="{{ route('tenant-portal.payments.index') }}" class="id-btn-line"><i class="bi bi-clock-history"></i> Payment history</a>
                     @endif
+                    @if ((float) $rentInvoice->balance_due > 0 && ! in_array($rentInvoice->status, ['cancelled', 'void'], true))
+                    <a href="{{ route('payments.online.create', $rentInvoice) }}" class="id-btn" style="background:#D05208;border-color:#D05208;color:#fff;"><i class="bi bi-phone"></i> Pay now</a>
+                    @endif
+                    <a href="{{ route('ledger.show', $rentInvoice->lease_id) }}" class="id-btn-line"><i class="bi bi-journal-text"></i> Ledger</a>
                     <button type="button" class="id-btn" id="idPrint"><i class="bi bi-printer"></i> Print invoice</button>
                 </div>
             </div>

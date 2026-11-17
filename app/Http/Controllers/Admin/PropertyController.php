@@ -190,7 +190,13 @@ class PropertyController extends Controller
         Request $request,
         ?Property $property = null
     ): array {
-        return $request->validate([
+        $data = $request->validate([
+            'upi' => ['nullable', 'string', 'max:60'],
+            'amenities' => ['nullable', 'array'],
+            'amenities.*' => ['string', Rule::in(array_keys(Property::AMENITIES))],
+            'utilities' => ['nullable', 'array'],
+            'utilities.*' => ['string', Rule::in(array_keys(Property::UTILITIES))],
+            'video_url' => ['nullable', 'url', 'max:255'],
             'property_owner_id' => [
                 'required',
                 Rule::exists('property_owners', 'id')
@@ -237,6 +243,12 @@ class PropertyController extends Controller
                 'max:5120',
             ],
         ]);
+
+        // Unticking every checkbox sends nothing, so clear the lists explicitly.
+        $data['amenities'] = array_values(array_unique($data['amenities'] ?? []));
+        $data['utilities'] = array_values(array_unique($data['utilities'] ?? []));
+
+        return $data;
     }
 
     private function syncActiveManagers(

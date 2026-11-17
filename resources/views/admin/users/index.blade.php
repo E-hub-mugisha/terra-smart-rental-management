@@ -9,6 +9,9 @@
         'owner'   => 'Property Owner',
         'manager' => 'Property Manager',
         'tenant'  => 'Tenant',
+        'accountant' => 'Accountant / Finance',
+        'agent'   => 'Real Estate Agent',
+        'technician' => 'Service Provider / Technician',
     ];
 
     $roleShort = [
@@ -16,6 +19,9 @@
         'owner'   => 'Owner',
         'manager' => 'Manager',
         'tenant'  => 'Tenant',
+        'accountant' => 'Accountant',
+        'agent'   => 'Agent',
+        'technician' => 'Technician',
     ];
 
     $roleColors = [
@@ -23,6 +29,9 @@
         'owner'   => 'role-owner',
         'manager' => 'role-manager',
         'tenant'  => 'role-tenant',
+        'accountant' => 'role-manager',
+        'agent'   => 'role-owner',
+        'technician' => 'role-tenant',
     ];
 
     $roleIcons = [
@@ -30,6 +39,9 @@
         'owner'   => 'bi-building',
         'manager' => 'bi-briefcase',
         'tenant'  => 'bi-person',
+        'accountant' => 'bi-calculator',
+        'agent'   => 'bi-person-badge',
+        'technician' => 'bi-tools',
     ];
 
     // Admin routes that show the profile of each role.

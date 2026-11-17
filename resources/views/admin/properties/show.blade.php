@@ -32,7 +32,7 @@
 .tp-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--mute); font-size: .8rem; }
 .tp-crumbs a { color: var(--mute); text-decoration: none; }
 .tp-crumbs a:hover { color: var(--o); }
-.tp-crumbs i { font-size: 9px; }
+.tp-crumbs i { font-size: 10px; }
 .tp-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
 .tp-title { margin: 0 0 6px; color: var(--navy); font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -.035em; }
 .tp-sub { margin: 0; max-width: 620px; color: var(--mute); line-height: 1.6; }
@@ -351,7 +351,7 @@ $floorForms    = collect([null])->concat($buildings->flatMap->floors);
 $unitForms     = collect([null])->concat($buildings->flatMap->units);
 
 $unitTypes = ['apartment' => 'Apartment', 'studio' => 'Studio', 'house' => 'House', 'office' => 'Office', 'shop' => 'Shop', 'warehouse' => 'Warehouse', 'other' => 'Other'];
-$unitStatuses = ['available' => 'Available', 'occupied' => 'Occupied', 'reserved' => 'Reserved', 'maintenance' => 'Under maintenance', 'inactive' => 'Inactive'];
+$unitStatuses = \App\Models\Unit::STATUSES;
 @endphp
 
 <div class="tp">
@@ -389,65 +389,12 @@ $unitStatuses = ['available' => 'Available', 'occupied' => 'Occupied', 'reserved
         </div>
     </div>
 
-    {{-- ===== Hero ===== --}}
-    <section class="tp-hero">
-        <div class="tp-hero-main">
-            <div class="d-flex flex-wrap align-items-center gap-2">
-                <span class="tp-pill no-dot"><i class="bi bi-upc-scan"></i> {{ $property->property_code ?: 'No code' }}</span>
-                <span class="tp-pill {{ $pillClass($property->status) }}">{{ $label($property->status) }}</span>
-                <span class="tp-pill no-dot"><i class="bi bi-building"></i> {{ $label($property->property_type) }}</span>
-                @if($property->year_built)
-                    <span class="tp-pill no-dot"><i class="bi bi-calendar3"></i> Built {{ $property->year_built }}</span>
-                @endif
-            </div>
-
-            <h1 class="tp-hero-title">{{ $property->name }}</h1>
-
-            <p class="tp-hero-loc">
-                <i class="bi bi-geo-alt"></i>
-                <span>
-                    {{ $location ?: 'Location not specified' }}
-                    @if($property->latitude !== null && $property->longitude !== null)
-                        <a href="https://www.google.com/maps?q={{ urlencode($property->latitude . ',' . $property->longitude) }}"
-                           target="_blank" rel="noopener noreferrer" class="ms-1">Open in Maps</a>
-                    @endif
-                </span>
-            </p>
-
-            <dl class="tp-facts">
-                <div>
-                    <dt>Owner</dt>
-                    <dd>
-                        {{ $property->owner?->name ?? 'Owner unavailable' }}
-                        @if($property->owner?->email) <small>{{ $property->owner->email }}</small> @endif
-                    </dd>
-                </div>
-                <div>
-                    <dt>Managers</dt>
-                    <dd>{{ $managers->count() ? $managers->count() . ' assigned' : 'None assigned' }}</dd>
-                </div>
-                <div>
-                    <dt>Last updated</dt>
-                    <dd>{{ $property->updated_at?->format('d M Y') ?? 'Unavailable' }}</dd>
-                </div>
-            </dl>
-        </div>
-
-        @if($coverImage)
-            <button type="button" class="tp-hero-cover"
-                    data-bs-toggle="modal" data-bs-target="#propertyImageModal"
-                    data-image-src="{{ asset('storage/' . $coverImage->image_path) }}"
-                    data-image-caption="{{ $coverImage->caption ?: $property->name }}"
-                    aria-label="View cover image larger">
-                <img src="{{ asset('storage/' . $coverImage->image_path) }}" alt="{{ $coverImage->caption ?? $property->name }}">
-                <span class="tp-hero-hint"><i class="bi bi-arrows-fullscreen"></i> View</span>
-            </button>
-        @else
-            <a href="{{ route('admin.properties.edit', $property) }}" class="tp-hero-cover is-empty text-decoration-none">
-                <i class="bi bi-image"></i>
-                <span>Add a cover photo</span>
-            </a>
-        @endif
+    {{-- ===== Property showcase (same layout as the public property page) ===== --}}
+    <section class="tp-panel mb-4" style="padding:22px;">
+        <x-property-showcase :property="$property" mode="admin"
+            :edit-url="route('admin.properties.edit', $property)"
+            :public-url="route('listings.show', $property)"
+            unit-modal-prefix="editUnit" />
     </section>
 
     {{-- ===== Key numbers ===== --}}
@@ -1194,6 +1141,22 @@ $v = fn ($field, $default = null) => old('_modal') === $modalId ? old($field, $d
                     <div class="col-12">
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-control" rows="3">{{ $v('description', $unit?->description) }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Key features <small class="text-muted fw-normal">(one per line — shown on the property page)</small></label>
+                        <textarea name="features" class="form-control" rows="3" placeholder="Spacious living room&#10;Modern kitchen&#10;Balcony with great view">{{ $v('features', implode(PHP_EOL, $unit?->features ?? [])) }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Electricity meter no.</label>
+                        <input name="electricity_meter" class="form-control" maxlength="60" value="{{ $v('electricity_meter', $unit?->electricity_meter) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Water meter no.</label>
+                        <input name="water_meter" class="form-control" maxlength="60" value="{{ $v('water_meter', $unit?->water_meter) }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Inventory <small class="text-muted fw-normal">(furniture, appliances and fittings handed over)</small></label>
+                        <textarea name="inventory" class="form-control" rows="2">{{ $v('inventory', $unit?->inventory) }}</textarea>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Unit images</label>

@@ -61,7 +61,7 @@
     }
 
     .owner-edit-breadcrumb i {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .owner-edit-title {
@@ -187,7 +187,7 @@
         border-radius: 20px;
         background: #fff7f0;
         color: var(--owner-orange);
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         white-space: nowrap;
     }
@@ -262,7 +262,7 @@
         gap: 5px;
         padding: 5px 8px;
         border-radius: 20px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         text-transform: capitalize;
     }

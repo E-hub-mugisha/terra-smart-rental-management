@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $isReset ? 'Credentials reset' : 'Welcome to Terra' }}</title>
 </head>
-<body style="margin:0;padding:0;background:#f4f6fa;font-family:Arial,Helvetica,sans-serif;color:#19265d;">
+<body style="margin:0;padding:0;background:#f4f6fa;font-family:'Source Serif 4',Georgia,serif;color:#19265d;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fa;padding:32px 12px;">
     <tr>
         <td align="center">

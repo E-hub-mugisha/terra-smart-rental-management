@@ -48,7 +48,7 @@
     }
 
     .tenants-page .breadcrumb-line i {
-        font-size: 9px;
+        font-size: 10px;
         color: #AAB1BF;
     }
 
@@ -177,7 +177,7 @@
     .tenants-page .tnt-stat-footnote {
         margin-top: 6px;
         color: var(--tnt-muted);
-        font-size: 10px;
+        font-size: 11px;
     }
 
     /* Filter card */
@@ -309,7 +309,7 @@
         color: #5B6880;
         border-radius: 10px;
         padding: 0 7px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
     }
 
@@ -397,7 +397,7 @@
         border-bottom: 1px solid var(--tnt-border);
         background: #F8F9FC;
         color: #7B8498;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .55px;
@@ -464,7 +464,7 @@
     .tenants-page .tnt-meta {
         margin-top: 3px;
         color: var(--tnt-muted);
-        font-size: 10px;
+        font-size: 11px;
         line-height: 1.5;
     }
 
@@ -476,7 +476,7 @@
         border-radius: 5px;
         background: #F8F9FC;
         color: var(--tnt-navy);
-        font-size: 9.5px;
+        font-size: 11px;
         font-weight: 800;
         white-space: nowrap;
     }
@@ -519,7 +519,7 @@
         border-radius: 7px;
         background: #F3F5FA;
         color: var(--tnt-navy);
-        font-size: 10.5px;
+        font-size: 11.5px;
         font-weight: 800;
         white-space: nowrap;
     }
@@ -545,7 +545,7 @@
         gap: 6px;
         padding: 6px 9px;
         border-radius: 7px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         white-space: nowrap;
     }

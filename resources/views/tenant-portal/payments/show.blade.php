@@ -62,6 +62,9 @@
             <i class="bi bi-arrow-left"></i> Back to payments
         </a>
         <div class="d-flex flex-wrap gap-2">
+            @if ($rentPayment->status === 'confirmed')
+                <a href="{{ route('receipts.show', $rentPayment) }}" target="_blank" class="pd-btn-line"><i class="bi bi-file-earmark-check"></i> Receipt</a>
+            @endif
             @if (\Illuminate\Support\Facades\Route::has('tenant-portal.rent-invoices.index'))
                 <a href="{{ route('tenant-portal.rent-invoices.index') }}" class="pd-btn-line"><i class="bi bi-receipt"></i> My invoices</a>
             @endif

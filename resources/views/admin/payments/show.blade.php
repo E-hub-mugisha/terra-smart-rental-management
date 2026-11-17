@@ -14,6 +14,9 @@
             <p class="text-muted mb-0">Payment verification and invoice allocation</p>
         </div>
 
+        @if($payment->status === 'confirmed')
+            <a href="{{ route('receipts.show', $payment) }}" target="_blank" class="btn btn-outline-secondary ms-2"><i class="bi bi-file-earmark-check me-1"></i> Receipt</a>
+        @endif
         <a href="{{ route('admin.payments.index') }}"
            class="btn btn-outline-secondary">All Payments</a>
     </div>

@@ -42,7 +42,7 @@
     .tenant-dashboard {
         --td-primary: #D05208; --td-navy: #19265d; --td-text: #20283b;
         --td-muted: #748094; --td-border: #e8ebf1; --td-soft: #f4f6fb;
-        color: var(--td-text); font-family: "DM Sans", sans-serif;
+        color: var(--td-text); font-family: var(--terra-font);
     }
     .tenant-dashboard .muted { color: var(--td-muted); }
     .tenant-dashboard .td-in { animation: tdIn .5s both; }

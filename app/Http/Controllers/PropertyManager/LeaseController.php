@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PropertyManager;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lease;
+use App\Services\LeaseLifecycle;
 use App\Models\Property;
 use App\Models\PropertyManager;
 use App\Models\RentPayment;
@@ -126,6 +127,8 @@ class LeaseController extends Controller
     {
         $statuses = [
             'draft',
+            'pending_tenant_acceptance',
+            'pending_activation',
             'active',
             'expired',
             'terminated',
@@ -160,6 +163,8 @@ class LeaseController extends Controller
         $counts = [
             'all' => (clone $base)->count(),
             'draft' => (clone $base)->where('status', 'draft')->count(),
+            'pending_tenant_acceptance' => (clone $base)->where('status', 'pending_tenant_acceptance')->count(),
+            'pending_activation' => (clone $base)->where('status', 'pending_activation')->count(),
             'active' => (clone $base)->where('status', 'active')->count(),
             'expired' => (clone $base)->where('status', 'expired')->count(),
             'terminated' => (clone $base)->where('status', 'terminated')->count(),
@@ -188,18 +193,13 @@ class LeaseController extends Controller
             'application',
         ]);
 
-        $completedDepositPayments = RentPayment::query()
-            ->where('lease_id', $lease->id)
-            ->where('status', 'completed')
-            ->where('payment_method', 'security_deposit')
-            ->sum('amount');
+        $completedDepositPayments = $this->confirmedDepositPaid($lease);
 
         return view('property-portal.leases.show', compact(
             'lease',
             'completedDepositPayments'
         ));
     }
-
     public function edit(Lease $lease)
     {
         $lease = $this->scopedLease($lease);
@@ -276,130 +276,60 @@ class LeaseController extends Controller
     }
 
     /**
-     * Keep the lease as draft so the tenant portal can accept it.
-     * The model has no sent_at field, so this action does not invent one.
+     * Send the draft to the tenant (draft → pending_tenant_acceptance) and reserve the unit.
      */
     public function sendForSignature(Lease $lease)
     {
         $lease = $this->scopedLease($lease);
-
-        if ($lease->status !== 'draft') {
-            return back()->with('error', 'Only draft leases can be prepared for tenant acceptance.');
-        }
-
-        if ($lease->tenant_accepted_at) {
-            return back()->with('error', 'The tenant has already accepted this lease.');
-        }
-
-        DB::transaction(function () use ($lease) {
-            $lockedLease = $this->leasesQuery()
-                ->whereKey($lease->id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if (
-                $lockedLease->status !== 'draft'
-                || $lockedLease->tenant_accepted_at
-            ) {
-                throw ValidationException::withMessages([
-                    'lease' => 'This lease can no longer be prepared for acceptance.',
-                ]);
-            }
-
-            $unit = Unit::query()
-                ->whereKey($lockedLease->unit_id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if (!in_array($unit->status, ['available', 'reserved'], true)) {
-                throw ValidationException::withMessages([
-                    'lease' => 'This unit is not available for a new lease.',
-                ]);
-            }
-
-            $this->assertNoOverlappingLease($lockedLease);
-
-            $unit->status = 'reserved';
-            $unit->save();
-        });
+        app(LeaseLifecycle::class)->sendToTenant($lease);
 
         return redirect()
             ->route('property-manager.leases.show', $lease)
-            ->with(
-                'success',
-                'The draft is ready for tenant acceptance in the tenant portal.'
-            );
+            ->with('success', 'Lease sent. The tenant can now review and accept it in their portal.');
     }
 
     /**
-     * Activate only after tenant acceptance, security deposit payment,
-     * and manager move-in confirmation.
+     * Take an unaccepted lease back to draft to change its terms.
+     */
+    public function recall(Lease $lease)
+    {
+        $lease = $this->scopedLease($lease);
+        app(LeaseLifecycle::class)->recall($lease);
+
+        return redirect()
+            ->route('property-manager.leases.show', $lease)
+            ->with('success', 'Lease recalled to draft. Edit the terms, then send it again.');
+    }
+
+    /**
+     * Record that the tenant has moved in.
+     */
+    public function confirmMoveIn(Lease $lease)
+    {
+        $lease = $this->scopedLease($lease);
+        app(LeaseLifecycle::class)->confirmMoveIn($lease);
+
+        return back()->with('success', 'Move-in confirmed.');
+    }
+    /**
+     * Activate (pending_activation → active) once the tenant has accepted,
+     * the first invoices are paid and move-in is confirmed. Ticking
+     * "move-in confirmed" on the activation form records move-in as well.
      */
     public function activate(Request $request, Lease $lease)
     {
         $lease = $this->scopedLease($lease);
+        $lifecycle = app(LeaseLifecycle::class);
 
-        $request->validate([
-            'move_in_confirmed' => ['required', 'accepted'],
-        ]);
-
-        DB::transaction(function () use ($lease) {
-            $lockedLease = $this->leasesQuery()
-                ->whereKey($lease->id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if ($lockedLease->status !== 'draft') {
-                throw ValidationException::withMessages([
-                    'lease' => 'Only draft leases can be activated.',
-                ]);
-            }
-
-            if (!$lockedLease->tenant_accepted_at) {
-                throw ValidationException::withMessages([
-                    'lease' => 'The tenant must accept the lease before activation.',
-                ]);
-            }
-
-            $unit = Unit::query()
-                ->whereKey($lockedLease->unit_id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if ($unit->status !== 'reserved') {
-                throw ValidationException::withMessages([
-                    'lease' => 'The unit must be reserved for this lease.',
-                ]);
-            }
-
-            $this->assertNoOverlappingLease($lockedLease);
-
-            $paidDeposit = RentPayment::query()
-                ->where('lease_id', $lockedLease->id)
-                ->where('status', 'completed')
-                ->where('payment_method', 'security_deposit')
-                ->sum('amount');
-
-            if ((float) $paidDeposit < (float) $lockedLease->deposit_amount) {
-                throw ValidationException::withMessages([
-                    'lease' => 'The required security deposit has not been fully paid.',
-                ]);
-            }
-
-            $lockedLease->move_in_confirmed_at = now()->toDateString();
-            $lockedLease->activated_at = now()->toDateString();
-            $lockedLease->status = 'active';
-            $lockedLease->save();
-
-            $unit->status = 'occupied';
-            $unit->save();
-        });
+        if ($request->boolean('move_in_confirmed') && ! $lease->move_in_confirmed_at) {
+            $lifecycle->confirmMoveIn($lease);
+        }
+        $lifecycle->activate($lease);
 
         return redirect()
             ->route('property-manager.leases.show', $lease)
-            ->with('success', 'Lease activated successfully.');
+            ->with('success', 'Lease activated. The unit is now marked as occupied.');
     }
-
     public function terminate(Request $request, Lease $lease)
     {
         $lease = $this->scopedLease($lease);
@@ -462,161 +392,43 @@ class LeaseController extends Controller
             ->with('success', 'Lease terminated successfully.');
     }
 
-    private function assertNoOverlappingLease(
-        Lease $lease,
-        ?string $startDate = null,
-        ?string $endDate = null
-    ): void {
-        $startDate ??= $lease->start_date?->toDateString();
-        $endDate ??= $lease->end_date?->toDateString();
+    /**
+     * Deposit actually received: confirmed payments allocated to the lease's
+     * deposit invoices (the same rule activation uses), plus any legacy
+     * confirmed payments recorded with the "security_deposit" method.
+     */
+    private function confirmedDepositPaid(Lease $lease): float
+    {
+        $allocated = \App\Models\RentPaymentAllocation::query()
+            ->whereHas('invoice', fn (Builder $q) => $q->where('lease_id', $lease->id)->where('invoice_type', 'deposit'))
+            ->whereHas('payment', fn (Builder $q) => $q->where('status', 'confirmed'))
+            ->sum('amount');
 
-        $overlap = Lease::query()
-            ->where('unit_id', $lease->unit_id)
-            ->where('id', '!=', $lease->id)
-            ->whereNotIn('status', ['rejected', 'terminated', 'cancelled'])
-            ->whereDate('start_date', '<=', $endDate)
-            ->whereDate('end_date', '>=', $startDate)
-            ->exists();
+        $legacy = RentPayment::query()
+            ->where('lease_id', $lease->id)
+            ->where('status', 'confirmed')
+            ->where('payment_method', 'security_deposit')
+            ->sum('amount');
 
-        if ($overlap) {
-            throw ValidationException::withMessages([
-                'lease' => 'Another lease overlaps these dates for this unit.',
-            ]);
-        }
+        return (float) $allocated + (float) $legacy;
     }
 
+    private function assertNoOverlappingLease(Lease $lease, ?string $startDate = null, ?string $endDate = null): void
+    {
+        app(LeaseLifecycle::class)->assertNoOverlap($lease, $startDate, $endDate);
+    }
     /**
      * Generate the security deposit and initial rent invoices.
-     *
-     * Managers can only generate invoices for leases belonging to
-     * properties currently assigned to them.
      */
     public function generateRequiredInvoices(Lease $lease)
     {
         $lease = $this->scopedLease($lease);
-
-        if ($lease->status !== 'draft' || ! $lease->tenant_accepted_at) {
-            throw ValidationException::withMessages([
-                'lease' => 'The tenant must accept the draft lease before required invoices can be generated.',
-            ]);
-        }
-
-        DB::transaction(function () use ($lease) {
-            // Recheck the manager's access and lock the lease.
-            $lockedLease = $this->leasesQuery()
-                ->whereKey($lease->id)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if (
-                $lockedLease->status !== 'draft'
-                || ! $lockedLease->tenant_accepted_at
-            ) {
-                throw ValidationException::withMessages([
-                    'lease' => 'Invoices can only be generated for a tenant-accepted draft lease.',
-                ]);
-            }
-
-            // Generate the deposit invoice if a deposit is required.
-            if ((float) $lockedLease->deposit_amount > 0) {
-                $this->createInvoiceIfMissing(
-                    $lockedLease,
-                    'deposit',
-                    (float) $lockedLease->deposit_amount,
-                    'Security deposit - ' . $lockedLease->lease_number
-                );
-            }
-
-            // Generate the initial rent invoice for the first billing period.
-            $periodStart = $lockedLease->start_date->copy();
-
-            $periodEnd = $periodStart
-                ->copy()
-                ->addMonthNoOverflow()
-                ->subDay();
-
-            if ($periodEnd->gt($lockedLease->end_date)) {
-                $periodEnd = $lockedLease->end_date->copy();
-            }
-
-            $this->createInvoiceIfMissing(
-                $lockedLease,
-                'rent',
-                (float) $lockedLease->monthly_rent,
-                'Initial rent - ' . $lockedLease->lease_number,
-                $periodStart,
-                $periodEnd
-            );
-        });
+        app(LeaseLifecycle::class)->generateRequiredInvoices($lease);
 
         return redirect()
             ->route('property-manager.leases.show', $lease)
-            ->with(
-                'success',
-                'Required invoices have been generated, or the existing invoices were retained.'
-            );
+            ->with('success', 'Required invoices have been generated, or the existing invoices were retained.');
     }
-
-    /**
-     * Create an invoice only if the same invoice type and billing period
-     * do not already exist for this lease.
-     */
-    private function createInvoiceIfMissing(
-        Lease $lease,
-        string $type,
-        float $amount,
-        string $description,
-        $periodStart = null,
-        $periodEnd = null
-    ): void {
-        if ($type === 'deposit' && $amount <= 0) {
-            return;
-        }
-
-        $existingInvoice = RentInvoice::query()
-            ->where('lease_id', $lease->id)
-            ->where('invoice_type', $type)
-            ->when(
-                $periodStart,
-                fn($query) => $query->whereDate(
-                    'billing_period_start',
-                    $periodStart
-                )
-            )
-            ->when(
-                $periodEnd,
-                fn($query) => $query->whereDate(
-                    'billing_period_end',
-                    $periodEnd
-                )
-            )
-            ->exists();
-
-        if ($existingInvoice) {
-            return;
-        }
-
-        RentInvoice::create([
-            'invoice_number' => 'INV-' . strtoupper(Str::random(8)),
-            'lease_id' => $lease->id,
-            'tenant_id' => $lease->tenant_id,
-            'unit_id' => $lease->unit_id,
-            'invoice_type' => $type,
-            'billing_period_start' => $periodStart ?? $lease->start_date,
-            'billing_period_end' => $periodEnd ?? $lease->start_date,
-            'issue_date' => now()->toDateString(),
-            'due_date' => $lease->start_date,
-            'subtotal' => $amount,
-            'tax_amount' => 0,
-            'total_amount' => $amount,
-            'amount_paid' => 0,
-            'balance_due' => $amount,
-            'currency' => $lease->currency,
-            'status' => 'unpaid',
-            'description' => $description,
-        ]);
-    }
-
     /**
      * Calculate the amount allocated to an invoice through confirmed payments.
      */

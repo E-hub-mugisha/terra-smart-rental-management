@@ -269,7 +269,7 @@
         border-radius: 20px;
         background: #fff1e8;
         color: var(--mf-orange);
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
     }
 

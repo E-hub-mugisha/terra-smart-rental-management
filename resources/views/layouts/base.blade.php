@@ -44,15 +44,12 @@
 
     {{-- Bootstrap 5 + Icons --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    @include('partials.fonts')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     {{-- AOS (animate on scroll) --}}
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
-    {{-- Montserrat --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -67,7 +64,7 @@
             --tr-line: #e5e8ef;
             --tr-surface: #ffffff;
             --tr-ground: #f6f7fb;
-            --tr-font: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            --tr-font: var(--terra-font);
 
             --tr-shadow-sm: 0 2px 10px rgba(25, 38, 93, .06);
             --tr-shadow-md: 0 12px 32px rgba(25, 38, 93, .10);
@@ -91,7 +88,7 @@
         html { scroll-behavior: smooth; }
         body {
             font-family: var(--tr-font);
-            font-size: .93rem;
+            font-size: .95rem;
             line-height: 1.7;
             color: var(--tr-ink);
             background: var(--tr-surface);
@@ -128,7 +125,7 @@
         .tr-topbar {
             background: var(--tr-navy-deep);
             color: rgba(255,255,255,.78);
-            font-size: .74rem;
+            font-size: .8rem;
             font-weight: 500;
         }
         .tr-topbar .container {
@@ -179,7 +176,7 @@
             color: var(--tr-orange);
         }
         .tr-brand-sub {
-            font-size: .6rem;
+            font-size: .7rem;
             font-weight: 700;
             letter-spacing: .06em;
             text-transform: uppercase;
@@ -190,7 +187,7 @@
         .tr-nav .nav-link {
             position: relative;
             color: #454b60;
-            font-size: .84rem;
+            font-size: .87rem;
             font-weight: 600;
             padding: 27px 14px;
             transition: color .2s ease, padding .3s ease;
@@ -214,7 +211,7 @@
 
         .tr-nav-link-plain {
             color: var(--tr-navy);
-            font-size: .84rem;
+            font-size: .87rem;
             font-weight: 700;
             text-decoration: none;
             padding: 10px 14px;
@@ -228,7 +225,7 @@
             background: var(--tr-orange);
             border: 1px solid var(--tr-orange);
             color: #fff;
-            font-size: .83rem;
+            font-size: .86rem;
             font-weight: 700;
             border-radius: 10px;
             padding: 11px 20px;
@@ -394,7 +391,7 @@
             color: #fff;
             padding: 12px 20px;
             border-radius: 12px;
-            font-size: .85rem;
+            font-size: .88rem;
             font-weight: 600;
             box-shadow: var(--tr-shadow-lg);
             pointer-events: none;
@@ -411,7 +408,7 @@
             background: var(--tr-navy-deep);
             color: #cbd1e4;
             padding: 64px 0 24px;
-            font-size: .85rem;
+            font-size: .88rem;
             position: relative;
             overflow: hidden;
         }
@@ -419,7 +416,7 @@
         .tr-footer .container { position: relative; z-index: 1; }
         .tr-footer h2 {
             color: #fff;
-            font-size: .8rem;
+            font-size: .84rem;
             font-weight: 700;
             letter-spacing: .08em;
             text-transform: uppercase;
@@ -443,7 +440,7 @@
         }
         .tr-footer-brand small {
             display: block;
-            font-size: .64rem;
+            font-size: .72rem;
             font-weight: 700;
             color: #f2a477;
             margin-top: 7px;
@@ -454,7 +451,7 @@
             border-top: 1px solid rgba(255,255,255,.12);
             margin-top: 44px;
             padding-top: 20px;
-            font-size: .76rem;
+            font-size: .8rem;
             color: #aab3d0;
         }
 
@@ -470,7 +467,7 @@
             .tr-nav-actions { margin-top: 16px; }
         }
         @media (max-width: 575.98px) {
-            body { font-size: .9rem; }
+            body { font-size: .92rem; }
             .tr-footer { padding-top: 44px; }
             .tr-footer-base { margin-top: 30px; }
             .tr-top { right: 14px; bottom: 84px; }
@@ -516,35 +513,42 @@
             <div class="collapse navbar-collapse" id="baseNavbar">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">Home</a>
+                        <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">{{ __('Home') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('rentals.*') ? 'active' : '' }}" href="{{ route('rentals.index') }}">Units For Rent</a>
+                        <a class="nav-link {{ request()->routeIs('listings.*') ? 'active' : '' }}" href="{{ route('listings.index') }}">{{ __('Properties') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/#property-management') }}">Features</a>
+                        <a class="nav-link {{ request()->routeIs('listings.map') ? 'active' : '' }}" href="{{ route('listings.map') }}">{{ __('Map') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('rentals.*') ? 'active' : '' }}" href="{{ route('rentals.index') }}">{{ __('Units For Rent') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url('/#property-management') }}">{{ __('Features') }}</a>
                     </li>
                 </ul>
 
                 <div class="tr-nav-actions d-flex flex-column flex-lg-row align-items-lg-center gap-2">
+                    @include('partials.language-switcher', ['compact' => true])
                     @auth
                         <span class="small fw-semibold px-lg-2">
                             <i class="bi bi-person-circle me-1 text-primary"></i>{{ auth()->user()->name }}
                         </span>
 
                         @if(Route::has('dashboard'))
-                            <a href="{{ route('dashboard') }}" class="btn tr-nav-btn">My dashboard</a>
+                            <a href="{{ route('dashboard') }}" class="btn tr-nav-btn">{{ __('My dashboard') }}</a>
                         @endif
 
                         @if(Route::has('logout'))
                             <form method="POST" action="{{ route('logout') }}" class="m-0">
                                 @csrf
-                                <button type="submit" class="tr-nav-link-plain border-0 bg-transparent">Sign out</button>
+                                <button type="submit" class="tr-nav-link-plain border-0 bg-transparent">{{ __('Sign out') }}</button>
                             </form>
                         @endif
                     @else
-                        <a href="{{ route('login') }}" class="tr-nav-link-plain">Sign in</a>
-                        <a href="{{ route('register') }}" class="btn tr-nav-btn">Create account</a>
+                        <a href="{{ route('login') }}" class="tr-nav-link-plain">{{ __('Sign in') }}</a>
+                        <a href="{{ route('register') }}" class="btn tr-nav-btn">{{ __('Create account') }}</a>
                     @endauth
                 </div>
             </div>
@@ -574,7 +578,7 @@
                     <h2>Explore</h2>
                     <ul>
                         <li><a href="{{ route('rentals.index') }}">Find a rental</a></li>
-                        <li><a href="{{ url('/#property-management') }}">Features</a></li>
+                        <li><a href="{{ url('/#property-management') }}">{{ __('Features') }}</a></li>
                         <li><a href="{{ url('/#rentals') }}">Available homes</a></li>
                     </ul>
                 </div>
@@ -582,8 +586,8 @@
                 <div class="col-6 col-lg-2" data-aos="fade-up" data-aos-delay="200">
                     <h2>Account</h2>
                     <ul>
-                        <li><a href="{{ route('register') }}">Create account</a></li>
-                        <li><a href="{{ route('login') }}">Sign in</a></li>
+                        <li><a href="{{ route('register') }}">{{ __('Create account') }}</a></li>
+                        <li><a href="{{ route('login') }}">{{ __('Sign in') }}</a></li>
                     </ul>
                 </div>
 

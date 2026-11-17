@@ -61,7 +61,7 @@
     }
 
     .owner-create-breadcrumb i {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .owner-create-title {

@@ -9,6 +9,7 @@ $property = $unit?->building?->property;
 $tenant = $lease->tenant;
 
 $isDraft = $lease->status === 'draft';
+$awaitingActivation = $lease->status === 'pending_activation';
 $isActive = $lease->status === 'active';
 $tenantAccepted = (bool) $lease->tenant_accepted_at;
 $depositPaid = (float) $completedDepositPayments >= (float) $lease->deposit_amount;
@@ -238,7 +239,7 @@ $depositPaid = (float) $completedDepositPayments >= (float) $lease->deposit_amou
                         </div>
                     </div>
 
-                    @if($isDraft && $tenantAccepted)
+                    @if($awaitingActivation && $tenantAccepted)
                     <form
                         method="POST"
                         action="{{ route('property-manager.leases.generate-required-invoices', $lease) }}"
@@ -304,7 +305,7 @@ $depositPaid = (float) $completedDepositPayments >= (float) $lease->deposit_amou
                         </div>
                     </div>
 
-                    @if($isDraft && !$tenantAccepted)
+                    @if(!$tenantAccepted && in_array($lease->status, ['draft', 'pending_tenant_acceptance'], true))
                     <div class="alert alert-info mt-3 mb-0">
                         The tenant must accept the lease before the required invoices can be generated.
                     </div>
@@ -510,110 +511,13 @@ $depositPaid = (float) $completedDepositPayments >= (float) $lease->deposit_amou
         </div>
 
         <div class="col-xl-4">
-            @if($isDraft && !$tenantAccepted)
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h6 class="fw-bold">Tenant acceptance</h6>
-                    <p class="small text-muted">
-                        This lease is still a draft. Confirm the terms, then make the draft
-                        available for the tenant to accept through the tenant portal.
-                    </p>
-
-                    <div class="check-row">
-                        <span>Tenant acceptance</span>
-                        <span class="text-warning">Awaiting</span>
-                    </div>
-
-                    <div class="check-row">
-                        <span>Unit reservation</span>
-                        <span class="{{ $unit?->status === 'reserved' ? 'text-success' : 'text-warning' }}">
-                            {{ ucfirst($unit?->status ?? 'unknown') }}
-                        </span>
-                    </div>
-
-                    <form method="POST"
-                        action="{{ route('property-manager.leases.send-for-signature', $lease) }}"
-                        onsubmit="return confirm('Prepare this draft for tenant acceptance?');">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit" class="btn btn-brand w-100 mt-3">
-                            <i class="bi bi-send me-1"></i> Prepare for acceptance
-                        </button>
-                    </form>
-                </div>
-            </div>
-            @endif
-
-            @if($isDraft && $tenantAccepted)
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white py-3">
-                    <h6 class="fw-bold mb-0">Move-in and activation checks</h6>
-                </div>
-                <div class="card-body">
-                    <div class="check-row">
-                        <span>Tenant acceptance</span>
-                        <span class="text-success">
-                            <i class="bi bi-check-circle me-1"></i> Accepted
-                        </span>
-                    </div>
-
-                    <div class="check-row">
-                        <span>Security deposit</span>
-                        @if($depositPaid)
-                        <span class="text-success">
-                            <i class="bi bi-check-circle me-1"></i> Paid
-                        </span>
-                        @else
-                        <span class="text-danger text-end">
-                            {{ $lease->currency }}
-                            {{ number_format(max(0, (float) $lease->deposit_amount - (float) $completedDepositPayments), 0) }}
-                            outstanding
-                        </span>
-                        @endif
-                    </div>
-
-                    <div class="check-row">
-                        <span>Unit status</span>
-                        <span class="{{ $unit?->status === 'reserved' ? 'text-success' : 'text-danger' }}">
-                            {{ ucfirst($unit?->status ?? 'unknown') }}
-                        </span>
-                    </div>
-
-                    <hr>
-
-                    @if($depositPaid && $unit?->status === 'reserved')
-                    <form method="POST"
-                        action="{{ route('property-manager.leases.activate', $lease) }}"
-                        onsubmit="return confirm('Confirm move-in and activate this lease?');">
-                        @csrf
-                        @method('PATCH')
-
-                        <div class="form-check mb-3">
-                            <input
-                                type="checkbox"
-                                name="move_in_confirmed"
-                                value="1"
-                                id="move_in_confirmed"
-                                required
-                                class="form-check-input">
-                            <label for="move_in_confirmed" class="form-check-label small">
-                                I confirm the move-in requirements have been checked and completed.
-                            </label>
-                        </div>
-
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-check-circle me-1"></i> Activate lease
-                        </button>
-                    </form>
-                    @else
-                    <p class="small text-muted mb-0">
-                        Activation will be available when the security deposit is fully paid
-                        and the unit is reserved for this lease.
-                    </p>
-                    @endif
-                </div>
-            </div>
-            @endif
+            @include('leases._tenancy-panel', ['lease' => $lease])
+            @include('inspections._lease-panel', ['lease' => $lease])
+            @include('leases._workflow-panel', ['lease' => $lease, 'method' => 'PATCH', 'routes' => [
+                'send' => 'property-manager.leases.send-for-signature', 'recall' => 'property-manager.leases.recall',
+                'invoices' => 'property-manager.leases.generate-required-invoices', 'moveIn' => 'property-manager.leases.confirm-move-in',
+                'activate' => 'property-manager.leases.activate', 'edit' => 'property-manager.leases.edit',
+            ]])
 
             @if($isActive)
             <div class="card border-0 shadow-sm">
@@ -713,6 +617,8 @@ $depositPaid = (float) $completedDepositPayments >= (float) $lease->deposit_amou
         font-weight: 700;
     }
 
+    .pm-lease-detail .status-pending_tenant_acceptance { background: #fff3dc; color: #8f5a08; }
+    .pm-lease-detail .status-pending_activation { background: #e7f4fd; color: #116a9c; }
     .pm-lease-detail .status-draft {
         background: #f0f1f3;
         color: #525866;

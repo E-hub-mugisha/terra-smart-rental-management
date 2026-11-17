@@ -13,6 +13,9 @@ class DashboardController extends Controller
             'admin' => redirect()->route('admin.dashboard'),
             'manager','owner' => redirect()->route('property-manager.dashboard'),
             'tenant' => redirect()->route('tenant-portal.dashboard'),
+            'accountant' => redirect()->route('finance.dashboard'),
+            'agent' => redirect()->route('agent.dashboard'),
+            'technician' => redirect()->route('service-provider.dashboard'),
             default => abort(403, 'No dashboard is assigned to your account.'),
         };
     }

@@ -43,7 +43,7 @@
     .tenant-form-page .tf-breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; color: var(--tf-muted); font-size: 11px; }
     .tenant-form-page .tf-breadcrumb a { color: var(--tf-muted); text-decoration: none; }
     .tenant-form-page .tf-breadcrumb a:hover { color: var(--tf-orange); }
-    .tenant-form-page .tf-breadcrumb i { font-size: 9px; color: #AAB1BF; }
+    .tenant-form-page .tf-breadcrumb i { font-size: 10px; color: #AAB1BF; }
     .tenant-form-page .tf-title { margin: 0; color: var(--tf-navy); font-size: clamp(22px, 2vw, 28px); font-weight: 800; letter-spacing: -.7px; }
     .tenant-form-page .tf-description { max-width: 680px; margin: 7px 0 0; color: var(--tf-muted); font-size: 12px; line-height: 1.7; }
 
@@ -68,7 +68,7 @@
     /* Fields */
     .tenant-form-page .tf-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; color: #4B556B; font-size: 11px; font-weight: 700; }
     .tenant-form-page .tf-label .req { color: #B42318; margin-left: 2px; }
-    .tenant-form-page .tf-label .opt { color: #98A2B3; font-size: 10px; font-weight: 600; }
+    .tenant-form-page .tf-label .opt { color: #98A2B3; font-size: 11px; font-weight: 600; }
     .tenant-form-page .tf-input-wrap { position: relative; }
     .tenant-form-page .tf-input-wrap > i { position: absolute; top: 50%; left: 13px; transform: translateY(-50%); color: #8A94A7; font-size: 14px; pointer-events: none; }
     .tenant-form-page .tf-input-wrap .form-control, .tenant-form-page .tf-input-wrap .form-select { padding-left: 38px; }
@@ -80,8 +80,8 @@
     .tenant-form-page .form-control.is-invalid, .tenant-form-page .form-select.is-invalid { border-color: #E5A29C; background-image: none; }
     .tenant-form-page .form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(180, 35, 24, .1); }
     .tenant-form-page .tf-error { margin-top: 6px; color: #B42318; font-size: 11px; font-weight: 600; }
-    .tenant-form-page .tf-hint { margin-top: 6px; color: var(--tf-muted); font-size: 10.5px; }
-    .tenant-form-page .tf-counter { float: right; color: #98A2B3; font-size: 10px; }
+    .tenant-form-page .tf-hint { margin-top: 6px; color: var(--tf-muted); font-size: 11.5px; }
+    .tenant-form-page .tf-counter { float: right; color: #98A2B3; font-size: 11px; }
 
     /* Sidebar */
     .tenant-form-page .tf-info-box { display: flex; gap: 12px; padding: 14px; border: 1px solid #F6D8C5; border-radius: 12px; background: #FFF8F3; }

@@ -310,7 +310,7 @@
 <style>
     .profile-page {
         color: #202938;
-        font-family: "DM Sans", sans-serif;
+        font-family: var(--terra-font);
     }
 
     .profile-page .card {

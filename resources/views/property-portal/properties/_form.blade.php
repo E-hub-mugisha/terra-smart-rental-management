@@ -298,6 +298,8 @@
             </div>
         </div>
 
+        @include('admin.properties._profile-card')
+
         {{-- Images --}}
         <div class="card border-0 shadow-sm rounded-4 mb-4">
 

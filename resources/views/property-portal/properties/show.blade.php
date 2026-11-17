@@ -41,13 +41,7 @@ $unitTypes = [
 'other' => 'Other',
 ];
 
-$unitStatuses = [
-'available' => 'Available',
-'occupied' => 'Occupied',
-'reserved' => 'Reserved',
-'maintenance' => 'Under maintenance',
-'inactive' => 'Inactive',
-];
+$unitStatuses = \App\Models\Unit::STATUSES;
 
 $buildingForms = collect([null])->concat($buildings);
 $floorForms = collect([null])->concat($buildings->flatMap->floors);
@@ -91,76 +85,13 @@ $unitForms = collect([null])->concat($buildings->flatMap->units);
         </div>
     </div>
 
-    {{-- Property hero --}}
-    <section class="pm-hero mb-4">
-        <div class="row g-0">
-            <div class="col-12 col-lg-4">
-                @if($coverImage)
-                <img
-                    src="{{ asset('storage/' . $coverImage->image_path) }}"
-                    alt="{{ $property->name }}"
-                    class="pm-cover-image">
-                @else
-                <div class="pm-cover-placeholder">
-                    <i class="bi bi-buildings"></i>
-                    <span>Property overview</span>
-                </div>
-                @endif
-            </div>
-
-            <div class="col-12 col-lg-8">
-                <div class="pm-hero-content">
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                        <span class="pm-eyebrow">ASSIGNED PROPERTY</span>
-                        <span class="pm-pill bg-{{ $pill($property->status) }}">
-                            {{ $label($property->status ?: 'unspecified') }}
-                        </span>
-                    </div>
-
-                    <h3>{{ $property->name }}</h3>
-
-                    <p class="pm-muted mb-4">
-                        {{ collect([
-                            $property->address,
-                            $property->village,
-                            $property->cell,
-                            $property->sector,
-                            $property->district,
-                            $property->province,
-                            $property->country,
-                        ])->filter()->implode(', ') ?: 'No property address recorded.' }}
-                    </p>
-
-                    <div class="row g-3">
-                        <div class="col-6 col-md-3">
-                            <div class="pm-hero-metric">
-                                <span>Buildings</span>
-                                <strong>{{ number_format($buildingCount) }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <div class="pm-hero-metric">
-                                <span>Floors</span>
-                                <strong>{{ number_format($floorCount) }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <div class="pm-hero-metric">
-                                <span>Total units</span>
-                                <strong>{{ number_format($unitCount) }}</strong>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <div class="pm-hero-metric">
-                                <span>Occupancy</span>
-                                <strong>{{ $occupancy }}%</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    {{-- Property showcase (same layout as the public property page) --}}
+    <section class="pm-card mb-4" style="padding:22px;">
+        <x-property-showcase :property="$property" mode="admin"
+            :public-url="route('listings.show', $property)"
+            unit-modal-prefix="editUnit" />
     </section>
+
     {{-- Assigned property managers --}}
     @if($isPropertyOwner)
     <section class="pm-card mb-4">
@@ -957,6 +888,22 @@ old('_modal') === $modalId ? old($field, $default) : $default;
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-control" rows="3">{{ $v('description', $unit?->description) }}</textarea>
                     </div>
+                    <div class="col-12">
+                        <label class="form-label">Key features <small class="text-muted fw-normal">(one per line — shown on the property page)</small></label>
+                        <textarea name="features" class="form-control" rows="3" placeholder="Spacious living room&#10;Modern kitchen&#10;Balcony with great view">{{ $v('features', implode(PHP_EOL, $unit?->features ?? [])) }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Electricity meter no.</label>
+                        <input name="electricity_meter" class="form-control" maxlength="60" value="{{ $v('electricity_meter', $unit?->electricity_meter) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Water meter no.</label>
+                        <input name="water_meter" class="form-control" maxlength="60" value="{{ $v('water_meter', $unit?->water_meter) }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Inventory <small class="text-muted fw-normal">(furniture, appliances and fittings handed over)</small></label>
+                        <textarea name="inventory" class="form-control" rows="2">{{ $v('inventory', $unit?->inventory) }}</textarea>
+                    </div>
 
                     <div class="col-12">
                         <label class="form-label">Add images</label>
@@ -1228,7 +1175,7 @@ old('_modal') === $modalId ? old($field, $default) : $default;
 
     .pm-eyebrow {
         color: var(--pm-orange);
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         letter-spacing: 1px;
     }
@@ -1347,7 +1294,7 @@ old('_modal') === $modalId ? old($field, $default) : $default;
         align-items: center;
         border-radius: 20px;
         padding: 5px 9px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         white-space: nowrap;
     }
@@ -1499,7 +1446,7 @@ old('_modal') === $modalId ? old($field, $default) : $default;
         color: #65718a;
         background: #fff;
         border-bottom: 1px solid var(--pm-border);
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
         white-space: nowrap;

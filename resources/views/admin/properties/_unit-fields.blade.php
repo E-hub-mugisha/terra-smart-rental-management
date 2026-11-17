@@ -122,6 +122,22 @@
         <label class="form-label">Description</label>
         <textarea name="description" class="form-control" rows="3">{{ old('description', $unit?->description) }}</textarea>
     </div>
+                    <div class="col-12">
+                        <label class="form-label">Key features <small class="text-muted fw-normal">(one per line — shown on the property page)</small></label>
+                        <textarea name="features" class="form-control" rows="3" placeholder="Spacious living room&#10;Modern kitchen&#10;Balcony with great view">{{ old('features', implode(PHP_EOL, $unit?->features ?? [])) }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Electricity meter no.</label>
+                        <input name="electricity_meter" class="form-control" maxlength="60" value="{{ old('electricity_meter', $unit?->electricity_meter) }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Water meter no.</label>
+                        <input name="water_meter" class="form-control" maxlength="60" value="{{ old('water_meter', $unit?->water_meter) }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Inventory <small class="text-muted fw-normal">(furniture, appliances and fittings handed over)</small></label>
+                        <textarea name="inventory" class="form-control" rows="2">{{ old('inventory', $unit?->inventory) }}</textarea>
+                    </div>
 
     <div class="col-12">
         <label class="form-label">Unit images</label>

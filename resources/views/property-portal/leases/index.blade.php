@@ -34,7 +34,7 @@
                 ['Active', $counts['active'], 'bi-check-circle', 'green'],
                 ['Expired', $counts['expired'], 'bi-calendar-x', 'blue'],
                 ['Terminated', $counts['terminated'], 'bi-x-circle', 'red'],
-                ['Cancelled', $counts['cancelled'], 'bi-slash-circle', 'gray'],
+                ['Awaiting tenant / activation', $counts['pending_tenant_acceptance'] + $counts['pending_activation'], 'bi-hourglass-split', 'gray'],
             ];
         @endphp
 
@@ -241,6 +241,8 @@
         font-weight: 600;
         white-space: nowrap;
     }
+    .pm-leases .status-pending_tenant_acceptance { background: #fff3dc; color: #8f5a08; }
+    .pm-leases .status-pending_activation { background: #e7f4fd; color: #116a9c; }
     .pm-leases .status-draft { background: #f0f1f3; color: #525866; }
     .pm-leases .status-active { background: #e6f6ed; color: #18794e; }
     .pm-leases .status-expired { background: #eaf3ff; color: #245eaa; }

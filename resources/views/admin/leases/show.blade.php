@@ -483,6 +483,8 @@
         {{-- ================= ACTIONS ================= --}}
         <div class="col-xl-4">
             <div class="ls-side">
+            @include('leases._tenancy-panel', ['lease' => $lease])
+            @include('inspections._lease-panel', ['lease' => $lease])
                 <section class="ls-panel">
                     <div class="ls-panel-head">
                         <div>
@@ -497,14 +499,25 @@
                         @if($status === 'draft')
                             <div class="ls-alert is-plain mb-0">
                                 <i class="bi bi-pencil-square"></i>
-                                <span style="font-weight:500;">This lease is still a draft. Submit it for tenant acceptance through your usual lease workflow.</span>
+                                <span style="font-weight:500;">This lease is still a draft. Check the terms, then send it to the tenant to accept.</span>
                             </div>
+                            @error('lease')<div class="alert alert-danger small py-2 mt-2 mb-0">{{ $message }}</div>@enderror
+                            <form method="POST" action="{{ route('admin.leases.send-to-tenant', $lease) }}" class="mt-2" data-busy="Sending…"
+                                  onsubmit="return confirm('Send this lease to the tenant? The unit is reserved until they respond.')">
+                                @csrf
+                                <button type="submit" class="ls-btn is-primary w-100"><i class="bi bi-send"></i> Send to tenant</button>
+                            </form>
 
                         @elseif($status === 'pending_tenant_acceptance')
                             <div class="ls-alert is-warn mb-0">
                                 <i class="bi bi-hourglass-split"></i>
                                 <span style="font-weight:500;">The tenant hasn't accepted this lease yet. Activation unlocks once they do.</span>
                             </div>
+                            <form method="POST" action="{{ route('admin.leases.recall', $lease) }}" class="mt-2"
+                                  onsubmit="return confirm('Recall the lease to draft? The tenant will not be able to accept it until it is sent again.')">
+                                @csrf
+                                <button type="submit" class="ls-btn w-100"><i class="bi bi-arrow-counterclockwise"></i> Recall to draft</button>
+                            </form>
 
                         @elseif($status === 'pending_activation')
                             <div class="ls-check {{ $accepted ? 'is-done' : '' }}">

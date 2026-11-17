@@ -29,6 +29,10 @@ class MaintenanceRequest extends Model
         'actual_cost',
         'attachment_path',
         'created_by',
+        'service_provider_id',
+        'tenant_confirmed_at',
+        'tenant_rating',
+        'tenant_feedback',
     ];
 
     protected function casts(): array
@@ -39,6 +43,8 @@ class MaintenanceRequest extends Model
             'resolved_at' => 'datetime',
             'estimated_cost' => 'decimal:2',
             'actual_cost' => 'decimal:2',
+            'tenant_confirmed_at' => 'datetime',
+            'tenant_rating' => 'integer',
         ];
     }
 
@@ -50,6 +56,11 @@ class MaintenanceRequest extends Model
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    public function serviceProvider(): BelongsTo
+    {
+        return $this->belongsTo(ServiceProvider::class);
     }
 
     public function assignee(): BelongsTo

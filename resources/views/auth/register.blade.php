@@ -9,10 +9,8 @@
     <title>Create account | Terra Smart Rental Management</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    @include('partials.fonts')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -24,7 +22,7 @@
             --muted: #687086;
             --line: #e5e8ef;
             --ground: #f6f7fb;
-            --font: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+            --font: var(--terra-font);
         }
 
         *,
@@ -41,7 +39,7 @@
             justify-content: center;
             padding: 32px 16px;
             font-family: var(--font);
-            font-size: .92rem;
+            font-size: .94rem;
             line-height: 1.6;
             color: var(--ink);
             /* background: radial-gradient(ellipse at 50% -10%, #ffe9db 0, transparent 55%), var(--ground); */
@@ -106,7 +104,7 @@
         .brand small {
             display: block;
             margin-top: 4px;
-            font-size: .6rem;
+            font-size: .7rem;
             font-weight: 700;
             letter-spacing: .08em;
             text-transform: uppercase;
@@ -143,7 +141,7 @@
             display: block;
             margin-bottom: 6px;
             color: var(--navy);
-            font-size: .78rem;
+            font-size: .82rem;
             font-weight: 700;
         }
 
@@ -156,7 +154,7 @@
             height: 46px;
             padding: 0 14px;
             font-family: var(--font);
-            font-size: .9rem;
+            font-size: .92rem;
             color: var(--ink);
             background: #fff;
             border: 1.5px solid #d9deea;
@@ -209,7 +207,7 @@
             display: block;
             margin-top: 5px;
             color: #dc3545;
-            font-size: .78rem;
+            font-size: .82rem;
             font-weight: 600;
         }
 
@@ -268,7 +266,7 @@
             background: var(--orange);
             color: #fff;
             font-family: var(--font);
-            font-size: .92rem;
+            font-size: .94rem;
             font-weight: 700;
             cursor: pointer;
             transition: background .2s, transform .2s, box-shadow .2s;
@@ -291,13 +289,13 @@
             margin: 20px 0 0;
             text-align: center;
             color: var(--muted);
-            font-size: .86rem;
+            font-size: .88rem;
         }
 
         .legal {
             margin: 18px 0 0;
             text-align: center;
-            font-size: .74rem;
+            font-size: .8rem;
             color: #9aa2b8;
         }
 

@@ -313,7 +313,7 @@
     .quick-link-description {
         margin-top: 3px;
         color: #8791a4;
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .dashboard-table {
@@ -326,7 +326,7 @@
         background: #f8f9fc;
         color: #7d8799;
         border-bottom: 1px solid #edf0f5;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: .45px;
@@ -351,7 +351,7 @@
     .dashboard-badge {
         padding: 5px 9px;
         border-radius: 20px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
     }
 
@@ -404,6 +404,8 @@
 @section('content')
 
 <div class="container-fluid px-0">
+
+    @include('admin._platform-monitor')
 
     {{-- Welcome banner --}}
     <div class="admin-welcome mb-4">
@@ -1015,7 +1017,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const chartFont = {
-        family: 'DM Sans',
+        family: "'Source Serif 4', Georgia, serif",
         size: 11
     };
 

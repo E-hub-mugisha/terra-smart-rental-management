@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Terra SMS alerts (rent due/overdue, payment confirmations). Off by default.
+    'sms' => [
+        'enabled' => env('SMS_ENABLED', false),
+        'driver' => env('SMS_DRIVER', 'log'),
+        'log_channel' => env('SMS_LOG_CHANNEL', 'stack'),
+    ],
+
 ];

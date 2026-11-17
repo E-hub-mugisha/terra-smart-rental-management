@@ -279,6 +279,7 @@
 
         {{-- Sidebar --}}
         <div class="col-lg-4">
+            @include('maintenance._tenant-confirm')
 
             {{-- Progress --}}
             <div class="card border-0 shadow-sm rounded-4 mb-4">
@@ -422,7 +423,7 @@
 <style>
     .maintenance-page {
         color: #202938;
-        font-family: "DM Sans", sans-serif;
+        font-family: var(--terra-font);
     }
 
     .maintenance-page .card {

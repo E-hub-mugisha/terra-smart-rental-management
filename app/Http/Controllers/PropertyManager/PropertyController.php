@@ -241,6 +241,13 @@ class PropertyController extends Controller
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
 
+            'upi' => ['nullable', 'string', 'max:60'],
+            'amenities' => ['nullable', 'array'],
+            'amenities.*' => ['string', Rule::in(array_keys(Property::AMENITIES))],
+            'utilities' => ['nullable', 'array'],
+            'utilities.*' => ['string', Rule::in(array_keys(Property::UTILITIES))],
+            'video_url' => ['nullable', 'url', 'max:255'],
+
             'images' => ['nullable', 'array', 'max:10'],
             'images.*' => [
                 'image',
@@ -271,6 +278,11 @@ class PropertyController extends Controller
 
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
+
+                'upi' => $validated['upi'] ?? null,
+                'amenities' => array_values(array_unique($validated['amenities'] ?? [])),
+                'utilities' => array_values(array_unique($validated['utilities'] ?? [])),
+                'video_url' => $validated['video_url'] ?? null,
             ]);
 
             // Upload property images using the correct argument order.
@@ -557,7 +569,11 @@ class PropertyController extends Controller
             'deposit_amount' => ['required', 'numeric', 'min:0'],
             'currency' => ['required', Rule::in(['RWF', 'USD', 'EUR'])],
             'description' => ['nullable', 'string', 'max:5000'],
-            'status' => ['required', Rule::in(['available', 'occupied', 'reserved', 'maintenance', 'inactive'])],
+            'status' => ['required', Rule::in(array_keys(Unit::STATUSES))],
+            'features' => ['nullable', 'string', 'max:3000'],
+            'electricity_meter' => ['nullable', 'string', 'max:60'],
+            'water_meter' => ['nullable', 'string', 'max:60'],
+            'inventory' => ['nullable', 'string', 'max:5000'],
             'images' => ['nullable', 'array', 'max:10'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -600,6 +616,10 @@ class PropertyController extends Controller
             'deposit_amount' => $data['deposit_amount'],
             'currency' => $data['currency'],
             'description' => $data['description'] ?? null,
+            'features' => $data['features'] ?? null,
+            'electricity_meter' => $data['electricity_meter'] ?? null,
+            'water_meter' => $data['water_meter'] ?? null,
+            'inventory' => $data['inventory'] ?? null,
             'status' => $data['status'],
         ]);
 
@@ -633,7 +653,11 @@ class PropertyController extends Controller
             'deposit_amount' => ['required', 'numeric', 'min:0'],
             'currency' => ['required', Rule::in(['RWF', 'USD', 'EUR'])],
             'description' => ['nullable', 'string', 'max:5000'],
-            'status' => ['required', Rule::in(['available', 'occupied', 'reserved', 'maintenance', 'inactive'])],
+            'status' => ['required', Rule::in(array_keys(Unit::STATUSES))],
+            'features' => ['nullable', 'string', 'max:3000'],
+            'electricity_meter' => ['nullable', 'string', 'max:60'],
+            'water_meter' => ['nullable', 'string', 'max:60'],
+            'inventory' => ['nullable', 'string', 'max:5000'],
             'images' => ['nullable', 'array', 'max:10'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
@@ -674,6 +698,10 @@ class PropertyController extends Controller
             'deposit_amount' => $data['deposit_amount'],
             'currency' => $data['currency'],
             'description' => $data['description'] ?? null,
+            'features' => $data['features'] ?? null,
+            'electricity_meter' => $data['electricity_meter'] ?? null,
+            'water_meter' => $data['water_meter'] ?? null,
+            'inventory' => $data['inventory'] ?? null,
             'status' => $data['status'],
         ]);
 

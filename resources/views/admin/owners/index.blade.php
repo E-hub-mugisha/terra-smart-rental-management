@@ -29,7 +29,7 @@
     }
     .owners-page .breadcrumb-line a { color: var(--owners-muted); text-decoration: none; }
     .owners-page .breadcrumb-line a:hover { color: var(--owners-orange); }
-    .owners-page .breadcrumb-line i { font-size: 9px; color: #AAB1BF; }
+    .owners-page .breadcrumb-line i { font-size: 10px; color: #AAB1BF; }
     .owners-page .page-title {
         margin: 0; color: var(--owners-navy); font-size: clamp(23px, 2vw, 29px);
         line-height: 1.25; letter-spacing: -.8px; font-weight: 800;
@@ -74,7 +74,7 @@
         margin-top: 10px; color: var(--owners-navy); font-size: 27px;
         line-height: 1.1; font-weight: 800; letter-spacing: -.8px;
     }
-    .owners-page .owner-stat-footnote { margin-top: 6px; color: var(--owners-muted); font-size: 10px; }
+    .owners-page .owner-stat-footnote { margin-top: 6px; color: var(--owners-muted); font-size: 11px; }
 
     /* Filter card */
     .owners-page .owner-filter-card {
@@ -115,7 +115,7 @@
     .owners-page .status-pill:hover { background: #F5F7FB; color: var(--owners-navy); }
     .owners-page .status-pill.active { background: var(--owners-navy); border-color: var(--owners-navy); color: #fff; }
     .owners-page .status-pill .pill-count {
-        background: #EEF1F7; color: #5B6880; border-radius: 10px; padding: 0 7px; font-size: 10px; font-weight: 800;
+        background: #EEF1F7; color: #5B6880; border-radius: 10px; padding: 0 7px; font-size: 11px; font-weight: 800;
     }
     .owners-page .status-pill.active .pill-count { background: rgba(255, 255, 255, .2); color: #fff; }
 
@@ -148,7 +148,7 @@
     .owners-page .owner-table { width: 100%; min-width: 880px; margin: 0; border-collapse: separate; border-spacing: 0; }
     .owners-page .owner-table thead th {
         padding: 13px 17px; border-bottom: 1px solid var(--owners-border); background: #F8F9FC;
-        color: #7B8498; font-size: 10px; font-weight: 800; text-transform: uppercase;
+        color: #7B8498; font-size: 11px; font-weight: 800; text-transform: uppercase;
         letter-spacing: .55px; white-space: nowrap;
     }
     .owners-page .owner-table tbody td {
@@ -171,11 +171,11 @@
         overflow-wrap: anywhere; text-decoration: none; display: inline-block;
     }
     .owners-page a.owner-name:hover { color: var(--owners-orange); text-decoration: underline; }
-    .owners-page .owner-meta { margin-top: 3px; color: var(--owners-muted); font-size: 10px; line-height: 1.5; }
+    .owners-page .owner-meta { margin-top: 3px; color: var(--owners-muted); font-size: 11px; line-height: 1.5; }
     .owners-page .owner-number {
         display: inline-block; margin-top: 5px; padding: 2px 7px; border: 1px solid #E8EBF3;
         border-radius: 5px; background: #F8F9FC; color: var(--owners-navy);
-        font-size: 9.5px; font-weight: 800; white-space: nowrap;
+        font-size: 11px; font-weight: 800; white-space: nowrap;
     }
 
     .owners-page .contact-line {
@@ -188,13 +188,13 @@
     .owners-page .property-count {
         display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px;
         border-radius: 7px; background: #F3F5FA; color: var(--owners-navy);
-        font-size: 10.5px; font-weight: 800; white-space: nowrap;
+        font-size: 11.5px; font-weight: 800; white-space: nowrap;
     }
     .owners-page .property-count i { color: #8792A7; font-size: 12px; }
 
     .owners-page .owner-status {
         display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-        padding: 6px 9px; border-radius: 7px; font-size: 10px; font-weight: 800; white-space: nowrap;
+        padding: 6px 9px; border-radius: 7px; font-size: 11px; font-weight: 800; white-space: nowrap;
     }
     .owners-page .owner-status::before {
         content: ""; width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: currentColor;

@@ -203,7 +203,7 @@
                 border-radius: 20px;
                 background: #fff0e5;
                 color: var(--terra-orange, #D05208);
-                font-size: 10px;
+                font-size: 11px;
                 font-weight: 700;
             }
 

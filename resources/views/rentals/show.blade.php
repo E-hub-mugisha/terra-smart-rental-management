@@ -484,9 +484,16 @@
     {{-- Breadcrumb / tools --}}
     <div class="tr-crumbs">
         <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <a href="{{ route('rentals.index') }}" class="tr-back">
-                <i class="bi bi-arrow-left"></i> Back to rentals
-            </a>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <a href="{{ route('rentals.index') }}" class="tr-back">
+                    <i class="bi bi-arrow-left"></i> Back to rentals
+                </a>
+                @if($unit->building?->property && $unit->building->property->status === 'active')
+                    <a href="{{ route('listings.show', $unit->building->property) }}" class="tr-back">
+                        <i class="bi bi-buildings"></i> All units in {{ $unit->building->property->name }}
+                    </a>
+                @endif
+            </div>
             <div class="tr-tools">
                 <button type="button" class="tr-tool" id="shareBtn">
                     <i class="bi bi-share"></i> Share

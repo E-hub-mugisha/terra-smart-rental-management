@@ -11,3 +11,8 @@ Artisan::command('inspire', function () {
 Schedule::command('rent-invoices:generate')
     ->dailyAt('00:15')
     ->withoutOverlapping();
+
+// Rent due / overdue and lease expiry alerts (brief §12).
+Schedule::command('notifications:send-reminders')
+    ->dailyAt('08:00')
+    ->withoutOverlapping();

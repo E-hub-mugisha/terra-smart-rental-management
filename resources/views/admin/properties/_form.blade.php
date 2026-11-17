@@ -341,6 +341,8 @@
             </div>
         </div>
 
+        @include('admin.properties._profile-card')
+
         {{-- Property managers --}}
         <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;">
             <div class="card-header bg-white border-bottom p-4">

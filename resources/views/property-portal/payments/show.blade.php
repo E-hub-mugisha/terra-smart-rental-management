@@ -250,6 +250,9 @@
         </div>
 
         <div class="d-flex flex-wrap align-items-center gap-2">
+            @if ($payment->status === 'confirmed')
+                <a href="{{ route('receipts.show', $payment) }}" target="_blank" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-check me-1"></i> Receipt</a>
+            @endif
             <a
                 href="{{ route('property-manager.payments.index') }}"
                 class="btn btn-outline-secondary"

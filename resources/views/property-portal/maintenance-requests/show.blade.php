@@ -244,6 +244,7 @@
 
         {{-- Right side --}}
         <div class="col-12 col-lg-4">
+            @include('maintenance._assign-panel')
 
             {{-- Status update --}}
             <div class="card border-0 shadow-sm mb-4">

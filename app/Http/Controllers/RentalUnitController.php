@@ -49,7 +49,7 @@ class RentalUnitController extends Controller
     {
         abort_unless($unit->status === 'available', 404);
 
-        $unit->load(['building', 'floor', 'images']);
+        $unit->load(['building.property', 'floor', 'images']);
 
         // Preserve the selected unit when the visitor authenticates.
         if (!auth()->check()) {

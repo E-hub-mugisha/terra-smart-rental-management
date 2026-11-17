@@ -30,9 +30,6 @@
     $awaiting = $leases->getCollection()->where('status', 'pending_tenant_acceptance');
 @endphp
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <div class="ls">
     <div class="container py-4">
@@ -180,7 +177,7 @@
         --ls-muted: #6b7388;
         --ls-line: #e3e6ee;
         --ls-soft: #f5f6fa;
-        font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        font-family: var(--terra-font);
         color: var(--ls-text);
         font-variant-numeric: tabular-nums;
         line-height: 1.5;

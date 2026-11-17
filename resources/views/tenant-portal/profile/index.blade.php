@@ -301,7 +301,7 @@
 <style>
     .tenant-profile {
         color: #202938;
-        font-family: "DM Sans", sans-serif;
+        font-family: var(--terra-font);
     }
 
     .tenant-profile .card {

@@ -34,5 +34,52 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Paginator::useBootstrapFive();
+
+        // Notification engine (brief §12): domain changes → alerts.
+        foreach ([
+            \App\Models\RentPayment::class,
+            \App\Models\RentInvoice::class,
+            \App\Models\MaintenanceRequest::class,
+            \App\Models\TenantApplication::class,
+            \App\Models\Lease::class,
+            \App\Models\Unit::class,
+        ] as $model) {
+            $model::observe(\App\Observers\NotificationObserver::class);
+        }
+
+        // Audit trail (brief §24): every change to these records is logged.
+        foreach ([
+            \App\Models\User::class,
+            \App\Models\Property::class,
+            \App\Models\Building::class,
+            \App\Models\Unit::class,
+            \App\Models\PropertyOwner::class,
+            \App\Models\PropertyManager::class,
+            \App\Models\PropertyManagerAssignment::class,
+            \App\Models\Tenant::class,
+            \App\Models\TenantApplication::class,
+            \App\Models\Lease::class,
+            \App\Models\LeaseRequest::class,
+            \App\Models\RentInvoice::class,
+            \App\Models\RentPayment::class,
+            \App\Models\RentPaymentAllocation::class,
+            \App\Models\PropertyExpense::class,
+            \App\Models\MaintenanceRequest::class,
+            \App\Models\Inspection::class,
+            \App\Models\Document::class,
+            \App\Models\PaymentIntent::class,
+        ] as $model) {
+            $model::observe(\App\Observers\AuditObserver::class);
+        }
+
+        // Security events.
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class,
+            fn ($e) => \App\Observers\AuditObserver::record('login', $e->user, null, $e->user->getAuthIdentifier()));
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Logout::class,
+            fn ($e) => $e->user && \App\Observers\AuditObserver::record('logout', $e->user, null, $e->user->getAuthIdentifier()));
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Failed::class,
+            fn ($e) => \App\Observers\AuditObserver::record('login_failed', null, ['email' => mb_substr((string) ($e->credentials['email'] ?? ''), 0, 120)]));
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\PasswordReset::class,
+            fn ($e) => \App\Observers\AuditObserver::record('password_reset', $e->user, null, $e->user->getAuthIdentifier()));
     }
 }

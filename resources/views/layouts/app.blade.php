@@ -9,10 +9,8 @@
     <title>@yield('title', 'Dashboard') | Terra Smart Rental Management</title>
     <meta name="description" content="@yield('meta_description', 'Manage rental properties, tenants, leases, payments and maintenance with Terra Smart Rental Management.')">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    @include('partials.fonts')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <style>
@@ -41,10 +39,10 @@
 
         body {
             margin: 0;
-            font-family: 'DM Sans', sans-serif;
+            font-family: var(--terra-font);
             color: var(--terra-text);
             background: var(--terra-bg);
-            font-size: 14px;
+            font-size: 15px;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -54,7 +52,7 @@
         .terra-skip-link {
             position: fixed; z-index: 3000; top: -60px; left: 16px;
             padding: 10px 16px; border-radius: 0 0 10px 10px;
-            background: var(--terra-orange); color: #fff; font-weight: 700; font-size: 12px;
+            background: var(--terra-orange); color: #fff; font-weight: 700; font-size: 12.5px;
             transition: top .2s ease;
         }
         .terra-skip-link:focus { top: 0; color: #fff; }
@@ -73,7 +71,7 @@
         .terra-offline {
             display: none; position: fixed; z-index: 2500; left: 50%; bottom: 18px;
             transform: translateX(-50%); padding: 10px 16px; border-radius: 10px;
-            background: #1F2937; color: #fff; font-size: 12px; font-weight: 600;
+            background: #1F2937; color: #fff; font-size: 12.5px; font-weight: 600;
             box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
         }
         .terra-offline.is-visible { display: flex; align-items: center; gap: 8px; }
@@ -107,7 +105,7 @@
         }
         .terra-brand-name { font-size: 17px; line-height: 1.15; font-weight: 800; letter-spacing: -.4px; }
         .terra-brand-subtitle {
-            margin-top: 3px; color: #8E99BD; font-size: 9.5px; font-weight: 700;
+            margin-top: 3px; color: #8E99BD; font-size: 11px; font-weight: 700;
             letter-spacing: .8px; text-transform: uppercase;
         }
 
@@ -120,18 +118,18 @@
             margin-bottom: 18px; padding: 9px 12px;
             border: 1px solid rgba(255, 255, 255, .10); border-radius: 10px;
             background: rgba(255, 255, 255, .05); color: #9AA5C7;
-            font-size: 12px; text-align: left; transition: background .18s ease, border-color .18s ease;
+            font-size: 12.5px; text-align: left; transition: background .18s ease, border-color .18s ease;
         }
         .terra-side-search:hover { background: rgba(255, 255, 255, .09); border-color: rgba(255, 255, 255, .18); color: #fff; }
         .terra-side-search kbd {
             margin-left: auto; padding: 1px 6px; border-radius: 5px;
-            background: rgba(255, 255, 255, .10); color: #B7C0DC; font-size: 10px; font-family: inherit;
+            background: rgba(255, 255, 255, .10); color: #B7C0DC; font-size: 11px; font-family: inherit;
         }
 
         .terra-nav-group { margin-bottom: 20px; }
         .terra-nav-heading {
             padding: 0 12px; margin: 0 0 8px; color: #7C88AE;
-            font-size: 10px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase;
+            font-size: 11px; font-weight: 800; letter-spacing: 1.1px; text-transform: uppercase;
             white-space: nowrap;
         }
         .terra-nav { display: flex; flex-direction: column; gap: 3px; }
@@ -139,7 +137,7 @@
         .terra-nav-link {
             position: relative; display: flex; align-items: center; gap: 12px;
             min-height: 41px; padding: 9px 12px; border-radius: 10px;
-            color: #B9C2DD; font-size: 13px; font-weight: 600;
+            color: #B9C2DD; font-size: 14px; font-weight: 600;
             transition: background .16s ease, color .16s ease;
         }
         .terra-nav-link i { width: 19px; flex-shrink: 0; font-size: 17px; text-align: center; }
@@ -151,8 +149,8 @@
             border-top: 1px solid rgba(255, 255, 255, .08);
         }
         .terra-sidebar-user .terra-avatar { background: rgba(255, 255, 255, .12); }
-        .terra-sidebar-user-name { color: #fff; font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 130px; }
-        .terra-sidebar-user-role { color: #8E99BD; font-size: 10.5px; margin-top: 2px; }
+        .terra-sidebar-user-name { color: #fff; font-size: 12.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 130px; }
+        .terra-sidebar-user-role { color: #8E99BD; font-size: 11.5px; margin-top: 2px; }
         .terra-sidebar-logout {
             margin-left: auto; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
             border: 0; border-radius: 9px; background: rgba(255, 255, 255, .07); color: #C9D0E6; font-size: 15px;
@@ -188,7 +186,7 @@
         }
         .terra-topbar-left, .terra-topbar-right { display: flex; align-items: center; gap: 12px; }
         .terra-page-context { min-width: 0; }
-        .terra-crumbs { display: flex; align-items: center; gap: 7px; color: var(--terra-muted); font-size: 11px; margin-bottom: 3px; }
+        .terra-crumbs { display: flex; align-items: center; gap: 7px; color: var(--terra-muted); font-size: 12px; margin-bottom: 3px; }
         .terra-crumbs a { color: var(--terra-muted); }
         .terra-crumbs a:hover { color: var(--terra-orange); }
         .terra-crumbs i { font-size: 8px; color: #AAB1BF; }
@@ -204,60 +202,60 @@
             position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px;
             display: inline-flex; align-items: center; justify-content: center;
             border: 2px solid #fff; border-radius: 10px; background: var(--terra-orange);
-            color: #fff; font-size: 9.5px; font-weight: 800;
+            color: #fff; font-size: 11px; font-weight: 800;
         }
 
         .terra-top-search {
             display: flex; align-items: center; gap: 10px; min-width: 250px; height: 40px; padding: 0 12px;
             border: 1px solid var(--terra-border); border-radius: 11px; background: #F8F9FC;
-            color: var(--terra-muted); font-size: 12px; transition: all .16s ease;
+            color: var(--terra-muted); font-size: 12.5px; transition: all .16s ease;
         }
         .terra-top-search:hover { border-color: #F0C3A7; background: #fff; color: var(--terra-navy); }
         .terra-top-search kbd {
             margin-left: auto; padding: 1px 6px; border-radius: 5px; background: #EEF1F7;
-            color: #6B7589; font-size: 10px; font-family: inherit;
+            color: #6B7589; font-size: 11px; font-family: inherit;
         }
 
         .terra-primary-button {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             min-height: 40px; padding: 9px 14px; border: 0; border-radius: 10px;
-            background: var(--terra-orange); color: #fff; font-size: 12px; font-weight: 700;
+            background: var(--terra-orange); color: #fff; font-size: 12.5px; font-weight: 700;
         }
         .terra-primary-button:hover { background: var(--terra-orange-dark); color: #fff; }
 
         .terra-profile-button { display: flex; align-items: center; gap: 10px; padding: 3px; border: 0; background: transparent; text-align: left; }
         .terra-avatar {
             width: 38px; height: 38px; display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center;
-            border-radius: 12px; background: var(--terra-navy); color: #fff; font-size: 12px; font-weight: 800;
+            border-radius: 12px; background: var(--terra-navy); color: #fff; font-size: 12.5px; font-weight: 800;
         }
-        .terra-profile-name { max-width: 150px; overflow: hidden; color: var(--terra-navy); font-size: 12px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
-        .terra-profile-role { margin-top: 3px; color: var(--terra-muted); font-size: 11px; }
+        .terra-profile-name { max-width: 150px; overflow: hidden; color: var(--terra-navy); font-size: 12.5px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+        .terra-profile-role { margin-top: 3px; color: var(--terra-muted); font-size: 12px; }
 
         .terra-menu { border: 1px solid var(--terra-border) !important; border-radius: 12px !important; box-shadow: 0 14px 36px rgba(25, 38, 93, .14) !important; padding: 6px !important; }
-        .terra-menu .dropdown-item { border-radius: 8px; padding: 8px 12px; font-size: 12.5px; font-weight: 600; }
+        .terra-menu .dropdown-item { border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
         .terra-menu .dropdown-item:hover { background: #F5F7FB; color: var(--terra-navy); }
 
         .terra-notify-list { width: 340px; max-width: 92vw; padding: 0 !important; overflow: hidden; }
-        .terra-notify-head { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; border-bottom: 1px solid var(--terra-border); font-weight: 800; font-size: 13px; color: var(--terra-navy); }
+        .terra-notify-head { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; border-bottom: 1px solid var(--terra-border); font-weight: 800; font-size: 14px; color: var(--terra-navy); }
         .terra-notify-item { display: flex; gap: 11px; padding: 12px 16px; border-bottom: 1px solid #EFF1F6; }
         .terra-notify-item:last-child { border-bottom: 0; }
         .terra-notify-icon { width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: var(--terra-orange-light); color: var(--terra-orange); }
-        .terra-notify-text { font-size: 12px; line-height: 1.5; color: #39455C; }
-        .terra-notify-time { margin-top: 2px; color: var(--terra-muted); font-size: 10.5px; }
-        .terra-notify-empty { padding: 28px 16px; text-align: center; color: var(--terra-muted); font-size: 12px; }
+        .terra-notify-text { font-size: 12.5px; line-height: 1.5; color: #39455C; }
+        .terra-notify-time { margin-top: 2px; color: var(--terra-muted); font-size: 11.5px; }
+        .terra-notify-empty { padding: 28px 16px; text-align: center; color: var(--terra-muted); font-size: 12.5px; }
 
         /* ---------- Content ---------- */
         .terra-content { flex: 1; padding: 26px 28px; }
         .terra-content .card { border: 1px solid var(--terra-border); border-radius: var(--terra-radius); box-shadow: var(--terra-shadow); }
         .terra-content .btn-primary { border-color: var(--terra-orange); background: var(--terra-orange); }
         .terra-content .btn-primary:hover { border-color: var(--terra-orange-dark); background: var(--terra-orange-dark); }
-        .terra-content .form-control, .terra-content .form-select { min-height: 42px; border-color: var(--terra-border); border-radius: 9px; font-size: 13px; }
+        .terra-content .form-control, .terra-content .form-select { min-height: 42px; border-color: var(--terra-border); border-radius: 9px; font-size: 14px; }
         .terra-content .form-control:focus, .terra-content .form-select:focus { border-color: #E8A47D; box-shadow: 0 0 0 .2rem rgba(208, 82, 8, .10); }
 
         .terra-flash { margin-bottom: 18px; }
-        .terra-flash .alert { border-radius: 12px; font-size: 13px; }
+        .terra-flash .alert { border-radius: 12px; font-size: 14px; }
 
-        .terra-footer { padding: 16px 28px 22px; color: var(--terra-muted); font-size: 11px; }
+        .terra-footer { padding: 16px 28px 22px; color: var(--terra-muted); font-size: 12px; }
 
         .terra-to-top {
             position: fixed; z-index: 1010; right: 22px; bottom: 22px; width: 42px; height: 42px;
@@ -268,7 +266,7 @@
         .terra-to-top:hover { background: var(--terra-orange); }
 
         .terra-sidebar-backdrop { display: none; }
-        .terra-empty-nav { padding: 10px 12px; color: #8E99BD; font-size: 12px; }
+        .terra-empty-nav { padding: 10px 12px; color: #8E99BD; font-size: 12.5px; }
 
         /* ---------- Command palette ---------- */
         .terra-palette {
@@ -282,14 +280,14 @@
         .terra-palette-input i { color: var(--terra-muted); font-size: 16px; }
         .terra-palette-input input { flex: 1; height: 56px; border: 0; outline: 0; font-size: 15px; background: transparent; }
         .terra-palette-list { max-height: 360px; overflow-y: auto; padding: 8px; }
-        .terra-palette-group { padding: 10px 12px 6px; color: #98A1B2; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-        .terra-palette-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; color: #2B364D; font-size: 13px; font-weight: 600; }
+        .terra-palette-group { padding: 10px 12px 6px; color: #98A1B2; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        .terra-palette-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; color: #2B364D; font-size: 14px; font-weight: 600; }
         .terra-palette-item i { width: 20px; text-align: center; color: #7B879C; font-size: 16px; }
         .terra-palette-item.is-selected, .terra-palette-item:hover { background: var(--terra-orange-light); color: var(--terra-orange-dark); }
         .terra-palette-item.is-selected i { color: var(--terra-orange); }
-        .terra-palette-empty { padding: 34px 16px; text-align: center; color: var(--terra-muted); font-size: 13px; }
-        .terra-palette-foot { display: flex; gap: 16px; padding: 10px 18px; border-top: 1px solid var(--terra-border); background: #FAFBFD; color: var(--terra-muted); font-size: 11px; }
-        .terra-palette-foot kbd { padding: 1px 6px; border-radius: 5px; background: #EEF1F7; color: #5B6880; font-size: 10px; font-family: inherit; }
+        .terra-palette-empty { padding: 34px 16px; text-align: center; color: var(--terra-muted); font-size: 14px; }
+        .terra-palette-foot { display: flex; gap: 16px; padding: 10px 18px; border-top: 1px solid var(--terra-border); background: #FAFBFD; color: var(--terra-muted); font-size: 12px; }
+        .terra-palette-foot kbd { padding: 1px 6px; border-radius: 5px; background: #EEF1F7; color: #5B6880; font-size: 11px; font-family: inherit; }
 
         /* ---------- Responsive ---------- */
         @media (max-width: 1199.98px) { .terra-top-search { min-width: 0; } .terra-top-search span, .terra-top-search kbd { display: none; } .terra-top-search { width: 40px; justify-content: center; padding: 0; } }
@@ -428,6 +426,7 @@
                 ['label' => 'Property Owners', 'icon' => 'bi-person-badge', 'routes' => ['admin.owners.index', 'admin.property-owners.index'], 'active' => ['admin.owners.*', 'admin.property-owners.*']],
                 ['label' => 'Property Managers', 'icon' => 'bi-person-gear', 'routes' => ['admin.managers.index', 'admin.property-managers.index'], 'active' => ['admin.managers.*', 'admin.property-managers.*']],
                 ['label' => 'Tenants', 'icon' => 'bi-person-vcard', 'routes' => ['admin.tenants.index'], 'active' => ['admin.tenants.*']],
+                ['label' => 'Audit Log', 'icon' => 'bi-shield-check', 'routes' => ['admin.audit-logs.index'], 'active' => ['admin.audit-logs.*']],
             ]],
             ['heading' => 'Property Operations', 'items' => [
                 ['label' => 'Managed Properties', 'icon' => 'bi-buildings', 'routes' => ['admin.managed-properties.index', 'admin.properties.index'], 'active' => ['admin.managed-properties.*', 'admin.properties.*']],
@@ -556,6 +555,36 @@
         ];
     }
 
+    /* ---------------- Communication (brief §12–13), every role ---------------- */
+    if ($currentUser) {
+        $commsGroup = ['heading' => 'Communication & Care', 'items' => [
+            ['label' => 'Messages', 'icon' => 'bi-chat-dots', 'routes' => ['messages.index'], 'active' => ['messages.*']],
+            ['label' => 'Notifications', 'icon' => 'bi-bell', 'routes' => ['notifications.index'], 'active' => ['notifications.*']],
+            ['label' => 'Inspections', 'icon' => 'bi-clipboard-check', 'routes' => ['inspections.index'], 'active' => ['inspections.*']],
+            ['label' => 'Documents', 'icon' => 'bi-folder2-open', 'routes' => ['documents.index'], 'active' => ['documents.*']],
+            ['label' => 'Security & Language', 'icon' => 'bi-shield-lock', 'routes' => ['account.security'], 'active' => ['account.security*']],
+        ]];
+        array_splice($navigation, max(count($navigation) - 1, 1), 0, [$commsGroup]);
+
+        // Operations tools for admins, owners and managers.
+        if (in_array($role, ['admin', 'property_owner', 'property_manager'], true)) {
+            array_splice($navigation, max(count($navigation) - 1, 1), 0, [['heading' => 'Tools', 'items' => [
+                ['label' => 'Reports', 'icon' => 'bi-bar-chart-line', 'routes' => ['reports.index'], 'active' => ['reports.*']],
+                ['label' => 'Portfolio Map', 'icon' => 'bi-geo-alt', 'routes' => ['portfolio.map'], 'active' => ['portfolio.map']],
+                ['label' => 'Finance', 'icon' => 'bi-calculator', 'routes' => ['finance.dashboard'], 'active' => ['finance.*']],
+                ['label' => 'Service Providers', 'icon' => 'bi-person-gear', 'routes' => ['service-providers.index'], 'active' => ['service-providers.*']],
+                ['label' => 'Lease Templates', 'icon' => 'bi-file-earmark-ruled', 'routes' => ['lease-templates.index'], 'active' => ['lease-templates.*', 'contracts.*']],
+                ['label' => 'Agents & Accountants', 'icon' => 'bi-people', 'routes' => ['property-roles.index'], 'active' => ['property-roles.*']],
+            ]]]);
+        }
+        if ($role === 'real_estate_agent') {
+            $navigation[0]['items'][] = ['label' => 'Commissions', 'icon' => 'bi-cash-coin', 'routes' => ['agent.commissions.index'], 'active' => ['agent.commissions.*']];
+        }
+        if ($role === 'accountant') {
+            $navigation[0]['items'][] = ['label' => 'Rent Ledgers & Reports', 'icon' => 'bi-bar-chart-line', 'routes' => ['reports.index'], 'active' => ['reports.*']];
+        }
+    }
+
     // Resolve route names and drop links with no registered route.
     foreach ($navigation as $groupIndex => $group) {
         $resolvedItems = [];
@@ -565,10 +594,12 @@
                 continue;
             }
             $item['resolved_route'] = $resolvedRoute;
+            $item['label']          = __($item['label']);
             $item['is_active']      = $isTerraRouteActive($item['active'] ?? []);
             $resolvedItems[]        = $item;
         }
         $navigation[$groupIndex]['items'] = $resolvedItems;
+        $navigation[$groupIndex]['heading'] = __($group['heading']);
     }
     $navigation = array_values(array_filter($navigation, fn ($group) => !empty($group['items'])));
 
@@ -640,6 +671,11 @@
         $paletteItems[] = ['label' => $action['label'], 'url' => route($action['resolved_route']), 'icon' => $action['icon'], 'group' => 'Quick actions'];
     }
 
+    $messageCount = 0;
+    if ($currentUser && \Illuminate\Support\Facades\Route::has('messages.index')) {
+        try { $messageCount = $currentUser->unreadConversationCount(); } catch (\Throwable $e) { $messageCount = 0; }
+    }
+
     /* ---------------- Notifications (Laravel database notifications) ---------------- */
     $notifications = collect();
     $notificationCount = 0;
@@ -690,7 +726,7 @@
         <div class="terra-sidebar-content">
             <button type="button" class="terra-side-search" data-open-palette title="Search pages (Ctrl+K)">
                 <i class="bi bi-search"></i>
-                <span>Quick search</span>
+                <span>{{ __('Quick search') }}</span>
                 <kbd>Ctrl K</kbd>
             </button>
 
@@ -725,7 +761,7 @@
             @if (\Illuminate\Support\Facades\Route::has('logout'))
                 <form method="POST" action="{{ route('logout') }}" class="ms-auto">
                     @csrf
-                    <button type="submit" class="terra-sidebar-logout" title="Sign out" aria-label="Sign out">
+                    <button type="submit" class="terra-sidebar-logout" title="{{ __('Sign out') }}" aria-label="{{ __('Sign out') }}">
                         <i class="bi bi-box-arrow-right"></i>
                     </button>
                 </form>
@@ -765,6 +801,17 @@
                     <kbd>Ctrl K</kbd>
                 </button>
 
+                <div class="d-none d-md-flex">@include('partials.language-switcher', ['compact' => true])</div>
+
+                @if (\Illuminate\Support\Facades\Route::has('messages.index') && $currentUser)
+                    <a href="{{ route('messages.index') }}" class="terra-icon-button position-relative" aria-label="Messages{{ $messageCount ? ', ' . $messageCount . ' unread' : '' }}">
+                        <i class="bi bi-chat-dots"></i>
+                        @if ($messageCount > 0)
+                            <span class="terra-badge-dot">{{ $messageCount > 9 ? '9+' : $messageCount }}</span>
+                        @endif
+                    </a>
+                @endif
+
                 @if ($notificationsEnabled)
                     <div class="dropdown">
                         <button type="button" class="terra-icon-button" data-bs-toggle="dropdown"
@@ -778,7 +825,7 @@
 
                         <div class="dropdown-menu dropdown-menu-end terra-menu terra-notify-list">
                             <div class="terra-notify-head">
-                                <span>Notifications</span>
+                                <span>{{ __('Notifications') }}</span>
                                 @if ($notificationCount > 0)
                                     <span class="badge rounded-pill text-bg-light border">{{ $notificationCount }} new</span>
                                 @endif
@@ -788,10 +835,12 @@
                                 @php
                                     $data = (array) ($notification->data ?? []);
                                     $text = $data['message'] ?? $data['title'] ?? $data['body'] ?? class_basename($notification->type);
-                                    $link = $data['url'] ?? $data['link'] ?? null;
+                                    $link = \Illuminate\Support\Facades\Route::has('notifications.open')
+                                        ? route('notifications.open', $notification->id)
+                                        : ($data['url'] ?? $data['link'] ?? null);
                                 @endphp
                                 <a @if($link) href="{{ $link }}" @endif class="terra-notify-item text-decoration-none">
-                                    <span class="terra-notify-icon"><i class="bi bi-bell"></i></span>
+                                    <span class="terra-notify-icon"><i class="bi {{ $data['icon'] ?? 'bi-bell' }}"></i></span>
                                     <span>
                                         <span class="terra-notify-text d-block">{{ \Illuminate\Support\Str::limit($text, 110) }}</span>
                                         <span class="terra-notify-time d-block">{{ $notification->created_at?->diffForHumans() }}</span>
@@ -800,9 +849,21 @@
                             @empty
                                 <div class="terra-notify-empty">
                                     <i class="bi bi-check2-circle fs-4 d-block mb-2"></i>
-                                    You are all caught up.
+                                    {{ __('You are all caught up.') }}
                                 </div>
                             @endforelse
+
+                            @if (\Illuminate\Support\Facades\Route::has('notifications.index'))
+                                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top small">
+                                    <a href="{{ route('notifications.index') }}" class="fw-semibold text-decoration-none">{{ __('View all') }}</a>
+                                    @if ($notificationCount > 0)
+                                        <form method="POST" action="{{ route('notifications.read-all') }}" class="m-0">
+                                            @csrf
+                                            <button type="submit" class="btn btn-link btn-sm p-0 text-decoration-none">{{ __('Mark all read') }}</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -822,7 +883,7 @@
                                 <li>
                                     <a class="dropdown-item" href="{{ route($action['resolved_route']) }}">
                                         <i class="bi {{ $action['icon'] }} me-2 text-secondary"></i>
-                                        {{ $action['label'] }}
+                                        {{ __($action['label']) }}
                                     </a>
                                 </li>
                             @endforeach
@@ -861,7 +922,7 @@
 
                         <li>
                             <button type="button" class="dropdown-item" data-open-palette>
-                                <i class="bi bi-command me-2"></i> Quick search
+                                <i class="bi bi-command me-2"></i> {{ __('Quick search') }}
                             </button>
                         </li>
 

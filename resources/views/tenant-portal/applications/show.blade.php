@@ -67,7 +67,7 @@
     @if(
         $tenantApplication->status === 'approved'
         && $tenantApplication->lease
-        && $tenantApplication->lease->status === 'draft'
+        && in_array($tenantApplication->lease->status, ['draft', 'pending_tenant_acceptance'], true)
     )
         <div class="alert alert-primary border-0 shadow-sm">
             <div class="d-flex align-items-start gap-3">
@@ -79,10 +79,13 @@
                     </h5>
 
                     <p class="mb-0">
-                        The property manager has prepared a draft lease.
-                        Please review the details and terms below. You must
-                        accept the draft before the manager can proceed with
-                        payment verification and move-in arrangements.
+                        @if($tenantApplication->lease->status === 'draft')
+                            The property manager is preparing your lease. You will be notified
+                            as soon as it is ready for you to review and accept.
+                        @else
+                            Your lease is ready. Please review the details and terms below and
+                            accept it, so the manager can arrange payment and move-in.
+                        @endif
                     </p>
                 </div>
             </div>
@@ -479,7 +482,7 @@
                                     @if($tenantApplication->lease->tenant_accepted_at)
                                         Draft lease accepted.
                                     @else
-                                        Review and accept the draft lease.
+                                        {{ $tenantApplication->lease->status === 'draft' ? 'Your lease is being prepared.' : 'Review and accept your lease.' }}
                                     @endif
                                 </small>
                             </div>

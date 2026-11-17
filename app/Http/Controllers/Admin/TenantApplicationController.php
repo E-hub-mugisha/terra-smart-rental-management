@@ -123,7 +123,7 @@ class TenantApplicationController extends Controller
 
             // Prevent a conflicting lease for the same unit.
             $conflict = Lease::where('unit_id', $unit->id)
-                ->whereIn('status', ['active', 'draft'])
+                ->whereIn('status', \App\Services\LeaseLifecycle::LIVE)
                 ->whereDate('start_date', '<=', $endDate ?? '9999-12-31')
                 ->where(function ($query) use ($startDate) {
                     $query->whereNull('end_date')
@@ -149,9 +149,8 @@ class TenantApplicationController extends Controller
                 'currency' => $application->currency ?: 'RWF',
                 'rent_due_day' => $validated['rent_due_day'],
                 'payment_frequency' => $validated['payment_frequency'],
-                'status' => $startDate <= now()->toDateString()
-                    ? 'active'
-                    : 'draft',
+                // Every lease starts as a draft and follows the same workflow (send → accept → pay → move in → activate).
+                'status' => \App\Services\LeaseLifecycle::DRAFT,
                 'terms' => $validated['terms'] ?? null,
             ]);
 
@@ -167,7 +166,7 @@ class TenantApplicationController extends Controller
 
         return redirect()
             ->route('admin.tenant-applications.show', $tenantApplication)
-            ->with('success', "Application approved. Lease {$lease->lease_number} was created.");
+            ->with('success', "Application approved. Draft lease {$lease->lease_number} was created — review it and send it to the tenant.");
     }
 
     public function reject(Request $request, TenantApplication $tenantApplication)

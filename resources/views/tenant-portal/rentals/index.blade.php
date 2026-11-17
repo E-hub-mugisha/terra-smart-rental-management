@@ -38,9 +38,6 @@
     ];
 @endphp
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <div class="rn">
     <div class="container-fluid py-4">
@@ -245,7 +242,7 @@
         --rn-muted: #6b7388;
         --rn-line: #e3e6ee;
         --rn-soft: #f5f6fa;
-        font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        font-family: var(--terra-font);
         color: var(--rn-text);
         font-variant-numeric: tabular-nums;
         line-height: 1.5;

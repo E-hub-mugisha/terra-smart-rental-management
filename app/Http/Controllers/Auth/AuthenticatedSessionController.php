@@ -23,6 +23,15 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        // Two-step sign-in (brief §24): correct password → emailed code before the session starts.
+        $candidate = \App\Models\User::where('email', $credentials['email'])->first();
+        if ($candidate?->two_factor_enabled && \Illuminate\Support\Facades\Hash::check($credentials['password'], $candidate->password)) {
+            app(\App\Http\Controllers\Auth\TwoFactorController::class)->sendCode($candidate);
+            $request->session()->put('two_factor', ['user_id' => $candidate->id, 'remember' => $request->boolean('remember')]);
+
+            return redirect()->route('two-factor.challenge');
+        }
+
         if (! Auth::attempt(
             $credentials,
             $request->boolean('remember')

@@ -65,9 +65,6 @@
     $currentIdx = collect($steps)->search(fn ($s) => !$s['done']);
 @endphp
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <div class="ld">
     <div class="container py-4">
@@ -246,6 +243,8 @@
 
             {{-- ========== SIDEBAR ========== --}}
             <aside class="ld-side">
+            @include('leases._tenancy-panel', ['lease' => $lease])
+            @include('inspections._lease-panel', ['lease' => $lease])
 
                 <section class="ld-card" aria-labelledby="ldProgTitle">
                     <h3 class="ld-h" id="ldProgTitle">Lease progress</h3>
@@ -286,7 +285,7 @@
         --ld-line: #e3e6ee;
         --ld-soft: #f5f6fa;
         --ld-ok: #1a7f46;
-        font-family: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        font-family: var(--terra-font);
         color: var(--ld-text);
         font-variant-numeric: tabular-nums;
         line-height: 1.5;

@@ -817,7 +817,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const chartFont = {
-        family: "'DM Sans', sans-serif",
+        family: "'Source Serif 4', Georgia, serif",
         size: 11
     };
 
