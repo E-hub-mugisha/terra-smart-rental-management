@@ -21,9 +21,14 @@
 
 return [
 
-    'public_root' => env('UPLOADS_PUBLIC_ROOT') ?: public_path(),
+    // Leave empty to use the web root (public_path(), resolved on every request,
+    // so `php artisan config:cache` never freezes a wrong folder). On shared
+    // hosting set APP_PUBLIC_PATH (config/app.php) to your public_html folder;
+    // UPLOADS_PUBLIC_ROOT only overrides the uploads folder itself.
+    'public_root' => env('UPLOADS_PUBLIC_ROOT'),
 
-    'private_root' => env('UPLOADS_PRIVATE_ROOT') ?: base_path('uploads'),
+    // Leave empty for <project>/uploads (outside the web root).
+    'private_root' => env('UPLOADS_PRIVATE_ROOT'),
 
     // Folder permissions used when a destination folder is created.
     'directory_mode' => 0755,

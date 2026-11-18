@@ -19,6 +19,13 @@ class AppServiceProvider extends ServiceProvider
         // but loaded here too so they work even when vendor/ was installed or
         // copied without regenerating Composer's autoloader.
         require_once app_path('helpers.php');
+
+        // Shared hosting: the web root is public_html, not <project>/public.
+        // This makes public_path() — and every image upload — use it, for web
+        // requests and artisan commands alike.
+        if ($publicPath = config('app.public_path')) {
+            $this->app->usePublicPath(rtrim($publicPath, '\\/'));
+        }
     }
 
     /**

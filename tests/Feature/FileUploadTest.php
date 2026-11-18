@@ -145,6 +145,29 @@ class FileUploadTest extends TestCase
         $this->assertSame($newImage, \App\Models\PropertyImage::find($imageId)->image_path);
     }
 
+    public function test_shared_hosting_public_html_becomes_the_upload_web_root(): void
+    {
+        $publicHtml = $this->uploadsRoot . DIRECTORY_SEPARATOR . 'public_html';
+        mkdir($publicHtml, 0755, true);
+
+        // APP_PUBLIC_PATH=/home/user/public_html with no uploads override.
+        config(['uploads.public_root' => null, 'app.public_path' => $publicHtml]);
+        $this->app->register(\App\Providers\AppServiceProvider::class, true);
+
+        $this->assertSame($publicHtml, public_path());
+        $path = FileUpload::store(UploadedFile::fake()->image('front.jpg'), FileUpload::PROPERTY_IMAGES);
+        $this->assertFileExists($publicHtml . '/' . $path);
+
+        // Images saved earlier in the project public/ folder are moved across.
+        $oldPublic = $this->uploadsRoot . DIRECTORY_SEPARATOR . 'project-public';
+        mkdir($oldPublic . '/image/units', 0755, true);
+        file_put_contents($oldPublic . '/image/units/1731000000_abc.jpg', 'jpg');
+
+        $this->artisan('uploads:move-public', ['--from' => $oldPublic])->assertSuccessful();
+        $this->assertFileExists($publicHtml . '/image/units/1731000000_abc.jpg');
+        $this->assertFileDoesNotExist($oldPublic . '/image/units/1731000000_abc.jpg');
+    }
+
     public function test_documents_are_private_and_streamed_only_to_authorised_users(): void
     {
         $this->actingAs($this->admin)->post(route('documents.store'), [

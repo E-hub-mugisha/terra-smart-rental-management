@@ -55,6 +55,14 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     /*
+    | Web root folder. Leave empty for the project's public/ folder. On shared
+    | hosting where the site is served from public_html, set the absolute path,
+    | e.g. APP_PUBLIC_PATH=/home/youruser/public_html — uploaded images are then
+    | saved there (public_html/image/...) and served by the web server.
+    */
+    'public_path' => env('APP_PUBLIC_PATH'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
