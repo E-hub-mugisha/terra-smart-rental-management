@@ -120,7 +120,7 @@
 
                 $imagePath = $unit?->images?->sortBy('sort_order')->first()?->path;
                 $imageUrl = $imagePath
-                    ? \Illuminate\Support\Facades\Storage::disk('public')->url($imagePath)
+                    ? upload_url($imagePath)
                     : null;
 
                 $location = collect([

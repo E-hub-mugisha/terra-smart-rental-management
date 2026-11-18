@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DeletesUploadedFiles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MaintenanceRequest extends Model
 {
+    use DeletesUploadedFiles;
+
+    /** Uploaded file columns (stored in public/image/maintenance); true = private. */
+    protected array $uploadColumns = ['attachment_path' => false];
+
     use SoftDeletes;
 
     protected $fillable = [

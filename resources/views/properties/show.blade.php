@@ -11,7 +11,7 @@
 @section('og_title', $property->name)
 @section('og_description', $plainDescription)
 @if($cover)
-    @section('og_image', asset('storage/' . $cover->image_path))
+    @section('og_image', upload_url($cover->image_path))
 @endif
 
 @push('styles')

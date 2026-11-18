@@ -171,7 +171,7 @@
                                     </div>
                                 </div>
 
-                                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($maintenanceRequest->attachment_path) }}"
+                                <a href="{{ upload_url($maintenanceRequest->attachment_path) }}"
                                    target="_blank"
                                    rel="noopener noreferrer"
                                    class="btn btn-outline-primary btn-sm">

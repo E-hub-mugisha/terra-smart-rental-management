@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DeletesUploadedFiles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MessageAttachment extends Model
 {
+    use DeletesUploadedFiles;
+
+    /** Uploaded file columns (stored in uploads/messages/{year}/{month}); true = private. */
+    protected array $uploadColumns = ['path' => true];
+
     /** Attachments live on the private disk and are served through MessageController. */
-    public const DISK = 'local';
 
     protected $fillable = [
         'message_id',

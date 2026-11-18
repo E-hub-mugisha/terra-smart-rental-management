@@ -9,8 +9,9 @@ use App\Models\Property;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Support\FileUpload;
+use RuntimeException;
 
 class PropertyStructureController extends Controller
 {
@@ -39,21 +40,33 @@ class PropertyStructureController extends Controller
             ])->withInput();
         }
 
-        DB::transaction(function () use ($property, $data, $images) {
-            $building = $property->buildings()->create($data);
+        try {
+            $paths = FileUpload::storeMany($images, FileUpload::BUILDING_IMAGES);
+        } catch (RuntimeException $e) {
+            return back()->withInput()->withErrors(['images' => $e->getMessage()]);
+        }
 
-            foreach ($images as $index => $image) {
-                $building->images()->create([
-                    'image_path' => $image->store('buildings', 'public'),
-                    'is_primary' => $index === 0,
-                    'sort_order' => $index,
+        try {
+            DB::transaction(function () use ($property, $data, $paths) {
+                $building = $property->buildings()->create($data);
+
+                foreach ($paths as $index => $path) {
+                    $building->images()->create([
+                        'image_path' => $path,
+                        'is_primary' => $index === 0,
+                        'sort_order' => $index,
+                    ]);
+                }
+
+                $property->update([
+                    'total_buildings' => $property->buildings()->count(),
                 ]);
-            }
+            });
+        } catch (\Throwable $e) {
+            FileUpload::deleteMany($paths);
 
-            $property->update([
-                'total_buildings' => $property->buildings()->count(),
-            ]);
-        });
+            throw $e;
+        }
 
         return back()->with('success', 'Building created successfully.');
     }
@@ -386,19 +399,40 @@ class PropertyStructureController extends Controller
         ]);
     }
 
+    /**
+     * Moves uploaded images into public/image/{buildings|floors|units}/ and
+     * links them to the record. Files are removed again if saving fails.
+     */
     private function appendImages($record, array $images): void
     {
-        foreach ($images as $image) {
-            $relation = $record->images();
+        if ($images === []) {
+            return;
+        }
 
-            $record->images()->create([
-                'image_path' => $image->store(
-                    strtolower(class_basename($record)) . 's',
-                    'public'
-                ),
-                'is_primary' => !$relation->exists(),
-                'sort_order' => $relation->count(),
-            ]);
+        $directory = match (true) {
+            $record instanceof \App\Models\Building => FileUpload::BUILDING_IMAGES,
+            $record instanceof \App\Models\Floor => FileUpload::FLOOR_IMAGES,
+            default => FileUpload::UNIT_IMAGES,
+        };
+
+        try {
+            $paths = FileUpload::storeMany($images, $directory);
+        } catch (RuntimeException $e) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['images' => $e->getMessage()]);
+        }
+
+        try {
+            foreach ($paths as $path) {
+                $record->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => ! $record->images()->exists(),
+                    'sort_order' => $record->images()->count(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            FileUpload::deleteMany($paths);
+
+            throw $e;
         }
     }
 }

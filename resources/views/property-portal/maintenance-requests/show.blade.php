@@ -176,7 +176,7 @@
                     </div>
 
                     <div class="card-body">
-                        <a href="{{ asset('storage/' . $maintenanceRequest->attachment_path) }}"
+                        <a href="{{ upload_url($maintenanceRequest->attachment_path) }}"
                            target="_blank"
                            rel="noopener"
                            class="text-decoration-none">

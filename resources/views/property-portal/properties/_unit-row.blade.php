@@ -3,7 +3,7 @@
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
         <div class="d-flex gap-3">
             @if($unit->images->isNotEmpty())
-                <img src="{{ asset('storage/'.$unit->images->first()->image_path) }}"
+                <img src="{{ upload_url($unit->images->first()->image_path) }}"
                      alt="{{ $unit->unit_number }}"
                      class="rounded border"
                      style="width:85px;height:75px;object-fit:cover;">

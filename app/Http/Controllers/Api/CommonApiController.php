@@ -145,7 +145,7 @@ class CommonApiController extends Controller
             'id' => $p->id, 'name' => $p->name, 'location' => $p->location_line, 'district' => $p->district,
             'latitude' => $p->latitude !== null ? (float) $p->latitude : null, 'longitude' => $p->longitude !== null ? (float) $p->longitude : null,
             'units_available' => $p->units_available, 'rent_from' => $p->rent_from !== null ? (float) $p->rent_from : null,
-            'image' => $p->images->first() ? asset('storage/' . $p->images->first()->image_path) : null,
+            'image' => $p->images->first() ? upload_url($p->images->first()->image_path) : null,
             'url' => route('listings.show', $p),
         ])];
     }

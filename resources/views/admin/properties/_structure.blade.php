@@ -107,7 +107,7 @@
 
                         @if($primaryBuildingImage)
                             <img
-                                src="{{ asset('storage/' . $primaryBuildingImage->image_path) }}"
+                                src="{{ upload_url($primaryBuildingImage->image_path) }}"
                                 alt="{{ $building->name }}"
                                 class="rounded border"
                                 style="width:90px;height:75px;object-fit:cover;">

@@ -491,10 +491,10 @@ $unitStatuses = \App\Models\Unit::STATUSES;
                                 <div>
                                     <button type="button" class="tp-tile"
                                             data-bs-toggle="modal" data-bs-target="#propertyImageModal"
-                                            data-image-src="{{ asset('storage/' . $image->image_path) }}"
+                                            data-image-src="{{ upload_url($image->image_path) }}"
                                             data-image-caption="{{ $image->caption ?: $property->name }}"
                                             aria-label="View image larger">
-                                        <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $image->caption ?? $property->name }}" loading="lazy">
+                                        <img src="{{ upload_url($image->image_path) }}" alt="{{ $image->caption ?? $property->name }}" loading="lazy">
                                         @if($image->is_primary)
                                             <span class="tp-pill no-dot is-orange"><i class="bi bi-star-fill"></i> Cover</span>
                                         @endif
@@ -588,7 +588,7 @@ $unitStatuses = \App\Models\Unit::STATUSES;
                                 </button>
 
                                 @if($buildingImage)
-                                    <img src="{{ asset('storage/' . $buildingImage->image_path) }}" alt="{{ $building->name }}" class="tp-sq">
+                                    <img src="{{ upload_url($buildingImage->image_path) }}" alt="{{ $building->name }}" class="tp-sq">
                                 @else
                                     <div class="tp-sq"><i class="bi bi-buildings"></i></div>
                                 @endif
@@ -711,7 +711,7 @@ $unitStatuses = \App\Models\Unit::STATUSES;
                                                             <td>
                                                                 <div class="d-flex align-items-center gap-2">
                                                                     @if($unitImage)
-                                                                        <img src="{{ asset('storage/' . $unitImage->image_path) }}" alt="" class="tp-sq is-sm">
+                                                                        <img src="{{ upload_url($unitImage->image_path) }}" alt="" class="tp-sq is-sm">
                                                                     @else
                                                                         <div class="tp-sq is-sm"><i class="bi bi-door-closed"></i></div>
                                                                     @endif
@@ -1198,7 +1198,7 @@ $parent = $target['parent'];
                     @forelse($parent->images as $image)
                     <div class="col-6 col-md-4">
                         <div class="tp-image-card">
-                            <img src="{{ asset('storage/' . $image->image_path) }}" alt="{{ $image->caption ?? $target['title'] }}" loading="lazy">
+                            <img src="{{ upload_url($image->image_path) }}" alt="{{ $image->caption ?? $target['title'] }}" loading="lazy">
 
                             <div class="p-2">
                                 @if($image->is_primary)

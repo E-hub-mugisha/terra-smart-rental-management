@@ -21,7 +21,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /** Subscriber & contract management, field staff, contract PDFs and international phones. */
@@ -257,7 +256,6 @@ class SubscriptionsFieldStaffTest extends TestCase
 
     public function test_contract_pdfs_on_owner_and_tenant_profiles_with_access_control(): void
     {
-        Storage::fake('local');
         $tenantUser = User::factory()->create(['role' => 'tenant']);
         $tenant = Tenant::forceCreate(['user_id' => $tenantUser->id, 'tenant_number' => 'T1', 'full_name' => 'Tina Tenant', 'email' => $tenantUser->email, 'phone' => '+250788111111', 'status' => 'active']);
 

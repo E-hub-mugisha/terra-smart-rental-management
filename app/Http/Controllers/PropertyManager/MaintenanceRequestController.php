@@ -12,10 +12,11 @@ use App\Models\Unit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use App\Support\FileUpload;
+use RuntimeException;
 
 class MaintenanceRequestController extends Controller
 {
@@ -434,8 +435,11 @@ class MaintenanceRequestController extends Controller
         $attachmentPath = null;
 
         if ($request->hasFile('attachment')) {
-            $attachmentPath = $request->file('attachment')
-                ->store('maintenance-requests', 'public');
+            try {
+                $attachmentPath = FileUpload::store($request->file('attachment'), FileUpload::MAINTENANCE_IMAGES);
+            } catch (RuntimeException $e) {
+                return back()->withInput()->withErrors(['attachment' => $e->getMessage()]);
+            }
         }
 
         try {
@@ -471,7 +475,7 @@ class MaintenanceRequestController extends Controller
             });
         } catch (\Throwable $e) {
             if ($attachmentPath) {
-                Storage::disk('public')->delete($attachmentPath);
+                FileUpload::delete($attachmentPath);
             }
 
             throw $e;
@@ -635,8 +639,11 @@ class MaintenanceRequestController extends Controller
         $newAttachment = null;
 
         if ($request->hasFile('attachment')) {
-            $newAttachment = $request->file('attachment')
-                ->store('maintenance-requests', 'public');
+            try {
+                $newAttachment = FileUpload::store($request->file('attachment'), FileUpload::MAINTENANCE_IMAGES);
+            } catch (RuntimeException $e) {
+                return back()->withInput()->withErrors(['attachment' => $e->getMessage()]);
+            }
         }
 
         try {
@@ -690,7 +697,7 @@ class MaintenanceRequestController extends Controller
             });
         } catch (\Throwable $e) {
             if ($newAttachment) {
-                Storage::disk('public')->delete($newAttachment);
+                FileUpload::delete($newAttachment);
             }
 
             throw $e;
@@ -700,7 +707,7 @@ class MaintenanceRequestController extends Controller
             $oldAttachment &&
             ($newAttachment || $request->boolean('remove_attachment'))
         ) {
-            Storage::disk('public')->delete($oldAttachment);
+            FileUpload::delete($oldAttachment);
         }
 
         return redirect()

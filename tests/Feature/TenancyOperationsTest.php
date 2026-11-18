@@ -18,7 +18,6 @@ use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
@@ -42,7 +41,6 @@ class TenancyOperationsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('local');
         config(['payments.default' => 'sandbox']);
 
         $this->admin = User::factory()->create(['role' => 'admin']);

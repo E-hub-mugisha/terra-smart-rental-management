@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DeletesUploadedFiles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InspectionMedia extends Model
 {
+    use DeletesUploadedFiles;
+
+    /** Uploaded file columns (stored in uploads/inspections/{id}); true = private. */
+    protected array $uploadColumns = ['path' => true];
+
     /** Inspection evidence is private and served through InspectionController. */
-    public const DISK = 'local';
 
     protected $table = 'inspection_media';
 

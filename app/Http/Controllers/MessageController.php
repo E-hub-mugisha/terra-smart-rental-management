@@ -13,8 +13,9 @@ use App\Services\PropertyAudience;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Support\FileUpload;
+use RuntimeException;
 
 /**
  * Tenant–landlord communication (brief §13): direct conversations and
@@ -194,14 +195,9 @@ class MessageController extends Controller
         $attachment->loadMissing('message.conversation');
         $this->participantOrAbort($attachment->message->conversation, $request->user());
 
-        $disk = Storage::disk(MessageAttachment::DISK);
-        abort_unless($disk->exists($attachment->path), 404);
-
         $inline = $attachment->isImage() || $attachment->mime_type === 'application/pdf';
 
-        return $inline && ! $request->boolean('download')
-            ? $disk->response($attachment->path, $attachment->original_name, ['Content-Type' => $attachment->mime_type])
-            : $disk->download($attachment->path, $attachment->original_name);
+        return FileUpload::response($attachment->path, $attachment->original_name, $attachment->mime_type, $inline && ! $request->boolean('download'));
     }
 
     public function archive(Request $request, Conversation $conversation)
@@ -262,13 +258,19 @@ class MessageController extends Controller
             'body' => $body !== null ? trim($body) : null,
         ]);
 
-        foreach ($files as $file) {
-            $message->attachments()->create([
-                'path' => $file->store('message-attachments/' . now()->format('Y/m'), MessageAttachment::DISK),
-                'original_name' => mb_substr($file->getClientOriginalName(), 0, 255),
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
-            ]);
+        // Attachments are private: uploads/messages/{year}/{month}/, streamed only to participants.
+        // If anything fails, every file moved so far is removed (the DB transaction rolls back the rows).
+        $saved = [];
+        try {
+            foreach ($files as $file) {
+                $meta = ['original_name' => mb_substr($file->getClientOriginalName(), 0, 255), 'mime_type' => $file->getMimeType(), 'size' => $file->getSize()];
+                $saved[] = $path = FileUpload::store($file, FileUpload::MESSAGES . '/' . now()->format('Y/m'), true);
+                $message->attachments()->create($meta + ['path' => $path]);
+            }
+        } catch (\Throwable $e) {
+            FileUpload::deleteMany($saved, true);
+
+            throw $e;
         }
 
         return $message;

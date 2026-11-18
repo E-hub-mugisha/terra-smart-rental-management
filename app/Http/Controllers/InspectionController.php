@@ -11,9 +11,10 @@ use App\Services\Notifier;
 use App\Services\PropertyAudience;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use App\Support\FileUpload;
+use RuntimeException;
 
 /**
  * Move-in & move-out inspections (brief §16) with deposit settlement.
@@ -184,16 +185,27 @@ class InspectionController extends Controller
             'caption' => ['nullable', 'string', 'max:255'],
         ]);
 
-        foreach ($request->file('media') as $file) {
-            $inspection->media()->create([
-                'inspection_item_id' => $data['inspection_item_id'] ?? null,
-                'uploaded_by' => $request->user()->id,
-                'path' => $file->store('inspections/' . $inspection->id, InspectionMedia::DISK),
-                'original_name' => mb_substr($file->getClientOriginalName(), 0, 255),
-                'mime_type' => $file->getMimeType(),
-                'size' => $file->getSize(),
-                'caption' => $data['caption'] ?? null,
-            ]);
+        // Evidence is private: moved to uploads/inspections/{id}/, never under public/.
+        $saved = [];
+        try {
+            foreach ($request->file('media') as $file) {
+                // Read the details before move(): the temporary file is gone afterwards.
+                $meta = ['original_name' => mb_substr($file->getClientOriginalName(), 0, 255), 'mime_type' => $file->getMimeType(), 'size' => $file->getSize()];
+                $path = FileUpload::store($file, FileUpload::INSPECTIONS . '/' . $inspection->id, true);
+                $saved[] = $path;
+
+                $inspection->media()->create($meta + [
+                    'inspection_item_id' => $data['inspection_item_id'] ?? null,
+                    'uploaded_by' => $request->user()->id,
+                    'path' => $path,
+                    'caption' => $data['caption'] ?? null,
+                ]);
+            }
+        } catch (RuntimeException $e) {
+            FileUpload::deleteMany($saved, true);
+            InspectionMedia::whereIn('path', $saved)->delete();
+
+            return back()->withErrors(['media' => $e->getMessage()]);
         }
 
         return back()->with('success', count($request->file('media')) . ' file(s) added.');
@@ -204,8 +216,7 @@ class InspectionController extends Controller
         $this->assertEditable($request->user(), $inspection);
         abort_unless($media->inspection_id === $inspection->id, 404);
 
-        Storage::disk(InspectionMedia::DISK)->delete($media->path);
-        $media->delete();
+        $media->delete(); // the model removes its file from uploads/
 
         return back()->with('success', 'File removed.');
     }
@@ -215,10 +226,7 @@ class InspectionController extends Controller
         $media->loadMissing('inspection');
         $this->roleFor($request->user(), $media->inspection);
 
-        $disk = Storage::disk(InspectionMedia::DISK);
-        abort_unless($disk->exists($media->path), 404);
-
-        return $disk->response($media->path, $media->original_name, ['Content-Type' => $media->mime_type, 'Cache-Control' => 'private, max-age=3600']);
+        return FileUpload::response($media->path, $media->original_name, $media->mime_type);
     }
 
     public function submit(Request $request, Inspection $inspection)

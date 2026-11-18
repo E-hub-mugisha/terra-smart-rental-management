@@ -17,8 +17,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Support\FileUpload;
+use RuntimeException;
 
 /**
  * Document management (MVP #14) and tenant KYC (brief §6).
@@ -94,21 +95,38 @@ class DocumentController extends Controller
 
         $needsReview = $owner instanceof Tenant && ! $isContract;
 
+        if (! $request->hasFile('file')) {
+            return back()->withInput()->withErrors(['file' => 'Choose a file to upload.']);
+        }
+
+        // Read the details before move(): the temporary upload is gone afterwards.
         $file = $request->file('file');
-        $document = $owner->documents()->create([
-            'category' => $data['category'],
-            'title' => ($data['title'] ?? null) ?: Document::CATEGORIES[$data['category']],
-            'path' => $file->store('documents/' . $key . '/' . $owner->getKey(), Document::DISK),
+        $meta = [
             'original_name' => mb_substr($file->getClientOriginalName(), 0, 255),
             'mime_type' => $file->getMimeType(),
             'size' => $file->getSize(),
-            'uploaded_by' => $user->id,
-            // Staff uploading a tenant document have seen the original, so it counts as verified.
-            'status' => $needsReview ? ($isStaff ? 'verified' : 'pending') : 'not_required',
-            'verified_by' => $needsReview && $isStaff ? $user->id : null,
-            'verified_at' => $needsReview && $isStaff ? now() : null,
-            'expires_at' => $data['expires_at'] ?? null,
-        ]);
+        ];
+
+        // Private folder, outside public/: uploads/documents/{contracts|kyc|properties|general}/
+        $path = FileUpload::store($file, Document::directoryFor($data['category'], $key), true);
+
+        try {
+            $document = $owner->documents()->create($meta + [
+                'category' => $data['category'],
+                'title' => ($data['title'] ?? null) ?: Document::CATEGORIES[$data['category']],
+                'path' => $path,
+                'uploaded_by' => $user->id,
+                // Staff uploading a tenant document have seen the original, so it counts as verified.
+                'status' => $needsReview ? ($isStaff ? 'verified' : 'pending') : 'not_required',
+                'verified_by' => $needsReview && $isStaff ? $user->id : null,
+                'verified_at' => $needsReview && $isStaff ? now() : null,
+                'expires_at' => $data['expires_at'] ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            FileUpload::delete($path, true);
+
+            throw $e;
+        }
 
         if ($owner instanceof Tenant && $needsReview) {
             $owner->refreshKycStatus();
@@ -131,14 +149,9 @@ class DocumentController extends Controller
         $owner = $document->documentable;
         abort_unless($owner && $this->canRead($request->user(), $owner), 404);
 
-        $disk = Storage::disk(Document::DISK);
-        abort_unless($disk->exists($document->path), 404);
-
         $inline = str_starts_with((string) $document->mime_type, 'image/') || $document->mime_type === 'application/pdf';
 
-        return $inline && ! $request->boolean('download')
-            ? $disk->response($document->path, $document->original_name, ['Content-Type' => $document->mime_type, 'Cache-Control' => 'private'])
-            : $disk->download($document->path, $document->original_name);
+        return FileUpload::response($document->path, $document->original_name, $document->mime_type, $inline && ! $request->boolean('download'));
     }
 
     public function review(Request $request, Document $document)

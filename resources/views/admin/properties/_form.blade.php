@@ -490,7 +490,7 @@
                             <div class="col-6 col-md-4 col-lg-3">
                                 <div class="border rounded-3 overflow-hidden h-100">
                                     <img
-                                        src="{{ asset('storage/' . $image->image_path) }}"
+                                        src="{{ upload_url($image->image_path) }}"
                                         alt="{{ $image->caption ?? $property->name }}"
                                         class="w-100"
                                         style="height:135px;object-fit:cover;"

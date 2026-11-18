@@ -44,7 +44,7 @@
         ->unique('image_path')
         ->take(10)
         ->map(fn ($img) => [
-            'src' => asset('storage/' . $img->image_path),
+            'src' => upload_url($img->image_path),
             'alt' => $img->caption ?: $property->name,
         ])
         ->values();
@@ -93,7 +93,7 @@
             'baths' => (int) $u->bathrooms,
             'area' => $u->area_sqm ? rtrim(rtrim(number_format((float) $u->area_sqm, 2), '0'), '.') . ' m²' : null,
             'rent' => $money($u->rent_amount, $u->currency),
-            'image' => $u->images->first() ? asset('storage/' . $u->images->first()->image_path) : $cover,
+            'image' => $u->images->first() ? upload_url($u->images->first()->image_path) : $cover,
             'features' => array_slice($features, 0, 4),
             'url' => $isPublic && $u->status === 'available' ? route('rentals.show', $u) : null,
         ];

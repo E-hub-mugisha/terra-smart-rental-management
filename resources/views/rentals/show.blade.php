@@ -460,7 +460,7 @@
 
 @php
     $images = $unit->images->take(12);
-    $imageUrls = $images->map(fn ($i) => asset('storage/' . $i->image_path))->values();
+    $imageUrls = $images->map(fn ($i) => upload_url($i->image_path))->values();
     $buildingName = $unit->building?->name ?? 'Rental property';
     $currency = $unit->currency ?? 'RWF';
     $bedrooms = (int) ($unit->bedrooms ?? 0);
@@ -542,7 +542,7 @@
                                 <div class="carousel-inner">
                                     @foreach($images as $image)
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                            <img src="{{ asset('storage/' . $image->image_path) }}"
+                                            <img src="{{ upload_url($image->image_path) }}"
                                                  alt="{{ $buildingName }}, unit {{ $unit->unit_number }}, photo {{ $loop->iteration }}"
                                                  @if(!$loop->first) loading="lazy" @endif>
                                         </div>
@@ -585,7 +585,7 @@
                                         data-bs-target="#unitGallery"
                                         data-bs-slide-to="{{ $loop->index }}"
                                         aria-label="Show photo {{ $loop->iteration }}">
-                                    <img src="{{ asset('storage/' . $image->image_path) }}" alt="" loading="lazy">
+                                    <img src="{{ upload_url($image->image_path) }}" alt="" loading="lazy">
                                 </button>
                             @endforeach
                         </div>

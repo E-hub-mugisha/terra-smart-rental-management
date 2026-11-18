@@ -310,7 +310,7 @@ $unitForms = collect([null])->concat($buildings->flatMap->units);
                     </button>
 
                     @if($buildingImage)
-                    <img src="{{ asset('storage/' . $buildingImage->image_path) }}"
+                    <img src="{{ upload_url($buildingImage->image_path) }}"
                         alt="{{ $building->name }}"
                         class="pm-thumb pm-thumb-lg">
                     @else
@@ -384,7 +384,7 @@ $unitForms = collect([null])->concat($buildings->flatMap->units);
                             <div class="pm-floor-header">
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
                                     @if($floorImage)
-                                    <img src="{{ asset('storage/' . $floorImage->image_path) }}"
+                                    <img src="{{ upload_url($floorImage->image_path) }}"
                                         alt="{{ $floor->name }}"
                                         class="pm-thumb">
                                     @else
@@ -469,7 +469,7 @@ $unitForms = collect([null])->concat($buildings->flatMap->units);
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
                                                     @if($unitImage)
-                                                    <img src="{{ asset('storage/' . $unitImage->image_path) }}"
+                                                    <img src="{{ upload_url($unitImage->image_path) }}"
                                                         alt="Unit {{ $unit->unit_number }}"
                                                         class="pm-thumb">
                                                     @else

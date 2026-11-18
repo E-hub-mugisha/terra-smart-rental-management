@@ -23,3 +23,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /vendor.zip
+
+# Uploaded files (custom local storage)
+/uploads/
+/public/image/

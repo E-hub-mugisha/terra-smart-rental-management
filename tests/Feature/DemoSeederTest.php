@@ -10,7 +10,6 @@ use Database\Seeders\TerraDemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /** The Rwanda demo dataset seeds cleanly, is consistent, and sends nothing. */
@@ -20,8 +19,6 @@ class DemoSeederTest extends TestCase
 
     public function test_demo_seeder_builds_a_consistent_portfolio_without_side_effects(): void
     {
-        Storage::fake('public');
-        Storage::fake('local');
         Notification::fake();
         Mail::fake();
 
@@ -38,7 +35,9 @@ class DemoSeederTest extends TestCase
 
         Notification::assertNothingSent();
         Mail::assertNothingSent();
-        Storage::disk('public')->assertExists('demo/properties/TRD-KCY-0.jpg');
+        $this->assertUploadExists('image/properties/demo-TRD-KCY-0.jpg');
+        $this->assertSame(0, \App\Models\PropertyImage::where('image_path', 'not like', 'image/properties/%')->count());
+        $this->assertTrue(\App\Models\Document::all()->every(fn ($d) => \App\Support\FileUpload::exists($d->path, true)), 'every demo document is on disk');
 
         // Demo accounts can sign in.
         $this->post(route('login'), ['email' => 'tenant.aline@' . TerraDemoSeeder::DOMAIN, 'password' => TerraDemoSeeder::DEMO_PASSWORD])

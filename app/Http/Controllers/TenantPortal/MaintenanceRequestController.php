@@ -8,9 +8,10 @@ use App\Models\MaintenanceRequest;
 use App\Models\MaintenanceRequestActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Support\FileUpload;
+use RuntimeException;
 
 class MaintenanceRequestController extends Controller
 {
@@ -139,8 +140,11 @@ class MaintenanceRequestController extends Controller
         $attachmentPath = null;
 
         if ($request->hasFile('attachment')) {
-            $attachmentPath = $request->file('attachment')
-                ->store('maintenance-requests', 'public');
+            try {
+                $attachmentPath = FileUpload::store($request->file('attachment'), FileUpload::MAINTENANCE_IMAGES);
+            } catch (RuntimeException $e) {
+                return back()->withInput()->withErrors(['attachment' => $e->getMessage()]);
+            }
         }
 
         try {
@@ -176,7 +180,7 @@ class MaintenanceRequestController extends Controller
             });
         } catch (\Throwable $exception) {
             if ($attachmentPath) {
-                Storage::disk('public')->delete($attachmentPath);
+                FileUpload::delete($attachmentPath);
             }
 
             throw $exception;

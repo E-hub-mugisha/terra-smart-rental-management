@@ -35,6 +35,7 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Services\ContractBuilder;
 use App\Services\InspectionService;
+use App\Support\FileUpload;
 use App\Support\Phone;
 use Carbon\Carbon;
 use Database\Seeders\Support\DemoImages;
@@ -42,7 +43,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -101,7 +101,7 @@ class TerraDemoSeeder extends Seeder
 
         $this->today = Carbon::today();
         $this->passwordHash = Hash::make(self::DEMO_PASSWORD);
-        $this->images = new DemoImages('public');
+        $this->images = new DemoImages();
         mt_srand(2026);
 
         Model::withoutEvents(function () {
@@ -205,7 +205,7 @@ class TerraDemoSeeder extends Seeder
     {
         // Shared interior photos, reused across units.
         foreach (['living', 'bedroom', 'kitchen', 'bathroom', 'living', 'bedroom', 'kitchen', 'living'] as $i => $room) {
-            $this->interiorPool[] = $this->images->interior("demo/interiors/{$room}-{$i}.jpg", 100 + $i, $room);
+            $this->interiorPool[] = $this->images->interior(FileUpload::UNIT_IMAGES . "/demo-{$room}-{$i}.jpg", 100 + $i, $room);
         }
 
         foreach ($this->propertySpecs() as $spec) {
@@ -231,7 +231,7 @@ class TerraDemoSeeder extends Seeder
 
             // Exterior photos.
             for ($p = 0; $p < 3; $p++) {
-                $path = $this->images->exterior("demo/properties/{$spec['code']}-{$p}.jpg", crc32($spec['code']) % 1000 + $p, $spec['style'], $spec['photo_floors']);
+                $path = $this->images->exterior(FileUpload::PROPERTY_IMAGES . "/demo-{$spec['code']}-{$p}.jpg", crc32($spec['code']) % 1000 + $p, $spec['style'], $spec['photo_floors']);
                 $property->images()->forceCreate([
                     'image_path' => $path, 'caption' => [$spec['name'], 'Street view', 'Compound and parking'][$p],
                     'is_primary' => $p === 0, 'sort_order' => $p,
@@ -721,11 +721,10 @@ class TerraDemoSeeder extends Seeder
 
         foreach (Tenant::whereNotNull('user_id')->get() as $i => $tenant) {
             $status = $tenant->full_name === 'Habimana Kevin' ? 'pending' : ($i % 7 === 3 ? 'pending' : 'verified');
-            $path = "documents/tenant/{$tenant->id}/national-id-demo.pdf";
-            Storage::disk(Document::DISK)->put($path, $pdf('DEMO DOCUMENT — Identity document placeholder', 'Sample file for ' . $tenant->full_name . '. Not a real identity document.'));
+            $path = FileUpload::put(FileUpload::KYC, "demo-national-id-{$tenant->id}.pdf", $pdf('DEMO DOCUMENT — Identity document placeholder', 'Sample file for ' . $tenant->full_name . '. Not a real identity document.'), true);
             $tenant->documents()->forceCreate([
                 'category' => 'national_id', 'title' => 'National ID', 'path' => $path, 'original_name' => 'national-id.pdf',
-                'mime_type' => 'application/pdf', 'size' => Storage::disk(Document::DISK)->size($path),
+                'mime_type' => 'application/pdf', 'size' => FileUpload::size($path, true),
                 'uploaded_by' => $tenant->user_id, 'status' => $status,
                 'verified_by' => $status === 'verified' ? $this->users['mgr_mugisha']->id : null,
                 'verified_at' => $status === 'verified' ? $this->today->copy()->subMonths(1) : null,
@@ -734,11 +733,10 @@ class TerraDemoSeeder extends Seeder
         }
 
         foreach ($this->properties as $code => $property) {
-            $path = "documents/property/{$property->id}/title-deed-demo.pdf";
-            Storage::disk(Document::DISK)->put($path, $pdf('DEMO DOCUMENT — Title deed placeholder', $property->name . ' · UPI ' . $property->upi . '. Sample file only.'));
+            $path = FileUpload::put(FileUpload::PROPERTY_DOCUMENTS, "demo-title-deed-{$property->id}.pdf", $pdf('DEMO DOCUMENT — Title deed placeholder', $property->name . ' · UPI ' . $property->upi . '. Sample file only.'), true);
             $property->documents()->forceCreate([
                 'category' => 'title_deed', 'title' => 'Certificate of registration (UPI ' . $property->upi . ')', 'path' => $path,
-                'original_name' => 'title-deed.pdf', 'mime_type' => 'application/pdf', 'size' => Storage::disk(Document::DISK)->size($path),
+                'original_name' => 'title-deed.pdf', 'mime_type' => 'application/pdf', 'size' => FileUpload::size($path, true),
                 'uploaded_by' => $this->users['admin']->id, 'status' => 'not_required',
             ]);
         }
@@ -1167,11 +1165,10 @@ class TerraDemoSeeder extends Seeder
 
         // Signed contracts as PDFs on owner and tenant profiles, and on subscription agreements.
         $put = function ($owner, string $key, string $category, string $title, string $file, string $line, int $uploader) {
-            $path = "documents/{$key}/{$owner->getKey()}/{$file}";
-            Storage::disk(Document::DISK)->put($path, $this->simplePdf('DEMO DOCUMENT — ' . $title, $line));
+            $path = FileUpload::put(Document::directoryFor($category, $key), "demo-{$key}-{$owner->getKey()}-{$file}", $this->simplePdf('DEMO DOCUMENT — ' . $title, $line), true);
             $owner->documents()->forceCreate([
                 'category' => $category, 'title' => $title, 'path' => $path, 'original_name' => $file, 'mime_type' => 'application/pdf',
-                'size' => Storage::disk(Document::DISK)->size($path), 'uploaded_by' => $uploader, 'status' => 'not_required',
+                'size' => FileUpload::size($path, true), 'uploaded_by' => $uploader, 'status' => 'not_required',
             ]);
         };
         foreach (['owner_kayitesi', 'owner_rugamba', 'owner_ndayisaba'] as $key) {

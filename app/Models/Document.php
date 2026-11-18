@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DeletesUploadedFiles;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -10,9 +11,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /** A stored document attached to a property, unit, tenant or lease (brief §6, MVP #14). */
 class Document extends Model
 {
+    use DeletesUploadedFiles;
+
+    /** Uploaded file columns (stored in uploads/documents/...); true = private. */
+    protected array $uploadColumns = ['path' => true];
+
     use SoftDeletes;
 
-    public const DISK = 'local';
 
     public const CATEGORIES = [
         'national_id' => 'National ID',
@@ -68,6 +73,17 @@ class Document extends Model
     public function getCategoryLabelAttribute(): string
     {
         return self::CATEGORIES[$this->category] ?? ucfirst(str_replace('_', ' ', $this->category));
+    }
+
+    /** Private folder (under uploads/) a document of this kind is moved into. */
+    public static function directoryFor(string $category, string $ownerKey): string
+    {
+        return match (true) {
+            in_array($category, self::CONTRACT_CATEGORIES, true) => \App\Support\FileUpload::CONTRACTS,
+            in_array($category, ['national_id', 'passport', 'proof_of_income', 'employment_letter', 'reference_letter'], true) => \App\Support\FileUpload::KYC,
+            in_array($ownerKey, ['property', 'unit'], true) => \App\Support\FileUpload::PROPERTY_DOCUMENTS,
+            default => \App\Support\FileUpload::GENERAL_DOCUMENTS,
+        };
     }
 
     public function getIsContractAttribute(): bool

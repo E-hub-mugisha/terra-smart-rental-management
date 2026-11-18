@@ -46,7 +46,7 @@
     @if($building && $building->images->isNotEmpty())
         <div class="col-12 d-flex flex-wrap gap-2">
             @foreach($building->images as $image)
-                <img src="{{ asset('storage/'.$image->image_path) }}"
+                <img src="{{ upload_url($image->image_path) }}"
                      alt="{{ $image->caption ?? $building->name }}"
                      class="rounded border"
                      style="width:90px;height:75px;object-fit:cover;">

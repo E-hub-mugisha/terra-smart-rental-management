@@ -2,7 +2,7 @@
 
 namespace Database\Seeders\Support;
 
-use Illuminate\Support\Facades\Storage;
+use App\Support\FileUpload;
 
 /**
  * Draws simple illustrative photos for demo data with GD: building
@@ -14,7 +14,8 @@ class DemoImages
     private const W = 1200;
     private const H = 760;
 
-    public function __construct(private string $disk = 'public')
+    /** Images are written into public/ (e.g. public/image/properties/), like real uploads. */
+    public function __construct()
     {
     }
 
@@ -277,8 +278,7 @@ class DemoImages
         $bytes = ob_get_clean();
         imagedestroy($img);
 
-        Storage::disk($this->disk)->put($path, $bytes);
-
-        return $path;
+        // Same layout as real uploads: the relative path under public/ is what gets saved.
+        return FileUpload::put(dirname($path), basename($path), $bytes);
     }
 }

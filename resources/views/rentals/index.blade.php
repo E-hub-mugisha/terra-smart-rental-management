@@ -510,7 +510,7 @@
                                                     @foreach($images as $image)
                                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                                                             <a href="{{ $detailUrl }}" tabindex="-1" aria-hidden="true">
-                                                                <img src="{{ asset('storage/' . $image->image_path) }}"
+                                                                <img src="{{ upload_url($image->image_path) }}"
                                                                      alt="{{ $buildingName }}, unit {{ $unit->unit_number }}, photo {{ $loop->iteration }}"
                                                                      @if(!$loop->first) loading="lazy" @endif>
                                                             </a>

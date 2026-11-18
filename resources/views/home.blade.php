@@ -1138,7 +1138,7 @@
 
                             @if($unitImages->isNotEmpty())
                             <a href="{{ $detailUrl }}" aria-label="View {{ $buildingName }}, unit {{ $unit->unit_number }}">
-                                <img src="{{ asset('storage/' . $unitImages->first()->image_path) }}"
+                                <img src="{{ upload_url($unitImages->first()->image_path) }}"
                                     alt="{{ $buildingName }}, unit {{ $unit->unit_number }}" loading="lazy">
                             </a>
                             @if($unitImages->count() > 1)

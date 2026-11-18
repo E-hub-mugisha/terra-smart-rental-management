@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use App\Support\FileUpload;
+use RuntimeException;
 
 class PropertyController extends Controller
 {
@@ -140,16 +142,32 @@ class PropertyController extends Controller
             return;
         }
 
-        foreach ($request->file('images', []) as $file) {
-            $path = $file->store($directory, 'public');
+        // Files go to public/image/{properties|buildings|floors|units}/.
+        $folder = match ($directory) {
+            'properties/buildings' => FileUpload::BUILDING_IMAGES,
+            'properties/floors' => FileUpload::FLOOR_IMAGES,
+            'properties/units' => FileUpload::UNIT_IMAGES,
+            default => FileUpload::PROPERTY_IMAGES,
+        };
 
-            $isFirst = ! $model->images()->exists();
+        try {
+            $paths = FileUpload::storeMany($request->file('images', []), $folder);
+        } catch (RuntimeException $e) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['images' => $e->getMessage()]);
+        }
 
-            $model->images()->create([
-                'image_path' => $path,
-                'is_primary' => $isFirst,
-                'sort_order' => (int) $model->images()->max('sort_order') + 1,
-            ]);
+        try {
+            foreach ($paths as $path) {
+                $model->images()->create([
+                    'image_path' => $path,
+                    'is_primary' => ! $model->images()->exists(),
+                    'sort_order' => (int) $model->images()->max('sort_order') + 1,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            FileUpload::deleteMany($paths);
+
+            throw $e;
         }
     }
 

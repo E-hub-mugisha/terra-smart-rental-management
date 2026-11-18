@@ -10,9 +10,10 @@ use App\Models\PropertyManagerAssignment;
 use App\Models\PropertyOwner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Support\FileUpload;
+use RuntimeException;
 
 class PropertyController extends Controller
 {
@@ -67,30 +68,37 @@ class PropertyController extends Controller
         $managerIds = $validated['manager_ids'] ?? [];
         unset($validated['manager_ids']);
 
-        $property = DB::transaction(function () use (
-            $validated,
-            $managerIds,
-            $images
-        ) {
-            $validated['property_code'] = $this->generatePropertyCode();
-            $validated['created_by'] = auth()->id();
+        // Files are moved first; if anything below fails they are removed again.
+        try {
+            $paths = FileUpload::storeMany($images, FileUpload::PROPERTY_IMAGES);
+        } catch (RuntimeException $e) {
+            return back()->withInput()->withErrors(['images' => $e->getMessage()]);
+        }
 
-            $property = Property::create($validated);
+        try {
+            $property = DB::transaction(function () use ($validated, $managerIds, $paths) {
+                $validated['property_code'] = $this->generatePropertyCode();
+                $validated['created_by'] = auth()->id();
 
-            $this->syncActiveManagers($property, $managerIds);
+                $property = Property::create($validated);
 
-            foreach ($images as $index => $image) {
-                $path = $image->store('properties', 'public');
+                $this->syncActiveManagers($property, $managerIds);
 
-                $property->images()->create([
-                    'image_path' => $path,
-                    'is_primary' => $index === 0,
-                    'sort_order' => $index,
-                ]);
-            }
+                foreach ($paths as $index => $path) {
+                    $property->images()->create([
+                        'image_path' => $path,
+                        'is_primary' => $index === 0,
+                        'sort_order' => $index,
+                    ]);
+                }
 
-            return $property;
-        });
+                return $property;
+            });
+        } catch (\Throwable $e) {
+            FileUpload::deleteMany($paths);
+
+            throw $e;
+        }
 
         return redirect()
             ->route('admin.properties.show', $property)
@@ -150,26 +158,31 @@ class PropertyController extends Controller
         $managerIds = $validated['manager_ids'] ?? [];
         unset($validated['manager_ids']);
 
-        DB::transaction(function () use (
-            $property,
-            $validated,
-            $managerIds,
-            $images
-        ) {
-            $property->update($validated);
+        try {
+            $paths = FileUpload::storeMany($images, FileUpload::PROPERTY_IMAGES);
+        } catch (RuntimeException $e) {
+            return back()->withInput()->withErrors(['images' => $e->getMessage()]);
+        }
 
-            $this->syncActiveManagers($property, $managerIds);
+        try {
+            DB::transaction(function () use ($property, $validated, $managerIds, $paths) {
+                $property->update($validated);
 
-            foreach ($images as $image) {
-                $path = $image->store('properties', 'public');
+                $this->syncActiveManagers($property, $managerIds);
 
-                $property->images()->create([
-                    'image_path' => $path,
-                    'is_primary' => !$property->images()->exists(),
-                    'sort_order' => $property->images()->count(),
-                ]);
-            }
-        });
+                foreach ($paths as $path) {
+                    $property->images()->create([
+                        'image_path' => $path,
+                        'is_primary' => ! $property->images()->exists(),
+                        'sort_order' => $property->images()->count(),
+                    ]);
+                }
+            });
+        } catch (\Throwable $e) {
+            FileUpload::deleteMany($paths);
+
+            throw $e;
+        }
 
         return redirect()
             ->route('admin.properties.show', $property)

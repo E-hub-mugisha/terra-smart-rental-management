@@ -206,7 +206,7 @@
 
                         @if($isEdit && $maintenanceRequest->attachment_path)
                             <div class="mt-3">
-                                <a href="{{ asset('storage/' . $maintenanceRequest->attachment_path) }}"
+                                <a href="{{ upload_url($maintenanceRequest->attachment_path) }}"
                                    target="_blank"
                                    rel="noopener">
                                     <i class="bi bi-paperclip me-1"></i>

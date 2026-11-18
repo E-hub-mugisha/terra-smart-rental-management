@@ -450,7 +450,7 @@
                     <article class="tp-row">
                         <a href="{{ route('admin.properties.show', $property) }}" class="tp-thumb" tabindex="-1" aria-hidden="true">
                             @if($image)
-                                <img src="{{ asset('storage/' . $image->image_path) }}"
+                                <img src="{{ upload_url($image->image_path) }}"
                                      alt="" loading="lazy">
                                 @if($imageCount > 1)
                                     <span class="tp-thumb-count"><i class="bi bi-images"></i> {{ $imageCount }}</span>

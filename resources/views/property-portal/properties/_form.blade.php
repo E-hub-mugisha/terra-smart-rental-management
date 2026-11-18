@@ -349,7 +349,7 @@
                         @foreach($property->images as $image)
                             <div class="col-6 col-md-4">
                                 <img
-                                    src="{{ asset('storage/' . $image->image_path) }}"
+                                    src="{{ upload_url($image->image_path) }}"
                                     alt="{{ $property->name }}"
                                     class="w-100 rounded-3"
                                     style="height:140px;object-fit:cover;"

@@ -4,7 +4,7 @@
         <div class="col-md-6 col-xl-4">
             <div class="card border-0 shadow-sm h-100 overflow-hidden" style="border-radius:14px;">
                 <div style="aspect-ratio:16/9;background:#e7ebf3;">
-                    @if($img)<img src="{{ asset('storage/' . $img->image_path) }}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy">@endif
+                    @if($img)<img src="{{ upload_url($img->image_path) }}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy">@endif
                 </div>
                 <div class="card-body">
                     <div class="small text-secondary"><i class="bi bi-geo-alt-fill"></i> {{ $p->location_line ?: 'Rwanda' }}</div>

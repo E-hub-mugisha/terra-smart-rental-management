@@ -16,7 +16,6 @@ use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -173,7 +172,6 @@ class CommunicationTest extends TestCase
 
     public function test_non_participants_cannot_read_conversation_or_attachments(): void
     {
-        Storage::fake('local');
 
         $this->actingAs($this->tenantUser)->post(route('messages.store'), [
             'type' => 'direct',
@@ -184,7 +182,7 @@ class CommunicationTest extends TestCase
 
         $conversation = Conversation::firstOrFail();
         $attachment = $conversation->messages()->first()->attachments()->firstOrFail();
-        Storage::disk('local')->assertExists($attachment->path);
+        $this->assertUploadExists($attachment->path, true);
 
         $this->actingAs($this->strangerUser)->get(route('messages.show', $conversation))->assertNotFound();
         $this->actingAs($this->strangerUser)->get(route('messages.attachments.show', $attachment))->assertNotFound();

@@ -24,7 +24,7 @@
                     @if($job->tenant_feedback)<dt class="col-sm-4 text-secondary fw-normal">Tenant feedback</dt><dd class="col-sm-8 text-danger">{{ $job->tenant_feedback }}</dd>@endif
                 </dl>
                 @if($job->attachment_path)
-                    <a href="{{ asset('storage/' . $job->attachment_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill mt-3"><i class="bi bi-paperclip"></i> Tenant's photo</a>
+                    <a href="{{ upload_url($job->attachment_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill mt-3"><i class="bi bi-paperclip"></i> Tenant's photo</a>
                 @endif
             </div>
         </div>

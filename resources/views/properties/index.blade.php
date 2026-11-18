@@ -59,7 +59,7 @@
                 <a href="{{ route('listings.show', $property) }}" class="tpl-card">
                     <div class="tpl-img">
                         @if($img)
-                            <img src="{{ asset('storage/' . $img->image_path) }}" alt="{{ $property->name }}" loading="lazy">
+                            <img src="{{ upload_url($img->image_path) }}" alt="{{ $property->name }}" loading="lazy">
                         @else
                             <span class="tpl-noimg"><i class="bi bi-building"></i></span>
                         @endif

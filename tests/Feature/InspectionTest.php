@@ -13,7 +13,6 @@ use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /** Move-in / move-out inspections and deposit settlement (brief §16). */
@@ -32,7 +31,6 @@ class InspectionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('local');
 
         $this->admin = User::factory()->create(['role' => 'admin']);
         $ownerUser = User::factory()->create(['role' => 'owner']);
@@ -119,7 +117,7 @@ class InspectionTest extends TestCase
             'media' => [UploadedFile::fake()->image('wall.jpg')],
         ])->assertRedirect();
         $media = $inspection->media()->firstOrFail();
-        Storage::disk('local')->assertExists($media->path);
+        $this->assertUploadExists($media->path, true);
 
         $this->rateAll($inspection, ['electricity_reading' => 1520.5, 'keys_handed' => 3], [$wall->id => ['condition' => 'fair', 'notes' => 'Small scuff near door']]);
 

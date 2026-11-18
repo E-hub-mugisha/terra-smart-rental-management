@@ -11,7 +11,8 @@ use App\Models\Property;
 use App\Models\Unit;
 use App\Models\UnitImage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use App\Support\FileUpload;
+use RuntimeException;
 
 class PropertyImageController extends Controller
 {
@@ -138,7 +139,7 @@ class PropertyImageController extends Controller
             }
         });
 
-        // Delete only the stored path from the database record.
-        Storage::disk('public')->delete($path);
+        // The record is gone, so remove the file from public/image/... too.
+        FileUpload::delete($path);
     }
 }

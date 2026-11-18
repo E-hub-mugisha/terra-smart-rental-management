@@ -26,7 +26,7 @@
         <div class="col-6 col-md-4 col-xl-3">
             <div class="card h-100">
                 <img
-                    src="{{ asset('storage/' . $image->image_path) }}"
+                    src="{{ upload_url($image->image_path) }}"
                     class="card-img-top"
                     alt="{{ $image->caption ?? 'Property image' }}"
                     style="height: 160px; object-fit: cover;"
