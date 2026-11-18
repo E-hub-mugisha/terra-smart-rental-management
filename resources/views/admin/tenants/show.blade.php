@@ -1199,6 +1199,14 @@
                     @endif
                 </div>
             </div>
+            {{-- Documents & contracts --}}
+            @include('documents._profile-panel', [
+                'owner' => $tenant,
+                'ownerKey' => 'tenant',
+                'documents' => $tenant->documents()->with('uploader:id,name')->latest()->get(),
+                'canUpload' => true,
+                'heading' => 'Tenant documents & contracts',
+            ])
         </div>
 
         {{-- Sidebar --}}

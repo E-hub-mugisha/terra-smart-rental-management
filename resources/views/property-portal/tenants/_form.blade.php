@@ -29,7 +29,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label">Phone number <span class="text-danger">*</span></label>
-                        <input name="phone" required maxlength="30"
+                        <input name="phone" type="tel" data-intl-phone required maxlength="30"
                             class="form-control @error('phone') is-invalid @enderror"
                             value="{{ old('phone', $tenant->phone ?? '') }}">
                         @error('phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -37,7 +37,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label">Alternative phone</label>
-                        <input name="alternative_phone" maxlength="30"
+                        <input name="alternative_phone" type="tel" data-intl-phone maxlength="30"
                             class="form-control @error('alternative_phone') is-invalid @enderror"
                             value="{{ old('alternative_phone', $tenant->alternative_phone ?? '') }}">
                         @error('alternative_phone') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -68,7 +68,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Contact phone</label>
-                        <input name="emergency_contact_phone" maxlength="30"
+                        <input name="emergency_contact_phone" type="tel" data-intl-phone maxlength="30"
                             class="form-control @error('emergency_contact_phone') is-invalid @enderror"
                             value="{{ old('emergency_contact_phone', $tenant->emergency_contact_phone ?? '') }}">
                         @error('emergency_contact_phone') <div class="invalid-feedback">{{ $message }}</div> @enderror

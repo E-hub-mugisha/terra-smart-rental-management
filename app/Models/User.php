@@ -32,6 +32,7 @@ class User extends Authenticatable
         'notify_sms',
         'locale',
         'two_factor_enabled',
+        'phone',
     ];
 
     /**
@@ -96,6 +97,57 @@ class User extends Authenticatable
         return $this->role === 'technician';
     }
 
+    public function isFieldStaff(): bool
+    {
+        return $this->role === 'field_staff';
+    }
+
+    /** Owners and managers are Terra's paying subscribers. */
+    public function isSubscriber(): bool
+    {
+        return in_array($this->role, ['owner', 'manager'], true);
+    }
+
+    public function fieldStaff(): HasOne
+    {
+        return $this->hasOne(FieldStaff::class);
+    }
+
+    public function subscriptionContracts(): HasMany
+    {
+        return $this->hasMany(SubscriptionContract::class);
+    }
+
+    public function latestSubscription(): HasOne
+    {
+        return $this->hasOne(SubscriptionContract::class)->latestOfMany();
+    }
+
+    public function subscriptionInvoices(): HasMany
+    {
+        return $this->hasMany(SubscriptionInvoice::class);
+    }
+
+    public function subscriptionPayments(): HasMany
+    {
+        return $this->hasMany(SubscriptionPayment::class);
+    }
+
+    public function subscriberCalls(): HasMany
+    {
+        return $this->hasMany(SubscriberCall::class);
+    }
+
+    /** Best phone number on file for this person, from the account or any profile. */
+    public function contactPhone(): ?string
+    {
+        return $this->phone
+            ?? $this->propertyOwner?->phone
+            ?? $this->propertyManager?->phone
+            ?? $this->tenant?->phone
+            ?? $this->fieldStaff?->phone;
+    }
+
     public function serviceProvider(): HasOne
     {
         return $this->hasOne(ServiceProvider::class);
@@ -136,7 +188,8 @@ class User extends Authenticatable
     {
         return $this->tenant?->phone
             ?? $this->propertyManager?->phone
-            ?? $this->propertyOwner?->phone;
+            ?? $this->propertyOwner?->phone
+            ?? $this->phone;
     }
 
     /** Number of conversations with unread messages, for the topbar badge. */

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\InternationalPhone;
+use App\Support\Phone;
 use App\Models\Tenant;
 use App\Models\TenantApplication;
 use App\Models\Unit;
@@ -16,9 +18,10 @@ class PublicTenantApplicationController extends Controller
     {
         $user = $request->user();
 
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $validated = $request->validate([
-            'phone' => ['required', 'string', 'max:30'],
-            'alternative_phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', new InternationalPhone()],
+            'alternative_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'address' => ['nullable', 'string', 'max:2000'],
             'desired_move_in_date' => [
                 'required',

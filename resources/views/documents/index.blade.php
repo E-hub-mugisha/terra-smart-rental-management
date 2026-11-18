@@ -55,6 +55,8 @@
                                 @case('lease') Lease {{ $doc->documentable?->lease_number }} @break
                                 @case('property') Property: {{ $doc->documentable?->name }} @break
                                 @case('unit') Unit {{ $doc->documentable?->unit_number }} @break
+                                @case('owner') Owner: {{ $doc->documentable?->name }} @break
+                                @case('subscription') Subscription {{ $doc->documentable?->contract_number }} @break
                             @endswitch
                             · {{ $doc->human_size }} · uploaded {{ $doc->created_at->diffForHumans() }} by {{ $doc->uploader?->name ?? '—' }}
                             @if($doc->expires_at) · expires {{ $doc->expires_at->format('d M Y') }}@endif
@@ -144,6 +146,7 @@
                             <select name="category" id="docCategory" class="form-select form-select-sm @error('category') is-invalid @enderror" required>
                                 @foreach(\App\Models\Document::OWNER_TYPES as $type => [, $cats])
                                     @foreach($cats as $cat)
+                                        @continue(! $isStaff && in_array($cat, \App\Models\Document::CONTRACT_CATEGORIES, true))
                                         <option value="{{ $cat }}" data-owner="{{ $type }}" @selected(old('category') === $cat)>{{ \App\Models\Document::CATEGORIES[$cat] }}</option>
                                     @endforeach
                                 @endforeach

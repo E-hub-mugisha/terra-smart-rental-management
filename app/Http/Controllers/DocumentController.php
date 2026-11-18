@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\Lease;
 use App\Models\Property;
+use App\Models\PropertyOwner;
+use App\Models\SubscriptionContract;
 use App\Models\Tenant;
 use App\Models\TenantApplication;
 use App\Models\Unit;
@@ -66,12 +68,15 @@ class DocumentController extends Controller
         $user = $request->user();
 
         $data = $request->validate([
-            'owner' => ['required', 'string', 'regex:/^(property|unit|tenant|lease):\d+$/'],
+            'owner' => ['required', 'string', 'regex:/^(property|unit|tenant|lease|owner|subscription):\d+$/'],
             'category' => ['required', Rule::in(array_keys(Document::CATEGORIES))],
             'title' => ['nullable', 'string', 'max:150'],
             'expires_at' => ['nullable', 'date', 'after:today'],
-            'file' => self::FILE_RULES,
-        ]);
+            // Contracts must be PDF; other documents may also be photos or Word files.
+            'file' => in_array($request->input('category'), Document::CONTRACT_CATEGORIES, true)
+                ? ['required', 'file', 'max:10240', 'mimes:pdf', 'mimetypes:application/pdf']
+                : self::FILE_RULES,
+        ], ['file.mimes' => 'Contracts must be uploaded as a PDF file.', 'file.mimetypes' => 'Contracts must be uploaded as a PDF file.']);
 
         [$key, $id] = explode(':', $data['owner']);
         $owner = $this->resolveOwner($key, (int) $id);
@@ -82,7 +87,12 @@ class DocumentController extends Controller
         }
 
         $isStaff = $this->canManageOwner($user, $owner);
-        $needsReview = $owner instanceof Tenant;
+        $isContract = in_array($data['category'], Document::CONTRACT_CATEGORIES, true);
+
+        // Contracts are legal records: only staff responsible for the record may file them.
+        abort_if($isContract && ! $isStaff, 403, 'Only staff can upload contracts.');
+
+        $needsReview = $owner instanceof Tenant && ! $isContract;
 
         $file = $request->file('file');
         $document = $owner->documents()->create([
@@ -100,11 +110,15 @@ class DocumentController extends Controller
             'expires_at' => $data['expires_at'] ?? null,
         ]);
 
-        if ($owner instanceof Tenant) {
+        if ($owner instanceof Tenant && $needsReview) {
             $owner->refreshKycStatus();
             if (! $isStaff) {
                 $this->notifier->documentUploaded($document);
             }
+        }
+
+        if ($isContract) {
+            $this->notifier->contractDocumentFiled($document);
         }
 
         return back()->with('success', $document->status === 'pending'
@@ -197,7 +211,10 @@ class DocumentController extends Controller
             $owner instanceof Unit => $this->audience->canManageProperty($user, $this->audience->propertyIdForUnit($owner)),
             $owner instanceof Lease => $this->audience->canManageProperty($user, $this->audience->propertyIdForLease($owner)),
             $owner instanceof Tenant => $this->tenantPropertyIds($owner)->contains(fn ($pid) => $this->audience->canManageProperty($user, $pid))
-                || $this->audience->accessiblePropertyIds($user) === null,
+                || $this->audience->accessiblePropertyIds($user) === null
+                || ($this->audience->isStaff($user) && (int) $owner->created_by === $user->id),
+            // Owner agreements and subscriptions are between the owner and Terra: admins only.
+            $owner instanceof PropertyOwner, $owner instanceof SubscriptionContract => $user->isAdmin(),
             default => false,
         };
     }
@@ -206,11 +223,18 @@ class DocumentController extends Controller
     {
         return $this->canManageOwner($user, $owner)
             || ($owner instanceof Tenant && $owner->user_id === $user->id)
-            || ($owner instanceof Lease && $this->audience->isTenantOf($user, $owner));
+            || ($owner instanceof Lease && $this->audience->isTenantOf($user, $owner))
+            || ($owner instanceof PropertyOwner && $owner->user_id && $owner->user_id === $user->id)
+            || ($owner instanceof SubscriptionContract && $owner->user_id === $user->id);
     }
 
     private function canWrite(User $user, Model $owner): bool
     {
+        // Owners and subscribers may read their agreements but only Terra files them.
+        if ($owner instanceof PropertyOwner || $owner instanceof SubscriptionContract) {
+            return $this->canManageOwner($user, $owner);
+        }
+
         return $this->canRead($user, $owner);
     }
 
@@ -232,21 +256,31 @@ class DocumentController extends Controller
             return $query; // admin
         }
 
+        if ($user->isFieldStaff()) {
+            return $query->whereRaw('1 = 0');
+        }
+
         $unitIds = Unit::whereHas('building', fn ($b) => $b->whereIn('property_id', $ids))->pluck('id');
         $leaseIds = Lease::whereIn('unit_id', $unitIds)->pluck('id');
         $tenantIds = Lease::whereIn('unit_id', $unitIds)->pluck('tenant_id')
-            ->concat(TenantApplication::whereIn('unit_id', $unitIds)->pluck('tenant_id'));
+            ->concat(TenantApplication::whereIn('unit_id', $unitIds)->pluck('tenant_id'))
+            ->concat(Tenant::where('created_by', $user->id)->pluck('id'));
 
         if ($tenant = $user->tenant) {
             $tenantIds->push($tenant->id);
             $leaseIds = $leaseIds->concat($tenant->leases()->pluck('id'));
         }
 
-        return $query->where(function ($q) use ($ids, $unitIds, $leaseIds, $tenantIds) {
+        $ownerProfileId = $user->propertyOwner?->id;
+        $subscriptionIds = SubscriptionContract::where('user_id', $user->id)->pluck('id');
+
+        return $query->where(function ($q) use ($ids, $unitIds, $leaseIds, $tenantIds, $ownerProfileId, $subscriptionIds) {
             $q->where(fn ($w) => $w->where('documentable_type', Property::class)->whereIn('documentable_id', $ids))
                 ->orWhere(fn ($w) => $w->where('documentable_type', Unit::class)->whereIn('documentable_id', $unitIds))
                 ->orWhere(fn ($w) => $w->where('documentable_type', Lease::class)->whereIn('documentable_id', $leaseIds->unique()))
-                ->orWhere(fn ($w) => $w->where('documentable_type', Tenant::class)->whereIn('documentable_id', $tenantIds->unique()));
+                ->orWhere(fn ($w) => $w->where('documentable_type', Tenant::class)->whereIn('documentable_id', $tenantIds->unique()))
+                ->orWhere(fn ($w) => $w->where('documentable_type', PropertyOwner::class)->where('documentable_id', $ownerProfileId ?? 0))
+                ->orWhere(fn ($w) => $w->where('documentable_type', SubscriptionContract::class)->whereIn('documentable_id', $subscriptionIds));
         });
     }
 
@@ -263,6 +297,11 @@ class DocumentController extends Controller
         }
 
         $ids = $this->audience->accessiblePropertyIds($user);
+        if ($ids === null) {
+            foreach (PropertyOwner::orderBy('name')->limit(200)->get(['id', 'name']) as $o) {
+                $targets->push(['value' => 'owner:' . $o->id, 'label' => 'Owner · ' . $o->name, 'type' => 'owner']);
+            }
+        }
         if ($ids === null || $ids->isNotEmpty()) {
             $properties = Property::when($ids !== null, fn ($q) => $q->whereIn('id', $ids))->orderBy('name')->limit(200)->get(['id', 'name']);
             foreach ($properties as $p) {

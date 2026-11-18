@@ -837,6 +837,14 @@
                     </section>
                 </div>
             </div>
+            {{-- Documents & contracts --}}
+            @include('documents._profile-panel', [
+                'owner' => $owner,
+                'ownerKey' => 'owner',
+                'documents' => $owner->documents()->with('uploader:id,name')->latest()->get(),
+                'canUpload' => true,
+                'heading' => 'Owner documents & contracts',
+            ])
         </div>
 
         {{-- ============ SIDEBAR ============ --}}

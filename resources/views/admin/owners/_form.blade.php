@@ -445,6 +445,7 @@
                 type="tel"
                 name="phone"
                 id="phone"
+                data-intl-phone
                 class="form-control @error('phone') is-invalid @enderror"
                 value="{{ old('phone', $owner->phone) }}"
                 maxlength="30"
@@ -594,6 +595,7 @@
 </section>
 
 {{-- Verification and account status --}}
+@unless($registrationOnly ?? false)
 <section class="owner-form-section">
     <div class="owner-form-section-title">
         <i class="bi bi-shield-check"></i>
@@ -659,6 +661,7 @@
         </div>
     </div>
 </section>
+@endunless
 
 {{-- Internal notes --}}
 <section class="owner-form-section">
@@ -698,7 +701,7 @@
     </div>
 
     <div class="d-flex flex-wrap gap-2">
-        <a href="{{ route('admin.owners.index') }}" class="btn-terra-outline">
+        <a href="{{ $cancelUrl ?? route('admin.owners.index') }}" class="btn-terra-outline">
             Cancel
         </a>
 

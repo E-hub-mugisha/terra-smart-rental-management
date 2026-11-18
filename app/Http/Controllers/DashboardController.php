@@ -16,6 +16,7 @@ class DashboardController extends Controller
             'accountant' => redirect()->route('finance.dashboard'),
             'agent' => redirect()->route('agent.dashboard'),
             'technician' => redirect()->route('service-provider.dashboard'),
+            'field_staff' => redirect()->route('field-staff.dashboard'),
             default => abort(403, 'No dashboard is assigned to your account.'),
         };
     }

@@ -402,6 +402,98 @@ class Notifier
     }
 
     /* =====================================================================
+     |  Subscriptions, contracts & field staff
+     * ===================================================================== */
+
+    /** Tell the person a contract PDF was filed on their profile. */
+    public function contractDocumentFiled(\App\Models\Document $document): void
+    {
+        $owner = $document->documentable;
+        $user = match (true) {
+            $owner instanceof Tenant, $owner instanceof \App\Models\PropertyOwner, $owner instanceof \App\Models\SubscriptionContract => $owner->user,
+            default => null,
+        };
+        if ($owner instanceof \App\Models\SubscriptionContract) {
+            $user = $owner->subscriber;
+        }
+        if (! $user || $user->id === auth()->id()) {
+            return;
+        }
+
+        $this->toUser($user, new TerraAlert('document',
+            'New contract on your profile',
+            $document->title . ' has been added to your documents. You can view or download it at any time.',
+            route('documents.index'),
+            ['icon' => 'bi-file-earmark-pdf', 'tone' => 'info', 'action' => 'View documents']));
+    }
+
+    public function subscriptionContractEvent(\App\Models\SubscriptionContract $contract, string $event): void
+    {
+        [$title, $tone] = match ($event) {
+            'created' => ['Your Terra subscription agreement is ready', 'info'],
+            'activated' => ['Your Terra subscription is active', 'success'],
+            'renewed' => ['Your Terra subscription was renewed', 'success'],
+            'expiring' => ['Your Terra subscription expires soon', 'warning'],
+            'expired' => ['Your Terra subscription has expired', 'warning'],
+            'terminated' => ['Your Terra subscription was terminated', 'danger'],
+            default => ['Subscription update', 'info'],
+        };
+
+        $period = $contract->start_date?->format('d M Y') . ($contract->end_date ? ' to ' . $contract->end_date->format('d M Y') : '');
+        $this->toUser($contract->subscriber, new TerraAlert('subscription', $title,
+            'Agreement ' . $contract->contract_number . ' (' . $period . '), ' . $this->money($contract->amount, $contract->currency) . ' per ' . match ($contract->billing_cycle) { 'annual' => 'year', 'quarterly' => 'quarter', default => 'month' } . '.',
+            Route::has('subscription.show') ? route('subscription.show') : null,
+            ['icon' => 'bi-patch-check', 'tone' => $tone, 'action' => 'View subscription']));
+    }
+
+    public function subscriptionInvoiceIssued(\App\Models\SubscriptionInvoice $invoice): void
+    {
+        $this->toUser($invoice->subscriber, new TerraAlert('subscription',
+            'Subscription invoice ' . $invoice->invoice_number,
+            $this->money($invoice->amount, $invoice->currency) . ' is due on ' . $invoice->due_date->format('d M Y') . '.',
+            Route::has('subscription.show') ? route('subscription.show') : null,
+            ['icon' => 'bi-receipt', 'tone' => 'info', 'action' => 'View invoice']));
+    }
+
+    public function subscriptionInvoiceOverdue(\App\Models\SubscriptionInvoice $invoice): void
+    {
+        $this->toUser($invoice->subscriber, new TerraAlert('subscription',
+            'Subscription payment overdue',
+            'Invoice ' . $invoice->invoice_number . ' (' . $this->money($invoice->balance, $invoice->currency) . ') was due on ' . $invoice->due_date->format('d M Y') . '. Please pay to keep your account active.',
+            Route::has('subscription.show') ? route('subscription.show') : null,
+            ['icon' => 'bi-exclamation-triangle', 'tone' => 'danger', 'action' => 'Pay now', 'sms' => true]));
+    }
+
+    public function subscriptionPaymentReceived(\App\Models\SubscriptionPayment $payment): void
+    {
+        $this->toUser($payment->subscriber, new TerraAlert('payment',
+            'Subscription payment received',
+            'We received ' . $this->money($payment->amount, $payment->currency) . ' by ' . strtolower($payment->method_label) . '. Thank you.',
+            Route::has('subscription.show') ? route('subscription.show') : null,
+            ['icon' => 'bi-check2-circle', 'tone' => 'success']));
+    }
+
+    /** Admins hear about new owners/managers signed up by field staff. */
+    public function fieldRegistration(User $staff, string $kind, string $name, ?string $url): void
+    {
+        foreach (User::where('role', 'admin')->get() as $admin) {
+            $this->toUser($admin, new TerraAlert('registration',
+                'New ' . $kind . ' registered in the field',
+                $staff->name . ' registered ' . $name . ' as a property ' . $kind . '.',
+                $url,
+                ['icon' => 'bi-person-plus', 'tone' => 'info', 'mail' => false]));
+        }
+    }
+
+    /** Send one alert to one user, never breaking the caller. */
+    public function toUser(?User $user, TerraAlert $alert): void
+    {
+        if ($user) {
+            $this->safely(fn () => $user->notify($alert));
+        }
+    }
+
+    /* =====================================================================
      |  Delivery helpers
      * ===================================================================== */
 

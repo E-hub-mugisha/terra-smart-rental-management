@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Rules\InternationalPhone;
+use App\Support\Phone;
 use App\Http\Controllers\Controller;
 use App\Mail\ManagerAccountCreated;
 use App\Models\PropertyManager;
@@ -54,6 +56,7 @@ class PropertyManagerController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
@@ -72,6 +75,7 @@ class PropertyManagerController extends Controller
                     'password' => Hash::make($password),
                     'email_verified_at' => now(),
                     'role' => 'manager',
+                    'phone' => $data['phone'] ?? null,
                 ])->save();
 
                 return PropertyManager::create([
@@ -90,10 +94,12 @@ class PropertyManagerController extends Controller
         }
 
         $manager->load('user:id,name,email');
+        $mailSent = $this->sendCredentials($manager, $password);
+        $this->registered($manager);
 
         return redirect()
-            ->route('admin.managers.index')
-            ->with('success', $this->sendCredentials($manager, $password)
+            ->to($this->afterStoreUrl($manager))
+            ->with('success', $mailSent
                 ? "Property manager created. Login credentials were emailed to {$manager->user->email}."
                 : 'Property manager created, but the credentials email could not be sent. '
                     . 'Use "Resend credentials" once the mail settings are fixed.');
@@ -115,6 +121,7 @@ class PropertyManagerController extends Controller
 
     public function update(Request $request, PropertyManager $manager): RedirectResponse
     {
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -130,6 +137,7 @@ class PropertyManagerController extends Controller
             $manager->user->forceFill([
                 'name' => $data['name'],
                 'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
             ])->save();
 
             $manager->update($this->profileData($data));
@@ -177,7 +185,18 @@ class PropertyManagerController extends Controller
         );
     }
 
-    private function profileRules(Request $request): array
+    /** Where to go after registering a manager (the field staff portal overrides this). */
+    protected function afterStoreUrl(PropertyManager $manager): string
+    {
+        return route('admin.managers.index');
+    }
+
+    /** Hook run after a manager account has been created. */
+    protected function registered(PropertyManager $manager): void
+    {
+    }
+
+    protected function profileRules(Request $request): array
     {
         $isRwanda = strcasecmp(trim((string) $request->input('country')), 'Rwanda') === 0;
         $provinces = config('rwanda.provinces', []);
@@ -192,7 +211,7 @@ class PropertyManagerController extends Controller
         }
 
         return [
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'country' => ['required', 'string', 'max:100'],
             'province' => $provinceRules,
             'district' => $districtRules,
@@ -208,7 +227,7 @@ class PropertyManagerController extends Controller
         ];
     }
 
-    private function profileData(array $data): array
+    protected function profileData(array $data): array
     {
         return [
             'phone' => $data['phone'] ?? null,
@@ -224,7 +243,7 @@ class PropertyManagerController extends Controller
         ];
     }
 
-    private function messages(): array
+    protected function messages(): array
     {
         return [
             'email.unique' => 'A user account with this email already exists.',
@@ -232,7 +251,7 @@ class PropertyManagerController extends Controller
         ];
     }
 
-    private function sendCredentials(PropertyManager $manager, string $password, bool $reset = false): bool
+    protected function sendCredentials(PropertyManager $manager, string $password, bool $reset = false): bool
     {
         try {
             Mail::to($manager->user->email)->send(new ManagerAccountCreated(
@@ -252,7 +271,7 @@ class PropertyManagerController extends Controller
         }
     }
 
-    private function generatePassword(): string
+    protected function generatePassword(): string
     {
         // Readable, no ambiguous characters (0/O, 1/l/I).
         $alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -265,7 +284,7 @@ class PropertyManagerController extends Controller
         return $password;
     }
 
-    private function generateManagerNumber(): string
+    protected function generateManagerNumber(): string
     {
         do {
             $number = 'MGR-' . now()->format('Ymd') . '-'

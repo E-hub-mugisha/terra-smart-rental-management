@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Rules\InternationalPhone;
+use App\Support\Phone;
 use App\Http\Controllers\Controller;
 use App\Mail\TenantAccountCreated;
 use App\Models\Tenant;
@@ -51,6 +53,7 @@ class TenantController extends Controller
      */
     public function store(Request $request)
     {
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $validated = $request->validate([
             'email' => [
                 'required',
@@ -129,6 +132,7 @@ class TenantController extends Controller
      */
     public function update(Request $request, Tenant $tenant)
     {
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $validated = $request->validate([
             'email' => [
                 'required',
@@ -227,14 +231,14 @@ class TenantController extends Controller
 
         return [
             'full_name' => ['required', 'string', 'max:150'],
-            'phone' => ['required', 'string', 'max:30'],
-            'alternative_phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', new InternationalPhone()],
+            'alternative_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'country' => ['required', 'string', 'max:100'],
             'province' => $provinceRules,
             'district' => $districtRules,
             'address' => ['nullable', 'string'],
             'emergency_contact_name' => ['nullable', 'string', 'max:150'],
-            'emergency_contact_phone' => ['nullable', 'string', 'max:30'],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'notes' => ['nullable', 'string'],
         ];

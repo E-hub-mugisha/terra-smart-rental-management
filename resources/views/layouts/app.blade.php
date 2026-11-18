@@ -358,6 +358,7 @@
         'real_estate_agent' => 'Real Estate Agent',
         'service_provider'  => 'Service Provider',
         'accountant'        => 'Accountant',
+        'field_staff'       => 'Field Staff',
         'user'              => 'User',
     ];
     $roleLabel = $roleLabels[$role] ?? ucwords(str_replace('_', ' ', $role));
@@ -407,6 +408,7 @@
         'accountant'       => ['accountant.dashboard', 'finance.dashboard', 'dashboard'],
         'real_estate_agent'=> ['real-estate-agent.dashboard', 'agent.dashboard', 'dashboard'],
         'service_provider' => ['service-provider.dashboard', 'dashboard'],
+        'field_staff'      => ['field-staff.dashboard'],
         default            => ['dashboard', 'rentals.index'],
     };
     $dashboardRoute = $resolveTerraRoute($dashboardCandidates);
@@ -426,7 +428,15 @@
                 ['label' => 'Property Owners', 'icon' => 'bi-person-badge', 'routes' => ['admin.owners.index', 'admin.property-owners.index'], 'active' => ['admin.owners.*', 'admin.property-owners.*']],
                 ['label' => 'Property Managers', 'icon' => 'bi-person-gear', 'routes' => ['admin.managers.index', 'admin.property-managers.index'], 'active' => ['admin.managers.*', 'admin.property-managers.*']],
                 ['label' => 'Tenants', 'icon' => 'bi-person-vcard', 'routes' => ['admin.tenants.index'], 'active' => ['admin.tenants.*']],
+                ['label' => 'Field Staff', 'icon' => 'bi-person-walking', 'routes' => ['admin.field-staff.index'], 'active' => ['admin.field-staff.*']],
                 ['label' => 'Audit Log', 'icon' => 'bi-shield-check', 'routes' => ['admin.audit-logs.index'], 'active' => ['admin.audit-logs.*']],
+            ]],
+            ['heading' => 'Subscribers & Billing', 'items' => [
+                ['label' => 'Subscribers', 'icon' => 'bi-person-check', 'routes' => ['admin.subscribers.index'], 'active' => ['admin.subscribers.*']],
+                ['label' => 'Subscription Contracts', 'icon' => 'bi-file-earmark-check', 'routes' => ['admin.subscriptions.contracts.index'], 'active' => ['admin.subscriptions.contracts.*']],
+                ['label' => 'Outstanding & Overdue', 'icon' => 'bi-hourglass-split', 'routes' => ['admin.subscriptions.invoices'], 'active' => ['admin.subscriptions.invoices*']],
+                ['label' => 'Transactions', 'icon' => 'bi-arrow-left-right', 'routes' => ['admin.subscriptions.payments'], 'active' => ['admin.subscriptions.payments*']],
+                ['label' => 'Plans', 'icon' => 'bi-stack', 'routes' => ['admin.subscriptions.plans'], 'active' => ['admin.subscriptions.plans*']],
             ]],
             ['heading' => 'Property Operations', 'items' => [
                 ['label' => 'Managed Properties', 'icon' => 'bi-buildings', 'routes' => ['admin.managed-properties.index', 'admin.properties.index'], 'active' => ['admin.managed-properties.*', 'admin.properties.*']],
@@ -471,7 +481,10 @@
             ['heading' => 'Property Services', 'items' => [
                 $multi('Maintenance Requests', 'bi-tools', $op, ['maintenance-requests', 'maintenance']),
             ]],
-            ['heading' => 'Account', 'items' => [$profileItem]],
+            ['heading' => 'Account', 'items' => [
+                ['label' => 'My Subscription', 'icon' => 'bi-patch-check', 'routes' => ['subscription.show'], 'active' => ['subscription.*']],
+                $profileItem,
+            ]],
         ];
     } elseif ($role === 'property_manager') {
         $mp = ['property-manager', 'manager'];
@@ -495,6 +508,7 @@
             ]],
             ['heading' => 'Service & Support', 'items' => [
                 $multi('Maintenance', 'bi-tools', $mp, ['maintenance-requests', 'maintenance']),
+                ['label' => 'My Subscription', 'icon' => 'bi-patch-check', 'routes' => ['subscription.show'], 'active' => ['subscription.*']],
                 $profileItem,
             ]],
         ];
@@ -545,6 +559,18 @@
                 $profileItem,
             ]],
         ];
+    } elseif ($role === 'field_staff') {
+        $navigation = [
+            ['heading' => 'Field Registration', 'items' => [
+                ['label' => 'Dashboard', 'icon' => 'bi-grid-1x2', 'routes' => ['field-staff.dashboard'], 'active' => ['field-staff.dashboard']],
+                ['label' => 'Register Owner', 'icon' => 'bi-person-badge', 'routes' => ['field-staff.owners.create'], 'active' => ['field-staff.owners.*']],
+                ['label' => 'Register Manager', 'icon' => 'bi-person-gear', 'routes' => ['field-staff.managers.create'], 'active' => ['field-staff.managers.*']],
+                ['label' => 'My Registrations', 'icon' => 'bi-list-check', 'routes' => ['field-staff.registrations'], 'active' => ['field-staff.registrations']],
+            ]],
+            ['heading' => 'Account', 'items' => [
+                ['label' => 'Change Password', 'icon' => 'bi-key', 'routes' => ['field-staff.password'], 'active' => ['field-staff.password*']],
+            ]],
+        ];
     } else {
         $navigation = [
             ['heading' => 'Explore Terra', 'items' => [
@@ -564,6 +590,10 @@
             ['label' => 'Documents', 'icon' => 'bi-folder2-open', 'routes' => ['documents.index'], 'active' => ['documents.*']],
             ['label' => 'Security & Language', 'icon' => 'bi-shield-lock', 'routes' => ['account.security'], 'active' => ['account.security*']],
         ]];
+        if ($role === 'field_staff') {
+            // Field staff only talk to Terra; no inspections or documents.
+            $commsGroup['items'] = array_values(array_filter($commsGroup['items'], fn ($i) => in_array($i['routes'][0], ['messages.index', 'notifications.index', 'account.security'], true)));
+        }
         array_splice($navigation, max(count($navigation) - 1, 1), 0, [$commsGroup]);
 
         // Operations tools for admins, owners and managers.
@@ -610,6 +640,8 @@
             ['label' => 'Register Owner', 'icon' => 'bi-person-badge', 'routes' => ['admin.owners.create']],
             ['label' => 'Add Manager', 'icon' => 'bi-person-gear', 'routes' => ['admin.managers.create']],
             ['label' => 'Add Tenant', 'icon' => 'bi-person-vcard', 'routes' => ['admin.tenants.create']],
+            ['label' => 'New Subscription Contract', 'icon' => 'bi-file-earmark-plus', 'routes' => ['admin.subscriptions.contracts.create']],
+            ['label' => 'Add Field Staff', 'icon' => 'bi-person-walking', 'routes' => ['admin.field-staff.create']],
             ['label' => 'Add Property', 'icon' => 'bi-building-add', 'routes' => ['admin.properties.create', 'admin.managed-properties.create']],
             ['label' => 'Record Payment', 'icon' => 'bi-cash-stack', 'routes' => ['admin.payments.create']],
             ['label' => 'Add Expense', 'icon' => 'bi-wallet2', 'routes' => ['admin.property-expenses.create']],
@@ -637,6 +669,10 @@
             ['label' => 'View Invoices', 'icon' => 'bi-receipt', 'routes' => ['accountant.rent-invoices.index', 'finance.rent-invoices.index', 'admin.rent-invoices.index']],
             ['label' => 'View Payments', 'icon' => 'bi-cash-stack', 'routes' => ['accountant.payments.index', 'finance.payments.index', 'admin.payments.index']],
             ['label' => 'Financial Reports', 'icon' => 'bi-graph-up-arrow', 'routes' => ['accountant.reports.index', 'finance.reports.index', 'admin.financial-reports.index']],
+        ],
+        'field_staff' => [
+            ['label' => 'Register Owner', 'icon' => 'bi-person-badge', 'routes' => ['field-staff.owners.create']],
+            ['label' => 'Register Manager', 'icon' => 'bi-person-gear', 'routes' => ['field-staff.managers.create']],
         ],
         default => [
             ['label' => 'Find a Rental', 'icon' => 'bi-house', 'routes' => ['rentals.index']],
@@ -1202,6 +1238,7 @@
 })();
 </script>
 
+@include('partials.intl-phone')
 @stack('scripts')
 
 </body>

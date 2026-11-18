@@ -666,7 +666,8 @@
         })();
     </script>
 
-    @stack('scripts')
+    @include('partials.intl-phone')
+@stack('scripts')
 
 </body>
 

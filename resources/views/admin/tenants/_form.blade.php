@@ -197,18 +197,18 @@
                         <label for="phone" class="tf-label"><span>Phone number<span class="req">*</span></span></label>
                         <div class="tf-input-wrap">
                             <i class="bi bi-telephone"></i>
-                            <input type="tel" id="phone" name="phone" maxlength="30" inputmode="tel" required
+                            <input type="tel" id="phone" name="phone" maxlength="30" inputmode="tel" required data-intl-phone
                                    class="form-control @error('phone') is-invalid @enderror"
                                    value="{{ $val('phone') }}" placeholder="+250 78X XXX XXX">
                         </div>
-                        @error('phone') <div class="tf-error">{{ $message }}</div> @else <div class="tf-hint">Use the +250 format or a local number starting with 07.</div> @enderror
+                        @error('phone') <div class="tf-error">{{ $message }}</div> @else <div class="tf-hint">Choose the country, then type the number. It is saved in international format.</div> @enderror
                     </div>
 
                     <div class="col-12 col-md-6">
                         <label for="alternative_phone" class="tf-label"><span>Alternative phone</span><span class="opt">Optional</span></label>
                         <div class="tf-input-wrap">
                             <i class="bi bi-telephone-plus"></i>
-                            <input type="tel" id="alternative_phone" name="alternative_phone" maxlength="30" inputmode="tel"
+                            <input type="tel" id="alternative_phone" name="alternative_phone" maxlength="30" inputmode="tel" data-intl-phone
                                    class="form-control @error('alternative_phone') is-invalid @enderror"
                                    value="{{ $val('alternative_phone') }}" placeholder="+250 7XX XXX XXX">
                         </div>
@@ -310,7 +310,7 @@
                         <label for="emergency_contact_phone" class="tf-label"><span>Contact phone</span><span class="opt">Optional</span></label>
                         <div class="tf-input-wrap">
                             <i class="bi bi-telephone"></i>
-                            <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone" maxlength="30" inputmode="tel"
+                            <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone" maxlength="30" inputmode="tel" data-intl-phone
                                    class="form-control @error('emergency_contact_phone') is-invalid @enderror"
                                    value="{{ $val('emergency_contact_phone') }}" placeholder="+250 7XX XXX XXX">
                         </div>
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateCounter();
 
     /* Light phone clean-up: keep digits, +, spaces */
-    document.querySelectorAll('input[type="tel"]').forEach(function (input) {
+    document.querySelectorAll('input[type="tel"]:not([data-intl-phone])').forEach(function (input) {
         input.addEventListener('input', function () {
             input.value = input.value.replace(/[^\d+\s-]/g, '');
         });

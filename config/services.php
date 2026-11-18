@@ -42,4 +42,10 @@ return [
         'log_channel' => env('SMS_LOG_CHANNEL', 'stack'),
     ],
 
+    // In-platform (browser) calls between Terra admins and subscribers.
+    // Any Jitsi Meet server works; self-host one for full control.
+    'calls' => [
+        'meet_url' => env('CALLS_MEET_URL', 'https://meet.jit.si'),
+    ],
+
 ];

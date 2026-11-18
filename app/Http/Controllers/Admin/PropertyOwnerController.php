@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Rules\InternationalPhone;
+use App\Support\Phone;
 use App\Http\Controllers\Controller;
 use App\Mail\OwnerAccountCreated;
 use App\Models\PropertyOwner;
@@ -75,9 +77,10 @@ class PropertyOwnerController extends Controller
         }
 
         $mailSent = $this->sendCredentials($owner, $password);
+        $this->registered($owner);
 
         return redirect()
-            ->route('admin.owners.index')
+            ->to($this->afterStoreUrl($owner))
             ->with('success', $mailSent
                 ? "Property owner created. Login credentials were emailed to {$owner->email}."
                 : 'Property owner created, but the credentials email could not be sent. '
@@ -107,6 +110,7 @@ class PropertyOwnerController extends Controller
                     $owner->user->forceFill([
                         'name' => $data['name'],
                         'email' => $data['email'],
+                        'phone' => $data['phone'] ?? null,
                     ])->save();
                 } elseif (! empty($data['email'])) {
                     // Legacy owner without a login yet: create one now.
@@ -171,7 +175,18 @@ class PropertyOwnerController extends Controller
         );
     }
 
-    private function validatedData(Request $request, ?PropertyOwner $owner = null): array
+    /** Where to go after registering an owner (the field staff portal overrides this). */
+    protected function afterStoreUrl(PropertyOwner $owner): string
+    {
+        return route('admin.owners.index');
+    }
+
+    /** Hook run after an owner account has been created. */
+    protected function registered(PropertyOwner $owner): void
+    {
+    }
+
+    protected function validatedData(Request $request, ?PropertyOwner $owner = null): array
     {
         $isRwanda = strcasecmp(trim((string) $request->input('country')), 'Rwanda') === 0;
         $provinces = config('rwanda.provinces', []);
@@ -193,11 +208,12 @@ class PropertyOwnerController extends Controller
 
         $emailRules[] = Rule::unique('users', 'email')->ignore($owner?->user_id);
 
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         return $request->validate([
             'owner_type' => ['required', Rule::in(['individual', 'company'])],
             'name' => ['required', 'string', 'max:255'],
             'email' => $emailRules,
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'national_id' => ['nullable', 'string', 'max:100'],
             'company_name' => [
                 Rule::requiredIf($request->input('owner_type') === 'company'),
@@ -221,7 +237,7 @@ class PropertyOwnerController extends Controller
         ]);
     }
 
-    private function createUserAccount(array $data, string $password): User
+    protected function createUserAccount(array $data, string $password): User
     {
         $attributes = [
             'name' => $data['name'],
@@ -249,7 +265,7 @@ class PropertyOwnerController extends Controller
         return $user;
     }
 
-    private function sendCredentials(PropertyOwner $owner, string $password, bool $reset = false): bool
+    protected function sendCredentials(PropertyOwner $owner, string $password, bool $reset = false): bool
     {
         try {
             Mail::to($owner->email)->send(new OwnerAccountCreated(
@@ -269,7 +285,7 @@ class PropertyOwnerController extends Controller
         }
     }
 
-    private function generatePassword(): string
+    protected function generatePassword(): string
     {
         // Readable, no ambiguous characters (0/O, 1/l/I).
         $alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -282,7 +298,7 @@ class PropertyOwnerController extends Controller
         return $password;
     }
 
-    private function generateOwnerNumber(): string
+    protected function generateOwnerNumber(): string
     {
         do {
             $number = 'OWN-' . now()->format('Ymd') . '-'

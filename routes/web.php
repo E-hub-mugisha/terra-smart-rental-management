@@ -734,3 +734,70 @@ Route::middleware('auth')->group(function () {
     });
     Route::get('/portfolio/map', [App\Http\Controllers\MapController::class, 'portfolio'])->name('portfolio.map');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Terra admin: subscribers, subscription contracts and field staff
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::controller(App\Http\Controllers\Admin\SubscriberController::class)->prefix('subscribers')->name('subscribers.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{subscriber}', 'show')->name('show');
+        Route::post('/{subscriber}/email', 'email')->middleware('throttle:20,1')->name('email');
+        Route::post('/{subscriber}/calls', 'logCall')->name('calls.store');
+        Route::post('/{subscriber}/calls/browser', 'startCall')->middleware('throttle:10,1')->name('calls.start');
+    });
+
+    Route::prefix('subscriptions')->name('subscriptions.')->group(function () {
+        Route::controller(App\Http\Controllers\Admin\SubscriptionContractController::class)->group(function () {
+            Route::get('/contracts', 'index')->name('contracts.index');
+            Route::get('/contracts/create', 'create')->name('contracts.create');
+            Route::post('/contracts', 'store')->name('contracts.store');
+            Route::get('/contracts/{contract}', 'show')->name('contracts.show');
+            Route::get('/contracts/{contract}/edit', 'edit')->name('contracts.edit');
+            Route::put('/contracts/{contract}', 'update')->name('contracts.update');
+            Route::post('/contracts/{contract}/transition', 'transition')->name('contracts.transition');
+            Route::post('/contracts/{contract}/invoices', 'issueInvoice')->name('contracts.invoices.store');
+            Route::post('/contracts/{contract}/payments', 'recordPayment')->name('contracts.payments.store');
+            Route::post('/invoices/{invoice}/void', 'voidInvoice')->name('invoices.void');
+        });
+        Route::controller(App\Http\Controllers\Admin\SubscriptionFinanceController::class)->group(function () {
+            Route::get('/invoices', 'invoices')->name('invoices');
+            Route::get('/payments', 'payments')->name('payments');
+            Route::get('/plans', 'plans')->name('plans');
+            Route::post('/plans', 'storePlan')->name('plans.store');
+            Route::put('/plans/{plan}', 'updatePlan')->name('plans.update');
+        });
+    });
+
+    Route::controller(App\Http\Controllers\Admin\FieldStaffController::class)->prefix('field-staff')->name('field-staff.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{fieldStaff}', 'show')->name('show');
+        Route::get('/{fieldStaff}/edit', 'edit')->name('edit');
+        Route::put('/{fieldStaff}', 'update')->name('update');
+        Route::post('/{fieldStaff}/toggle', 'toggle')->name('toggle');
+        Route::post('/{fieldStaff}/reset-password', 'resetPassword')->middleware('throttle:5,1')->name('reset-password');
+    });
+});
+
+/* Field staff portal: registration of owners and managers only. */
+Route::middleware(['auth', 'role:field_staff'])->prefix('field')->name('field-staff.')->group(function () {
+    Route::get('/', [App\Http\Controllers\FieldStaff\PortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/registrations', [App\Http\Controllers\FieldStaff\PortalController::class, 'registrations'])->name('registrations');
+    Route::get('/owners/create', [App\Http\Controllers\FieldStaff\OwnerRegistrationController::class, 'create'])->name('owners.create');
+    Route::post('/owners', [App\Http\Controllers\FieldStaff\OwnerRegistrationController::class, 'store'])->middleware('throttle:30,1')->name('owners.store');
+    Route::get('/managers/create', [App\Http\Controllers\FieldStaff\ManagerRegistrationController::class, 'create'])->name('managers.create');
+    Route::post('/managers', [App\Http\Controllers\FieldStaff\ManagerRegistrationController::class, 'store'])->middleware('throttle:30,1')->name('managers.store');
+    Route::get('/password', [App\Http\Controllers\FieldStaff\PortalController::class, 'password'])->name('password');
+    Route::put('/password', [App\Http\Controllers\FieldStaff\PortalController::class, 'updatePassword'])->middleware('throttle:10,1')->name('password.update');
+});
+
+/* Subscribers' own subscription page, and in-platform calls. */
+Route::middleware('auth')->group(function () {
+    Route::get('/my-subscription', [App\Http\Controllers\SubscriptionController::class, 'show'])->middleware('role:owner,manager')->name('subscription.show');
+    Route::get('/calls/{call}', [App\Http\Controllers\CallController::class, 'join'])->name('calls.join');
+    Route::post('/calls/{call}/end', [App\Http\Controllers\CallController::class, 'end'])->name('calls.end');
+});

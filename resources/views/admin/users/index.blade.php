@@ -22,6 +22,7 @@
         'accountant' => 'Accountant',
         'agent'   => 'Agent',
         'technician' => 'Technician',
+        'field_staff' => 'Field Staff',
     ];
 
     $roleColors = [
@@ -32,6 +33,7 @@
         'accountant' => 'role-manager',
         'agent'   => 'role-owner',
         'technician' => 'role-tenant',
+        'field_staff' => 'role-manager',
     ];
 
     $roleIcons = [
@@ -42,6 +44,7 @@
         'accountant' => 'bi-calculator',
         'agent'   => 'bi-person-badge',
         'technician' => 'bi-tools',
+        'field_staff' => 'bi-person-walking',
     ];
 
     // Admin routes that show the profile of each role.

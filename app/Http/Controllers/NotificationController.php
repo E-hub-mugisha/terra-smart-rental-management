@@ -15,7 +15,8 @@ class NotificationController extends Controller
         'maintenance' => ['Maintenance', ['maintenance']],
         'application' => ['Applications', ['application', 'vacancy']],
         'document' => ['Documents', ['document']],
-        'message' => ['Messages', ['message', 'announcement']],
+        'message' => ['Messages & calls', ['message', 'announcement', 'call']],
+        'subscription' => ['Subscription & accounts', ['subscription', 'registration']],
     ];
 
     public function index(Request $request)

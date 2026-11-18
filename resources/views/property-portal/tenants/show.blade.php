@@ -199,6 +199,15 @@
         </div>
 
         <div class="col-lg-7">
+            {{-- Documents & contracts --}}
+            @include('documents._profile-panel', [
+                'owner' => $tenant,
+                'ownerKey' => 'tenant',
+                'documents' => $tenant->documents()->with('uploader:id,name')->latest()->get(),
+                'canUpload' => true,
+                'heading' => 'Tenant documents & contracts',
+            ])
+
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h6 class="fw-bold mb-0">Lease history</h6>

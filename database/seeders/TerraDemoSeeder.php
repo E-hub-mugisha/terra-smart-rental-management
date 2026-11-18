@@ -6,6 +6,7 @@ use App\Models\AgentCommission;
 use App\Models\Building;
 use App\Models\Conversation;
 use App\Models\Document;
+use App\Models\FieldStaff;
 use App\Models\Floor;
 use App\Models\Inspection;
 use App\Models\Lease;
@@ -23,12 +24,18 @@ use App\Models\RentInvoice;
 use App\Models\RentPayment;
 use App\Models\RentPaymentAllocation;
 use App\Models\ServiceProvider;
+use App\Models\SubscriberCall;
+use App\Models\SubscriptionContract;
+use App\Models\SubscriptionInvoice;
+use App\Models\SubscriptionPayment;
+use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
 use App\Models\TenantApplication;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\ContractBuilder;
 use App\Services\InspectionService;
+use App\Support\Phone;
 use Carbon\Carbon;
 use Database\Seeders\Support\DemoImages;
 use Illuminate\Database\Eloquent\Model;
@@ -110,6 +117,7 @@ class TerraDemoSeeder extends Seeder
                 $this->contractsAndRequests();
                 $this->communication();
                 $this->rolesAndCommissions();
+                $this->subscriptions();
                 $this->recentActivity();
             });
         });
@@ -965,9 +973,10 @@ class TerraDemoSeeder extends Seeder
         return $prefix . '-D' . str_pad((string) ++$this->seq, $pad, '0', STR_PAD_LEFT);
     }
 
+    /** Demo numbers are stored the same way as real ones: E.164 (+2507...). */
     private function phone(string $p): string
     {
-        return preg_replace('/\D/', '', $p);
+        return Phone::e164($p) ?? preg_replace('/\D/', '', $p);
     }
 
     /** Rwandan national ID shape: 1 YYYY G NNNNNNN F CC (16 digits). Fictitious. */
@@ -1018,6 +1027,201 @@ class TerraDemoSeeder extends Seeder
         return $pdf . "trailer\n<< /Size " . (count($objects) + 1) . " /Root 1 0 R >>\nstartxref\n{$xref}\n%%EOF";
     }
 
+    /* ================================================================
+     |  Terra subscriptions, field staff and contract documents
+     * ================================================================ */
+
+    private function subscriptions(): void
+    {
+        $admin = $this->users['admin'];
+
+        // Field staff who signed some of the owners and managers up.
+        $field = [];
+        foreach ([['alice', 'Niyonsaba Alice', 'field', '0788 640 215', 'Kigali City', 'Gasabo'], ['olivier', 'Habimana Olivier', 'field.olivier', '0783 771 094', 'Northern Province', 'Musanze']] as $i => [$key, $name, $email, $phone, $region, $district]) {
+            $user = $this->user($name, $email, 'field_staff');
+            $user->forceFill(['phone' => $this->phone($phone)])->save();
+            FieldStaff::forceCreate([
+                'user_id' => $user->id, 'staff_number' => sprintf('FS-D%03d', $i + 1), 'phone' => $this->phone($phone),
+                'region' => $region, 'district' => $district, 'status' => 'active',
+                'last_active_at' => $this->today->copy()->subHours(3 + $i * 20), 'created_by' => $admin->id,
+                'created_at' => $this->today->copy()->subMonths(10), 'updated_at' => $this->today->copy()->subMonths(10),
+            ]);
+            $field[$key] = $user;
+        }
+        $this->users['field_alice'] = $field['alice'];
+        PropertyOwner::whereIn('user_id', [$this->users['owner_murekatete']->id, $this->users['owner_gasana']->id])
+            ->update(['created_by' => $field['alice']->id, 'created_at' => $this->today->copy()->subMonths(4)]);
+        PropertyOwner::where('user_id', $this->users['owner_ndayisaba']->id)->update(['created_by' => $field['olivier']->id, 'created_at' => $this->today->copy()->subMonths(7)]);
+        PropertyManager::where('user_id', $this->users['mgr_nkurunziza']->id)->update(['created_by' => $field['olivier']->id, 'created_at' => $this->today->copy()->subMonths(2)]);
+
+        // Login accounts carry the profile phone (E.164).
+        foreach (PropertyOwner::whereNotNull('user_id')->get() as $o) {
+            User::whereKey($o->user_id)->update(['phone' => $o->phone]);
+        }
+        foreach (PropertyManager::whereNotNull('user_id')->get() as $m) {
+            User::whereKey($m->user_id)->update(['phone' => $m->phone]);
+        }
+
+        $plans = [
+            'starter' => SubscriptionPlan::forceCreate(['name' => 'Starter', 'code' => 'starter', 'billing_cycle' => 'monthly', 'price' => 25000, 'currency' => 'RWF', 'max_properties' => 1, 'max_units' => 20, 'description' => 'One property, up to 20 units. Rent, leases, maintenance and tenant portal.', 'is_active' => true]),
+            'growth' => SubscriptionPlan::forceCreate(['name' => 'Growth', 'code' => 'growth', 'billing_cycle' => 'monthly', 'price' => 60000, 'currency' => 'RWF', 'max_properties' => 5, 'max_units' => 150, 'description' => 'Up to 5 properties. Adds inspections, contracts, reports and SMS alerts.', 'is_active' => true]),
+            'portfolio' => SubscriptionPlan::forceCreate(['name' => 'Portfolio', 'code' => 'portfolio', 'billing_cycle' => 'annual', 'price' => 650000, 'currency' => 'RWF', 'max_properties' => null, 'max_units' => null, 'description' => 'Unlimited properties for companies, billed yearly, with priority support.', 'is_active' => true]),
+        ];
+
+        // [user key, plan, status, start (months ago), term months, unpaid recent periods, auto renew]
+        $specs = [
+            ['owner_kayitesi', 'growth', 'active', 8, 12, 1, false],
+            ['owner_rugamba', 'portfolio', 'active', 5, 12, 0, true],
+            ['owner_ndayisaba', 'starter', 'active', 7, 12, 3, false],
+            ['owner_murekatete', 'starter', 'active', 11, 12, 0, false],
+            ['owner_gasana', 'growth', 'pending', 0, 12, 0, false],
+            ['mgr_mugisha', 'starter', 'active', 6, 12, 0, true],
+            ['mgr_uwamahoro', 'starter', 'expired', 14, 12, 0, false],
+            ['mgr_nkurunziza', 'starter', 'terminated', 2, 12, 1, false],
+        ];
+
+        $contracts = [];
+        foreach ($specs as $n => [$key, $planKey, $status, $ago, $term, $unpaid, $renew]) {
+            $plan = $plans[$planKey];
+            $user = $this->users[$key];
+            $start = $this->today->copy()->startOfMonth()->subMonths($ago);
+            if ($key === 'owner_murekatete') {
+                $start = $this->today->copy()->addDays(20)->subMonths(12)->addDay(); // expires in 20 days
+            }
+            $end = $start->copy()->addMonths($term)->subDay();
+            $contract = SubscriptionContract::forceCreate([
+                'contract_number' => 'SUB-' . $start->format('Y') . '-D' . str_pad((string) ($n + 1), 3, '0', STR_PAD_LEFT),
+                'user_id' => $user->id, 'subscription_plan_id' => $plan->id,
+                'title' => 'Terra ' . $plan->name . ' subscription agreement', 'start_date' => $start, 'end_date' => $end,
+                'billing_cycle' => $plan->billing_cycle, 'amount' => $plan->price, 'currency' => 'RWF', 'payment_due_days' => 7,
+                'status' => $status, 'auto_renew' => $renew,
+                'terms' => "1. Terra provides access to the platform for the properties covered by the plan.\n\n2. Fees are invoiced at the start of each billing cycle and are payable within 7 days.\n\n3. Either party may end the agreement with 30 days' written notice.",
+                'signed_at' => $status === 'pending' ? null : $start, 'activated_at' => $status === 'pending' ? null : $start,
+                'terminated_at' => $status === 'terminated' ? $this->today->copy()->subDays(9) : null,
+                'termination_reason' => $status === 'terminated' ? 'Manager moved to a company that already subscribes.' : null,
+                'created_by' => $admin->id, 'created_at' => $start->copy()->subDays(5), 'updated_at' => $start,
+            ]);
+            $contracts[$key] = $contract;
+            if ($status === 'pending') {
+                continue;
+            }
+
+            // Invoices for every started cycle up to today (or the contract end / termination).
+            $months = SubscriptionContract::CYCLES[$plan->billing_cycle];
+            $lastDay = $status === 'expired' ? $end : ($status === 'terminated' ? $this->today->copy()->subDays(9) : $this->today);
+            $periods = [];
+            for ($p = $start->copy(); $p->lte($lastDay) && $p->lte($end); $p->addMonths($months)) {
+                $periods[] = $p->copy();
+            }
+            foreach ($periods as $idx => $periodStart) {
+                $isUnpaid = $idx >= count($periods) - $unpaid;
+                $due = $periodStart->copy()->addDays(7);
+                $invoice = SubscriptionInvoice::forceCreate([
+                    'invoice_number' => 'SINV-' . $periodStart->format('Ym') . '-D' . str_pad((string) ++$this->seq, 4, '0', STR_PAD_LEFT),
+                    'subscription_contract_id' => $contract->id, 'user_id' => $user->id,
+                    'period_start' => $periodStart, 'period_end' => $periodStart->copy()->addMonths($months)->subDay()->min($end),
+                    'issue_date' => $periodStart, 'due_date' => $due, 'amount' => $plan->price, 'amount_paid' => 0,
+                    'currency' => 'RWF', 'status' => 'unpaid', 'created_at' => $periodStart, 'updated_at' => $periodStart,
+                ]);
+                if ($isUnpaid) {
+                    continue;
+                }
+                $paidAt = $periodStart->copy()->addDays(($idx * 3 + $n) % 7)->setTime(10 + $idx % 6, 15);
+                SubscriptionPayment::forceCreate([
+                    'reference' => ($n % 3 === 1 ? 'BK' : 'MP') . $paidAt->format('ymd') . str_pad((string) ($n * 37 + $idx), 4, '0', STR_PAD_LEFT),
+                    'subscription_invoice_id' => $invoice->id, 'subscription_contract_id' => $contract->id, 'user_id' => $user->id,
+                    'amount' => $plan->price, 'currency' => 'RWF', 'method' => $n % 3 === 1 ? 'bank_transfer' : 'mobile_money',
+                    'paid_at' => $paidAt, 'recorded_by' => $admin->id, 'created_at' => $paidAt, 'updated_at' => $paidAt,
+                ]);
+                $invoice->forceFill(['amount_paid' => $plan->price, 'status' => 'paid'])->save();
+            }
+        }
+
+        // Partial payment on Ndayisaba's oldest overdue invoice.
+        $oldest = $contracts['owner_ndayisaba']->invoices()->where('status', 'unpaid')->orderBy('period_start')->first();
+        if ($oldest) {
+            SubscriptionPayment::forceCreate([
+                'reference' => 'MP' . $oldest->due_date->format('ymd') . '9001', 'subscription_invoice_id' => $oldest->id,
+                'subscription_contract_id' => $oldest->subscription_contract_id, 'user_id' => $oldest->user_id, 'amount' => 10000,
+                'currency' => 'RWF', 'method' => 'mobile_money', 'paid_at' => $oldest->due_date->copy()->addDays(3)->setTime(16, 40),
+                'notes' => 'Part payment, promised the rest at month end.', 'recorded_by' => $admin->id,
+            ]);
+            $oldest->forceFill(['amount_paid' => 10000, 'status' => 'partial'])->save();
+        }
+
+        // Contact history.
+        $ndayisaba = $this->users['owner_ndayisaba'];
+        foreach ([
+            [$ndayisaba, 'phone', 'outbound', 'no_answer', null, 'Overdue subscription follow-up', null, 12],
+            [$ndayisaba, 'phone', 'outbound', 'answered', 260, 'Overdue subscription follow-up', 'Owner confirmed the invoices; will pay the balance after collecting rent on the 5th.', 10],
+            [$ndayisaba, 'email', 'outbound', 'sent', null, 'Reminder: overdue Terra subscription', "Dear Félix,\nThis is a reminder that two Terra subscription invoices are overdue. You can pay by MTN MoMo using the invoice number as reference.", 6],
+            [$this->users['owner_gasana'], 'browser', 'outbound', 'answered', 1140, 'Walk-through of the Growth plan', 'Demonstrated reports and inspections. Sending the agreement for signature.', 3],
+            [$this->users['owner_murekatete'], 'whatsapp', 'outbound', 'callback', null, 'Renewal before expiry', 'Asked to call back next week to discuss the Growth plan.', 1],
+        ] as [$u, $channel, $dir, $outcome, $secs, $subject, $notes, $daysAgo]) {
+            SubscriberCall::forceCreate([
+                'user_id' => $u->id, 'called_by' => $admin->id, 'direction' => $dir, 'channel' => $channel, 'phone' => $u->phone,
+                'outcome' => $outcome, 'duration_seconds' => $secs, 'subject' => $subject, 'notes' => $notes,
+                'called_at' => $this->today->copy()->subDays($daysAgo)->setTime(11, 20),
+            ]);
+        }
+
+        // Signed contracts as PDFs on owner and tenant profiles, and on subscription agreements.
+        $put = function ($owner, string $key, string $category, string $title, string $file, string $line, int $uploader) {
+            $path = "documents/{$key}/{$owner->getKey()}/{$file}";
+            Storage::disk(Document::DISK)->put($path, $this->simplePdf('DEMO DOCUMENT — ' . $title, $line));
+            $owner->documents()->forceCreate([
+                'category' => $category, 'title' => $title, 'path' => $path, 'original_name' => $file, 'mime_type' => 'application/pdf',
+                'size' => Storage::disk(Document::DISK)->size($path), 'uploaded_by' => $uploader, 'status' => 'not_required',
+            ]);
+        };
+        foreach (['owner_kayitesi', 'owner_rugamba', 'owner_ndayisaba'] as $key) {
+            $owner = PropertyOwner::where('user_id', $this->users[$key]->id)->first();
+            $put($owner, 'owner', 'management_agreement', 'Property management agreement', 'management-agreement.pdf', 'Agreement between ' . $owner->name . ' and Terra. Sample file only.', $admin->id);
+        }
+        foreach ($contracts as $key => $contract) {
+            if (in_array($contract->status, ['active', 'expired'], true)) {
+                $put($contract, 'subscription', 'subscription_agreement', 'Signed agreement ' . $contract->contract_number, 'signed-agreement.pdf', $contract->title . ' — sample signature page.', $admin->id);
+            }
+        }
+        // Field staff activity for the admin monitor.
+        $gasanaOwner = PropertyOwner::where('user_id', $this->users['owner_gasana']->id)->first();
+        $murekateteOwner = PropertyOwner::where('user_id', $this->users['owner_murekatete']->id)->first();
+        $ndayisabaOwner = PropertyOwner::where('user_id', $ndayisaba->id)->first();
+        foreach ([
+            [$field['alice'], 'created', $murekateteOwner, ['verification_status' => 'pending'], $this->today->copy()->subMonths(4)->setTime(10, 5)],
+            [$field['alice'], 'created', $gasanaOwner, ['verification_status' => 'pending'], $this->today->copy()->subMonths(4)->setTime(15, 40)],
+            [$field['olivier'], 'created', $ndayisabaOwner, ['verification_status' => 'pending'], $this->today->copy()->subMonths(7)->setTime(9, 30)],
+            [$field['olivier'], 'login', $field['olivier'], null, now()->subDay()->setTime(8, 2)],
+            [$field['alice'], 'login', $field['alice'], null, now()->subHours(3)],
+        ] as [$actor, $event, $subject, $new, $when]) {
+            \App\Models\AuditLog::forceCreate([
+                'user_id' => $actor->id, 'event' => $event, 'auditable_type' => $subject::class, 'auditable_id' => $subject->getKey(),
+                'new_values' => $new, 'ip_address' => '41.186.' . mt_rand(10, 90) . '.' . mt_rand(2, 250),
+                'user_agent' => 'Mozilla/5.0 (Android; Demo data)', 'created_at' => $when,
+            ]);
+        }
+
+        // Subscription alerts in the bell.
+        $alert = function (User $u, string $category, string $title, string $message, ?string $url, string $tone, int $hoursAgo) {
+            DB::table('notifications')->insert([
+                'id' => (string) Str::uuid(), 'type' => \App\Notifications\TerraAlert::class, 'notifiable_type' => User::class, 'notifiable_id' => $u->id,
+                'data' => json_encode(['category' => $category, 'title' => $title, 'message' => $message, 'url' => $url,
+                    'icon' => \App\Notifications\TerraAlert::iconFor($category), 'tone' => $tone, 'context' => []]),
+                'read_at' => null, 'created_at' => now()->subHours($hoursAgo), 'updated_at' => now()->subHours($hoursAgo),
+            ]);
+        };
+        $alert($ndayisaba, 'subscription', 'Subscription payment overdue', 'Two Terra subscription invoices are overdue (RWF 65,000). Please pay to keep your account active.', '/my-subscription', 'danger', 30);
+        $alert($this->users['owner_gasana'], 'subscription', 'Your Terra subscription agreement is ready', 'Agreement ' . $contracts['owner_gasana']->contract_number . ' (Growth plan) is waiting for your signature.', '/my-subscription', 'info', 50);
+        $alert($admin, 'registration', 'New owner registered in the field', 'Niyonsaba Alice registered Gasana Real Estate Ltd as a property owner.', '/admin/owners/' . $gasanaOwner->id, 'info', 20);
+
+        foreach ($this->leases as $lease) {
+            if ($lease->status === 'active' && $lease->tenant) {
+                $put($lease->tenant, 'tenant', 'tenancy_contract', 'Signed tenancy contract ' . $lease->lease_number, 'tenancy-contract.pdf', 'Tenancy contract for ' . $lease->tenant->full_name . '. Sample file only.', $this->managerFor($lease->unit)->id);
+                break;
+            }
+        }
+    }
+
     private function printCredentials(): void
     {
         if (! $this->command) {
@@ -1036,6 +1240,7 @@ class TerraDemoSeeder extends Seeder
             ['Accountant', 'accountant@' . self::DOMAIN, 'Finance workspace & reports'],
             ['Agent', 'agent@' . self::DOMAIN, 'Assigned properties & commissions'],
             ['Technician', 'technician@' . self::DOMAIN, 'Kigali Plumbing — assigned jobs'],
+            ['Field staff', 'field@' . self::DOMAIN, 'Register owners & managers; nothing else'],
         ]);
     }
 

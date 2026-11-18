@@ -96,12 +96,12 @@
 <section class="cover">
   <div class="brand">TERRA · REAL ESTATE LTD</div>
   <h1>Terra Property Management System</h1>
-  <div class="sub">Training &amp; user guide for administrators, landlords, property managers, tenants and service partners</div>
+  <div class="sub">Training &amp; user guide for administrators, field staff, landlords, property managers, tenants and service partners</div>
   <div class="rule"></div>
   <img class="shot" src="img/public-property.jpg" alt="">
   <svg class="hills" viewBox="0 0 800 200" preserveAspectRatio="none"><path d="M0 120 Q100 60 200 110 T400 100 T600 90 T800 110 V200 H0Z" fill="#ffffff"/><path d="M0 150 Q120 100 260 150 T520 140 T800 150 V200 H0Z" fill="#ffffff"/></svg>
   <div class="meta">
-    Version 1.0 · November 2026<br>
+    Version 1.1 · November 2026<br>
     Covers the web platform and the screens used in day-to-day operations<br>
     Screens shown use the Rwandan demo dataset (fictitious people and properties)
   </div>
@@ -114,18 +114,20 @@
     <div><b>1</b>Getting started</div>
     <div><b>2</b>The rental lifecycle at a glance</div>
     <div><b>3</b>Terra administrators</div>
-    <div><b>4</b>Landlords &amp; property managers</div>
-    <div><b>5</b>Leases from application to activation</div>
-    <div><b>6</b>Rent, payments, receipts &amp; ledger</div>
-    <div><b>7</b>Maintenance &amp; service providers</div>
-    <div><b>8</b>Move-in &amp; move-out inspections</div>
-    <div><b>9</b>Communication &amp; notifications</div>
-    <div><b>10</b>Tenants</div>
-    <div><b>11</b>Accountants, agents &amp; technicians</div>
-    <div><b>12</b>Reports, maps &amp; documents</div>
-    <div><b>13</b>Security, privacy &amp; good practice</div>
-    <div><b>14</b>Hands-on training exercises</div>
-    <div><b>15</b>Quick reference &amp; troubleshooting</div>
+    <div><b>4</b>Subscribers, contracts &amp; billing</div>
+    <div><b>5</b>Field staff</div>
+    <div><b>6</b>Landlords &amp; property managers</div>
+    <div><b>7</b>Leases from application to activation</div>
+    <div><b>8</b>Rent, payments, receipts &amp; ledger</div>
+    <div><b>9</b>Maintenance &amp; service providers</div>
+    <div><b>10</b>Move-in &amp; move-out inspections</div>
+    <div><b>11</b>Communication &amp; notifications</div>
+    <div><b>12</b>Tenants</div>
+    <div><b>13</b>Accountants, agents &amp; technicians</div>
+    <div><b>14</b>Reports, maps &amp; documents</div>
+    <div><b>15</b>Security, privacy &amp; good practice</div>
+    <div><b>16</b>Hands-on training exercises</div>
+    <div><b>17</b>Quick reference &amp; troubleshooting</div>
     <div><b>A</b>Appendix: preparing a demo environment</div>
   </div>
 
@@ -133,8 +135,8 @@
   <p>Terra brings the whole rental relationship into one place: listing a property, choosing a tenant, signing the lease, collecting rent, fixing problems, renewing and finally moving out. This guide explains each part of the platform from the point of view of the person who uses it, with real screens from the system.</p>
   <p>Use it in three ways:</p>
   <ul>
-    <li><strong>As a training course</strong> — read sections 1–2, then the section for your role, then complete the exercises in section 14 with the demo accounts.</li>
-    <li><strong>As a reference</strong> — section 15 lists every status, alert and common question.</li>
+    <li><strong>As a training course</strong> — read sections 1–2, then the section for your role, then complete the exercises in section 16 with the demo accounts.</li>
+    <li><strong>As a reference</strong> — section 17 lists every status, alert and common question.</li>
     <li><strong>For demonstrations</strong> — the demo accounts are prepared so every workflow has something to show.</li>
   </ul>
   <div class="note"><strong>About the screenshots</strong>All names, phone numbers, ID numbers, properties and amounts in this guide come from the demo dataset. They are realistic for Rwanda but fictitious. Property photos are illustrations marked “Demo image”.</div>
@@ -148,7 +150,8 @@
   <h2>Who uses Terra</h2>
   <table>
     <tr><th style="width:24%">Role</th><th>What they do in Terra</th></tr>
-    <tr><td><strong>Terra administrator</strong></td><td>Runs the platform: users and roles, all properties, verification of service providers, audit log, platform monitoring.</td></tr>
+    <tr><td><strong>Terra administrator</strong></td><td>Runs the platform: users and roles, all properties, verification of service providers, audit log, platform monitoring — and Terra’s own business: subscribers, subscription contracts, billing and field staff.</td></tr>
+    <tr><td><strong>Field staff</strong></td><td>Terra’s agents on the ground. They register property owners and managers they meet and can do nothing else — no admin, finance, property or settings pages.</td></tr>
     <tr><td><strong>Property owner (landlord)</strong></td><td>Sees and manages their own properties, tenants, leases, rent, expenses, maintenance and reports.</td></tr>
     <tr><td><strong>Property manager</strong></td><td>Manages properties assigned by Terra on behalf of owners — the main day-to-day operator.</td></tr>
     <tr><td><strong>Tenant</strong></td><td>Applies for homes, accepts the lease, pays rent, reports problems, talks to the manager, keeps receipts.</td></tr>
@@ -161,7 +164,7 @@
   <ol class="steps">
     <li>Open the Terra web address and choose <strong>Sign in</strong> (top right).</li>
     <li>Enter your email and password. New owners, managers and tenants created by staff receive their sign-in details by email; change the password after the first sign-in.</li>
-    <li>If <em>two-step sign-in</em> is on for your account, Terra emails you a 6-digit code — enter it to finish signing in (see section 13).</li>
+    <li>If <em>two-step sign-in</em> is on for your account, Terra emails you a 6-digit code — enter it to finish signing in (see section 15).</li>
     <li>You land on your own dashboard. The left menu shows only what your role can use.</li>
   </ol>
 
@@ -171,6 +174,8 @@
     <div class="card"><h4>Top bar</h4><strong>Quick search</strong> (Ctrl&nbsp;K) to jump to any page, the language switch (EN / RW / FR), the <strong>messages</strong> icon and the <strong>bell</strong> for alerts, and <strong>Quick actions</strong>.</div>
     <div class="card"><h4>Language</h4>Choose English, Kinyarwanda or French from the top bar or <em>Security &amp; Language</em>. Your choice is remembered on every device.</div>
     <div class="card"><h4>Phones &amp; tablets</h4>Pages adapt to phone screens. The menu folds behind the ☰ button.</div>
+    <div class="card"><h4>Phone numbers</h4>Every phone field has a country picker with the dialling code (Rwanda is pre-selected). Type the number as you would dial it locally — Terra checks it is valid for that country and saves it in international form, e.g. <code>+250788123456</code>.</div>
+    <div class="card"><h4>My subscription</h4>Owners and managers find their Terra agreement, invoices and payments under <em>Account → My Subscription</em> (section 4).</div>
   </div>
 
   <h2>Demo accounts</h2>
@@ -188,6 +193,8 @@
     <tr><td><code>accountant@terra-demo.test</code></td><td>Accountant</td><td>Finance workspace and reports</td></tr>
     <tr><td><code>agent@terra-demo.test</code></td><td>Agent</td><td>Assigned properties and commissions</td></tr>
     <tr><td><code>technician@terra-demo.test</code></td><td>Technician</td><td>Kigali Plumbing Services — assigned jobs</td></tr>
+    <tr><td><code>field@terra-demo.test</code></td><td>Field staff</td><td>Niyonsaba Alice — registers owners &amp; managers; blocked from everything else</td></tr>
+    <tr><td><code>owner.ndayisaba@terra-demo.test</code></td><td>Owner</td><td>Ndayisaba Félix — Terra subscription with RWF 65,000 overdue</td></tr>
   </table>
   <div class="warn"><strong>Demo only</strong>Never load the demo dataset on the live platform. Demo accounts use the reserved <code>.test</code> domain and cannot receive email.</div>
 </section>
@@ -248,17 +255,118 @@
     <figcaption>Audit log: filter by person, event, record type or date. Updates show the old value crossed out and the new value in green.</figcaption></figure>
 </section>
 
-<!-- ============================ 4 MANAGERS ============================ -->
+<!-- ============================ 6 MANAGERS ============================ -->
+<!-- ============================ 4 SUBSCRIBERS ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">4</span><h1>Landlords &amp; property managers</h1></div>
+  <div class="section-head"><span class="num">4</span><h1>Subscribers, contracts &amp; billing</h1></div>
+  <p class="lead">Property owners and managers are Terra’s customers. Administrators manage their subscription agreements, bill them, follow up payments and stay in touch — all under <em>Subscribers &amp; Billing</em>.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:92mm" src="img/admin-subscribers.jpg" alt=""></div>
+    <figcaption>Subscribers dashboard: every owner and manager with subscription status, end date, outstanding and overdue balance, last payment and one-click contact buttons.</figcaption></figure>
+  <div class="cols">
+    <div class="card"><h4>Reading the dashboard</h4>The tiles show active and pending contracts, contracts expiring in 30 days, money outstanding and overdue, and what was collected this month. Click a tile to open the matching list. The table puts subscribers who are behind at the top.</div>
+    <div class="card"><h4>Filters</h4>Search by name, email or phone; filter owners or managers, by subscription status (active, pending, expired, terminated, no contract) and by billing (overdue, has balance, paid up).</div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">The subscriber profile &amp; staying in touch</h2>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:72mm" src="img/admin-subscriber-profile.jpg" alt=""></div>
+    <figcaption>A subscriber profile: status, who registered them, totals, and tabs for contracts, invoices, payments, contact history, documents and profile.</figcaption></figure>
+  <table>
+    <tr><th style="width:24%">Button</th><th>What happens</th></tr>
+    <tr><td><strong>Call</strong> / <strong>WhatsApp</strong></td><td>Opens your phone or WhatsApp with the subscriber’s number. Afterwards use <strong>Log call</strong> to record the outcome (answered, no answer, busy, voicemail, call back), duration and notes.</td></tr>
+    <tr><td><strong>In-platform call</strong></td><td>Starts a private audio/video call in the browser. The subscriber gets an “Incoming call from Terra” alert with a <em>Join call</em> button. When you finish, choose <strong>End call &amp; save</strong> and the call is added to the contact history.</td></tr>
+    <tr><td><strong>Message</strong></td><td>Opens a Terra conversation with the subscriber (see section 11).</td></tr>
+    <tr><td><strong>Email</strong></td><td>Write a subject and message; Terra emails it from the platform, replies come back to you, and a copy can appear in the subscriber’s notifications. Every email is kept in the contact history.</td></tr>
+  </table>
+  <div class="tip"><strong>One history for the whole team</strong>Calls, emails and in-platform calls all appear under <em>Contact history</em>, so the next colleague can see what was promised and when.</div>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">Creating a subscription contract</h2>
+  <ol class="steps">
+    <li>Open <em>Subscription Contracts → New contract</em>, or <strong>New contract</strong> on a subscriber’s profile.</li>
+    <li>Choose the subscriber and a <strong>plan</strong> (Starter, Growth, Portfolio…). The plan fills in the fee and billing cycle; you can change them for a custom deal.</li>
+    <li>Set the start date, end date (empty = open-ended), payment terms in days, and <em>auto-renew</em> if the agreement continues automatically.</li>
+    <li>Check the terms text and the summary on the right (fee, term, total value).</li>
+    <li>Save. The contract is <span class="badge b-amber">Pending</span> until it is signed. If it is already signed, tick <em>activate it now</em>.</li>
+    <li>On the contract page, upload the signed agreement as a PDF under <em>Signed agreement</em>.</li>
+  </ol>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:82mm" src="img/admin-contract-form.jpg" alt=""></div>
+    <figcaption>The contract form with plan presets and a live summary of the contract value.</figcaption></figure>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">Status, invoices and payments</h2>
+  <div class="flow"><span class="o">Pending</span><i>→</i><span class="g">Active</span><i>→</i><span>Expired</span><i>or</i><span>Terminated</span></div>
+  <ul>
+    <li><strong>Activate</strong> when signed: Terra issues the invoices that are already due, one per billing cycle.</li>
+    <li>Every morning Terra issues the next invoices, expires contracts that reached their end date (or renews them if <em>auto-renew</em> is on), and reminds subscribers 30 days before expiry and when an invoice is overdue.</li>
+    <li><strong>Renew</strong> extends the end date by the months you choose. <strong>Terminate</strong> needs a reason; unpaid invoices for future periods are voided automatically.</li>
+  </ul>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:74mm" src="img/admin-subscription-contract.jpg" alt=""></div>
+    <figcaption>A contract page: status bar, invoices, payments, the record-payment form and the signed agreement.</figcaption></figure>
+  <div class="cols">
+    <div class="card"><h4>Recording a payment</h4>On the contract page fill in <em>Record a payment</em>: amount, method (mobile money, bank transfer, card, cash), reference and date. Leave <em>Apply to</em> on “oldest open invoices first” and Terra settles the oldest bills first. The subscriber gets a confirmation.</div>
+    <div class="card"><h4>Outstanding &amp; Overdue</h4>Lists open invoices across all subscribers, with overdue amounts grouped by age (1–30, 31–60, 61–90, 90+ days). <em>Transactions</em> lists every payment and exports to CSV for accounting.</div>
+  </div>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:40mm" src="img/admin-subscription-overdue.jpg" alt=""></div>
+    <figcaption>Outstanding &amp; overdue: the ageing tiles show how long money has been owed.</figcaption></figure>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">What the subscriber sees</h2>
+  <p>Owners and managers open <em>Account → My Subscription</em> to see their current agreement, balance, overdue amount, invoices, payment history, the signed agreement PDF and how to pay. A red banner appears when something is overdue.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:84mm" src="img/owner-subscription.jpg" alt=""></div>
+    <figcaption>My Subscription for an owner with two overdue invoices.</figcaption></figure>
+  <h3>Plans</h3>
+  <p><em>Subscribers &amp; Billing → Plans</em> lists the packages offered — price, billing cycle and limits. Retire a plan by switching off <em>Offered to new subscribers</em>; existing contracts keep their terms.</p>
+</section>
+
+<!-- ============================ 5 FIELD STAFF ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">5</span><h1>Field staff</h1></div>
+  <p class="lead">Field staff sign up landlords and property managers in the field. Their account can only register people — everything else in Terra is closed to them.</p>
+  <h3>Creating a field staff account (administrators)</h3>
+  <ol class="steps">
+    <li><em>People &amp; Access → Field Staff → Add field staff</em>.</li>
+    <li>Enter the name, email, phone (with country) and the area they cover.</li>
+    <li>Save. Terra emails the staff member a temporary password; ask them to change it after signing in.</li>
+  </ol>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:48mm" src="img/field-dashboard.jpg" alt=""></div>
+    <figcaption>The field staff dashboard: two big buttons, today’s and this month’s registrations, and the latest people registered.</figcaption></figure>
+  <h3>Registering an owner or manager (field staff)</h3>
+  <ol class="steps">
+    <li>Choose <strong>Register a property owner</strong> or <strong>Register a property manager</strong>.</li>
+    <li>Fill in the details with the person. For the phone number pick the country, then type the number — Terra rejects numbers that are not valid for that country.</li>
+    <li>Save. The new owner or manager receives their own Terra login by email. Owners start as <span class="badge b-amber">Pending review</span>; an administrator verifies them, and administrators are alerted to every field registration.</li>
+  </ol>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:52mm" src="img/field-register-owner.jpg" alt=""></div>
+    <figcaption>Registering an owner. The phone field shows the country flag and dialling code.</figcaption></figure>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">Monitoring field staff (administrators)</h2>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:56mm" src="img/admin-field-staff.jpg" alt=""></div>
+    <figcaption>Field staff list: owners and managers registered by each person, this month’s total and when they were last active.</figcaption></figure>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:66mm" src="img/admin-field-staff-profile.jpg" alt=""></div>
+    <figcaption>A field staff profile: registrations per month, everyone they registered (with links to the profile and subscription) and recent activity.</figcaption></figure>
+  <div class="cols">
+    <div class="card"><h4>What field staff can open</h4>Their dashboard, the two registration forms, <em>My Registrations</em>, messages and notifications, language and two-step sign-in, and <em>Change Password</em>.</div>
+    <div class="card"><h4>What is blocked</h4>Admin pages, properties, tenants, leases, finance, reports, documents and settings. Opening any of them shows “not allowed”, even with a copied link. <strong>Suspend</strong> signs the person out immediately.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><span class="num">6</span><h1>Landlords &amp; property managers</h1></div>
   <p class="lead">Owners and managers use the same workspace. Owners see the properties they own; managers see the properties Terra assigned to them.</p>
   <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:56mm" src="img/manager-dashboard.jpg" alt=""></div>
     <figcaption>Operations dashboard: occupancy, rent collected, outstanding balances and what needs attention.</figcaption></figure>
   <h3>A typical day</h3>
   <ol class="steps">
     <li>Check the <strong>bell</strong> and <strong>messages</strong> — new applications, maintenance requests, accepted leases, renewal requests.</li>
-    <li>Handle <strong>maintenance</strong>: assign new requests to a service provider (section 7).</li>
-    <li>Review <strong>applications</strong> and move leases forward (section 5).</li>
+    <li>Handle <strong>maintenance</strong>: assign new requests to a service provider (section 9).</li>
+    <li>Review <strong>applications</strong> and move leases forward (section 7).</li>
     <li>Look at <strong>outstanding rent</strong> (<em>Reports → Outstanding rent</em>) and contact tenants in arrears. Terra already sends automatic reminders.</li>
     <li>Record <strong>expenses</strong> (security, cleaning, REG electricity, WASAC water, repairs) so reports show true net income.</li>
   </ol>
@@ -272,9 +380,9 @@
   <div class="tip"><strong>Tip — key features sell units</strong>Short lines such as “Balcony with city view” or “Borehole water backup” appear on the public unit card. Three or four is ideal.</div>
 </section>
 
-<!-- ============================ 5 LEASES ============================ -->
+<!-- ============================ 7 LEASES ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">5</span><h1>Leases from application to activation</h1></div>
+  <div class="section-head"><span class="num">7</span><h1>Leases from application to activation</h1></div>
   <p class="lead">Every lease follows the same five stages. The <strong>Lease workflow</strong> panel on the lease page always shows the next step.</p>
   <div class="flow">
     <span>Draft</span><i>→ Send to tenant →</i><span class="o">Awaiting tenant acceptance</span><i>→ Tenant accepts →</i><span>Awaiting activation</span><i>→ Activate →</i><span class="g">Active</span>
@@ -304,7 +412,7 @@
   <h2>Renewals and move-out notices</h2>
   <div class="cols">
     <div class="card"><h4>Renewal</h4>The tenant asks to renew (6, 12, 24 or 36 months) — or the manager offers first. The manager sends the new end date and rent; when the tenant accepts, the lease is extended automatically.</div>
-    <div class="card"><h4>Move-out notice</h4>The tenant gives a move-out date from their lease page. The manager acknowledges it and plans the move-out inspection (section 8).</div>
+    <div class="card"><h4>Move-out notice</h4>The tenant gives a move-out date from their lease page. The manager acknowledges it and plans the move-out inspection (section 10).</div>
   </div>
   <p>Terra reminds both sides <strong>60, 30 and 7 days</strong> before a lease ends.</p>
 
@@ -316,9 +424,9 @@
   </ol>
 </section>
 
-<!-- ============================ 6 RENT ============================ -->
+<!-- ============================ 8 RENT ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">6</span><h1>Rent, payments, receipts &amp; ledger</h1></div>
+  <div class="section-head"><span class="num">8</span><h1>Rent, payments, receipts &amp; ledger</h1></div>
   <p class="lead">Invoices are created every month automatically. Tenants pay online with Mobile Money or by bank; managers can also record payments received another way.</p>
   <h3>How a tenant pays online</h3>
   <ol class="steps">
@@ -350,9 +458,9 @@
   </table>
 </section>
 
-<!-- ============================ 7 MAINTENANCE ============================ -->
+<!-- ============================ 9 MAINTENANCE ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">7</span><h1>Maintenance &amp; service providers</h1></div>
+  <div class="section-head"><span class="num">9</span><h1>Maintenance &amp; service providers</h1></div>
   <div class="flow"><span>Submitted</span><i>→</i><span>Assigned</span><i>→</i><span>Scheduled / In progress</span><i>→</i><span class="o">Resolved</span><i>→ tenant confirms →</i><span class="g">Closed</span></div>
   <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:100mm" src="img/manager-maintenance.jpg" alt=""></div>
     <figcaption>A maintenance request seen by the manager. The Service provider panel lists providers; ★ marks those offering this type of work, ✓ those verified by Terra.</figcaption></figure>
@@ -365,9 +473,9 @@
   <div class="tip"><strong>Build your network</strong><em>Tools → Service Providers</em>: add plumbers, electricians, cleaners and others with their categories. Tick “Give them a technician login” so they can receive and update jobs themselves.</div>
 </section>
 
-<!-- ============================ 8 INSPECTIONS ============================ -->
+<!-- ============================ 10 INSPECTIONS ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">8</span><h1>Move-in &amp; move-out inspections</h1></div>
+  <div class="section-head"><span class="num">10</span><h1>Move-in &amp; move-out inspections</h1></div>
   <p class="lead">A careful move-in record protects both sides and makes the deposit refund quick and fair.</p>
   <h3>Move-in</h3>
   <ol class="steps">
@@ -382,9 +490,9 @@
     <figcaption>A completed move-out: two items worse than at move-in, RWF 75,000 deducted, RWF 505,000 refunded with the MTN MoMo reference.</figcaption></figure>
 </section>
 
-<!-- ============================ 9 COMMUNICATION ============================ -->
+<!-- ============================ 11 COMMUNICATION ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">9</span><h1>Communication &amp; notifications</h1></div>
+  <div class="section-head"><span class="num">11</span><h1>Communication &amp; notifications</h1></div>
   <p class="lead">Messages replace scattered WhatsApp threads: every conversation is kept with the property and unit it concerns.</p>
   <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:68mm" src="img/manager-messages.jpg" alt=""></div>
     <figcaption>Messages: the inbox on the left, the conversation on the right, linked to Kacyiru Heights, Unit A201.</figcaption></figure>
@@ -393,14 +501,14 @@
     <div class="card"><h4>Announcements</h4><em>New announcement</em>: choose a property and every current tenant receives it — water cuts, security notices, drills. Tenants can read but not reply.</div>
   </div>
   <h3>Notifications</h3>
-  <p>The bell shows unread alerts; <em>Notifications</em> lists them all with filters (rent, payments, leases &amp; inspections, maintenance, applications, documents, messages). Alerts are also emailed unless the person turns email off. SMS is ready to switch on once Terra signs a gateway contract.</p>
+  <p>The bell shows unread alerts; <em>Notifications</em> lists them all with filters (rent, payments, leases &amp; inspections, maintenance, applications, documents, messages &amp; calls, subscription &amp; accounts). Alerts are also emailed unless the person turns email off. SMS is ready to switch on once Terra signs a gateway contract.</p>
   <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:50mm" src="img/tenant-notifications.jpg" alt=""></div>
     <figcaption>A tenant’s notification centre, with the email preference on the right.</figcaption></figure>
 </section>
 
-<!-- ============================ 10 TENANTS ============================ -->
+<!-- ============================ 12 TENANTS ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">10</span><h1>Tenants</h1></div>
+  <div class="section-head"><span class="num">12</span><h1>Tenants</h1></div>
   <p class="lead">Tenants manage their whole tenancy from a phone: lease, rent, receipts, repairs and messages.</p>
   <h3>Finding a home</h3>
   <p>The public website lists properties with photos, prices and available units, and a map of Rwanda for searching by location.</p>
@@ -431,9 +539,9 @@
     <figcaption>When a repair is marked resolved, the tenant confirms it and gives a rating — or reports that it is still a problem.</figcaption></figure>
 </section>
 
-<!-- ============================ 11 OTHER ROLES ============================ -->
+<!-- ============================ 13 OTHER ROLES ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">11</span><h1>Accountants, agents &amp; technicians</h1></div>
+  <div class="section-head"><span class="num">13</span><h1>Accountants, agents &amp; technicians</h1></div>
   <h3>Accountant / finance officer</h3>
   <p>The <em>Finance</em> workspace shows this month’s billed and collected rent, collection rate, outstanding and overdue amounts, expenses and net income for the properties assigned to the accountant, plus lists of payments, invoices and expenses with receipts and ledgers. Access is read-only.</p>
   <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:68mm" src="img/accountant-finance.jpg" alt=""></div><figcaption>Finance overview for an accountant.</figcaption></figure>
@@ -453,9 +561,9 @@
   </div>
 </section>
 
-<!-- ============================ 12 REPORTS ============================ -->
+<!-- ============================ 14 REPORTS ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">12</span><h1>Reports, maps &amp; documents</h1></div>
+  <div class="section-head"><span class="num">14</span><h1>Reports, maps &amp; documents</h1></div>
   <h3>Reports</h3>
   <p><em>Tools → Reports</em> has twelve reports in four groups. Choose a property and dates, then export to <strong>Excel</strong> or <strong>PDF</strong>.</p>
   <table>
@@ -470,11 +578,22 @@
     <div class="card"><h4>Portfolio map</h4><em>Tools → Portfolio Map</em> shows your properties coloured by occupancy. Add GPS coordinates on the property form for properties that are missing.</div>
     <div class="card"><h4>Documents</h4>Title deeds, signed contracts, insurance and tenant IDs are stored privately. Only people connected to that property, lease or tenant can open them.</div>
   </div>
+  <h3>Contracts on owner and tenant profiles</h3>
+  <p>Owner and tenant profiles have a <em>Documents &amp; contracts</em> panel. Staff choose the type (owner agreement, management agreement, tenancy contract…), add a title and upload the signed <strong>PDF</strong> — contracts must be PDF, up to 10&nbsp;MB. Everyone allowed can <strong>view</strong> or <strong>download</strong>; removing a file keeps a copy in the audit trail.</p>
+  <figure><div class="frame"><div class="bar"></div><img src="img/tenant-contract-documents.jpg" alt=""></div>
+    <figcaption>A tenant’s documents panel with the signed tenancy contract and ID.</figcaption></figure>
+  <table class="compact">
+    <tr><th style="width:30%">Who</th><th>Can do</th></tr>
+    <tr><td>Administrators</td><td>Upload, view and remove contracts on any owner or tenant profile.</td></tr>
+    <tr><td>Owners &amp; managers</td><td>Upload and manage contracts for tenants of their properties.</td></tr>
+    <tr><td>The owner or tenant</td><td>View and download their own contracts under <em>Documents</em>. They cannot upload or change contracts.</td></tr>
+    <tr><td>Everyone else</td><td>No access.</td></tr>
+  </table>
 </section>
 
-<!-- ============================ 13 SECURITY ============================ -->
+<!-- ============================ 15 SECURITY ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">13</span><h1>Security, privacy &amp; good practice</h1></div>
+  <div class="section-head"><span class="num">15</span><h1>Security, privacy &amp; good practice</h1></div>
   <div class="cols">
     <div class="card"><h4>Two-step sign-in</h4><em>Security &amp; Language → Two-step sign-in → Turn on</em>. After the password, a 6-digit code is emailed. Required practice for administrators, owners, managers and accountants.</div>
     <div class="card"><h4>Only what you need</h4>Every person sees only the properties, tenants and documents connected to them. Tenants never see other tenants’ information.</div>
@@ -488,13 +607,15 @@
     <li>Confirm offline payments only after checking the money has arrived.</li>
     <li>Record expenses every month so net income in reports is accurate.</li>
     <li>Use messages and announcements instead of private WhatsApp groups, so there is a shared history.</li>
+    <li>Suspend field staff accounts as soon as someone leaves; check <em>Field Staff</em> for accounts that have not been active for weeks.</li>
+    <li>Upload signed contracts as PDF on the profile instead of keeping paper copies in a drawer.</li>
     <li>Sign out on shared computers.</li>
   </ul>
 </section>
 
-<!-- ============================ 14 EXERCISES ============================ -->
+<!-- ============================ 16 EXERCISES ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">14</span><h1>Hands-on training exercises</h1></div>
+  <div class="section-head"><span class="num">16</span><h1>Hands-on training exercises</h1></div>
   <p class="lead">Use the demo accounts (password <code>Terra@Demo2026</code>). Do them in order — some continue from the one before. Each takes 5–10 minutes.</p>
 
   <div class="exercise"><h4>Exercise 1 — Explore the portfolio</h4><div class="who">Account: manager@terra-demo.test</div>
@@ -538,11 +659,23 @@
   <div class="exercise"><h4>Exercise 10 — Administrator checks</h4><div class="who">Account: admin@terra-demo.test</div>
     <ol><li>Read the Platform monitor alerts. Open <em>Audit Log</em> and filter by Lease.</li><li>Verify a pending tenant document under <em>Documents</em>.</li><li>Turn on two-step sign-in for your account under <em>Security &amp; Language</em>.</li></ol>
     <div class="result">Expected: you can say who changed a lease and when, and the document shows Verified.</div></div>
+
+  <div class="exercise"><h4>Exercise 11 — Follow up an overdue subscriber</h4><div class="who">Account: admin@terra-demo.test, then owner.ndayisaba@terra-demo.test</div>
+    <ol><li>Open <em>Subscribers</em>, filter Billing = Overdue and open <em>Ndayisaba Félix</em>. Read the contact history.</li><li>Use <strong>Log call</strong> to record a 3-minute answered call, then <strong>Email</strong> a short reminder.</li><li>Open his contract and record an MTN MoMo payment of RWF 40,000 with a reference.</li><li>Sign in as Félix and open <em>My Subscription</em>.</li></ol>
+    <div class="result">Expected: the two oldest invoices are settled, the overdue balance falls to RWF 25,000, and Félix sees the payment and a confirmation alert.</div></div>
+
+  <div class="exercise"><h4>Exercise 12 — Create and activate a contract</h4><div class="who">Account: admin@terra-demo.test</div>
+    <ol><li>Open <em>Subscription Contracts</em> → the <span class="badge b-amber">Pending</span> contract for Gasana Real Estate. Upload any PDF as the signed agreement.</li><li>Press <strong>Activate</strong>.</li></ol>
+    <div class="result">Expected: the status bar moves to Active and the first invoice appears.</div></div>
+
+  <div class="exercise"><h4>Exercise 13 — Register an owner in the field</h4><div class="who">Account: field@terra-demo.test, then admin@terra-demo.test</div>
+    <ol><li>As Alice, choose <strong>Register a property owner</strong>. Pick Kenya in the phone field and enter <code>712 345 678</code>; use any new email address.</li><li>Try opening <code>/admin/dashboard</code> in the address bar.</li><li>As the administrator, open <em>Field Staff → Niyonsaba Alice</em> and then the new owner’s profile.</li></ol>
+    <div class="result">Expected: the owner is saved as Pending review with phone <code>+254712345678</code>; the admin page is refused for Alice; the admin sees the registration counted under Alice and an alert in the bell.</div></div>
 </section>
 
-<!-- ============================ 15 QUICK REFERENCE ============================ -->
+<!-- ============================ 17 QUICK REFERENCE ============================ -->
 <section class="section">
-  <div class="section-head"><span class="num">15</span><h1>Quick reference &amp; troubleshooting</h1></div>
+  <div class="section-head"><span class="num">17</span><h1>Quick reference &amp; troubleshooting</h1></div>
   <div class="cols">
     <div>
       <h3 style="margin-top:0">Unit statuses</h3>
@@ -582,6 +715,23 @@
     </div>
   </div>
 
+  <div class="cols">
+    <div>
+      <h3>Subscription contract statuses</h3>
+      <table class="compact"><tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td><span class="badge b-amber">Pending</span></td><td>Created, waiting for signature — no invoices yet</td></tr>
+        <tr><td><span class="badge b-green">Active</span></td><td>Signed; invoices issued every cycle</td></tr>
+        <tr><td><span class="badge">Expired</span></td><td>End date passed without renewal</td></tr>
+        <tr><td><span class="badge b-red">Terminated</span></td><td>Ended early, with a recorded reason</td></tr></table>
+    </div>
+    <div>
+      <h3>Field staff account</h3>
+      <table class="compact"><tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td><span class="badge b-green">Active</span></td><td>Can sign in and register people</td></tr>
+        <tr><td><span class="badge b-red">Suspended</span></td><td>Signed out and cannot sign in</td></tr></table>
+    </div>
+  </div>
+
   <h3>Common questions</h3>
   <table class="compact">
     <tr><th style="width:38%">Problem</th><th>What to do</th></tr>
@@ -592,6 +742,10 @@
     <tr><td>Online payment “not completed”</td><td>The tenant declined or did not approve in time. No money was taken — they can try again.</td></tr>
     <tr><td>Nobody is receiving emails</td><td>Ask IT to check the background queue worker (the admin monitor warns when emails are stuck).</td></tr>
     <tr><td>A property is missing from the map</td><td>Add latitude and longitude on the property form.</td></tr>
+    <tr><td>“Enter a valid phone number”</td><td>Check the country flag matches the number. Type the number without the country code, or with it (e.g. <code>+250 788 123 456</code>).</td></tr>
+    <tr><td>A field staff member sees “not allowed”</td><td>Expected for anything except registration. Admin tasks must be done by an administrator.</td></tr>
+    <tr><td>“Contracts must be uploaded as a PDF”</td><td>Scan or export the signed contract to PDF (most phone scanner apps can) and upload again.</td></tr>
+    <tr><td>The subscriber did not join the in-platform call</td><td>They must be signed in to Terra and allow the microphone. Use <em>Call</em> or <em>WhatsApp</em> instead and log the call.</td></tr>
     <tr><td>I forgot my password</td><td>Use <em>Forgot password</em> on the sign-in page.</td></tr>
   </table>
 </section>
@@ -610,9 +764,10 @@
   <table>
     <tr><th style="width:32%">Item</th><th>Details</th></tr>
     <tr><td>Properties</td><td>7 properties, 68 units: Kacyiru Heights, Kimihurura Garden Residences, Nyarutarama Villas, Kicukiro Sunrise, Remera Business Plaza (shops &amp; offices), Musanze Volcano View, Rubavu Lakeside</td></tr>
-    <tr><td>People</td><td>Administrator, 5 owners (individuals and companies), 3 managers, accountant, agent, 6 service providers (3 with technician logins), about 60 tenants including 7 businesses</td></tr>
+    <tr><td>People</td><td>Administrator, 5 owners (individuals and companies), 3 managers, accountant, agent, 2 field staff, 6 service providers (3 with technician logins), about 60 tenants including 7 businesses. Phone numbers are stored in international form.</td></tr>
     <tr><td>Tenancies</td><td>55 active leases, one at each other stage (draft, awaiting tenant, awaiting activation, terminated), 7 ending within 60 days</td></tr>
     <tr><td>Money</td><td>Up to 18 months of invoices and payments (MTN MoMo, Airtel Money, Bank of Kigali, Equity, I&amp;M, BPR, cash), some arrears, 6 months of expenses</td></tr>
+    <tr><td>Terra subscriptions</td><td>3 plans, 8 subscription contracts in every status (active, pending, expiring soon, expired, terminated), monthly and annual invoices with payments, overdue balances, a call and email history, signed agreement PDFs, and registrations made by field staff</td></tr>
     <tr><td>Operations</td><td>Maintenance requests at every stage, inspections including a settled move-out, contracts, renewal requests, a move-out notice, messages, announcements, notifications, documents, agent commissions</td></tr>
   </table>
   <div class="warn"><strong>Safety built in</strong>The seeder refuses to run in production unless <code>ALLOW_DEMO_SEED=true</code> is set, refuses to run twice, and sends no emails, SMS or notifications while loading.</div>

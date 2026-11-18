@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\TenantPortal;
 
+use App\Rules\InternationalPhone;
+use App\Support\Phone;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
@@ -37,6 +39,7 @@ class ProfileController extends Controller
     {
         $tenant = $this->tenant();
 
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
             'email' => [
@@ -45,12 +48,12 @@ class ProfileController extends Controller
                 'max:255',
                 Rule::unique('tenants', 'email')->ignore($tenant->id),
             ],
-            'phone' => ['required', 'string', 'max:30'],
-            'alternative_phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', new InternationalPhone()],
+            'alternative_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'address' => ['nullable', 'string', 'max:2000'],
 
             'emergency_contact_name' => ['nullable', 'string', 'max:150'],
-            'emergency_contact_phone' => ['nullable', 'string', 'max:30'],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'emergency_contact_relationship' => ['nullable', 'string', 'max:100'],
 
             'current_password' => [

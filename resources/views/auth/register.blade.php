@@ -350,6 +350,16 @@
                 </div>
 
                 <div class="field">
+                    <label for="phone">Phone number <span style="font-weight:400;opacity:.7">(optional)</span></label>
+                    <div class="input">
+                        <input id="phone" name="phone" type="tel" data-intl-phone class="@error('phone') is-invalid @enderror"
+                            value="{{ old('phone') }}" autocomplete="tel">
+                    </div>
+                    @error('phone') <span class="err">{{ $message }}</span> @enderror
+                </div>
+
+
+                <div class="field">
                     <label for="password">Password</label>
                     <div class="input">
                         <input id="password" name="password" type="password" class="pad-r @error('password') is-invalid @enderror"
@@ -435,6 +445,7 @@
             b.textContent = 'Please wait…';
         });
     </script>
+@include('partials.intl-phone')
 </body>
 
 </html>

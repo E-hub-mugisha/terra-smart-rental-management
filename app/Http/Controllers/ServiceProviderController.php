@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\InternationalPhone;
+use App\Support\Phone;
 use App\Models\ServiceProvider;
 use App\Models\User;
 use App\Services\PropertyAudience;
@@ -104,10 +106,11 @@ class ServiceProviderController extends Controller
 
     private function validated(Request $request, ?ServiceProvider $provider = null): array
     {
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $data = $request->validate([
             'company_name' => ['required', 'string', 'max:150'],
             'contact_name' => ['nullable', 'string', 'max:150'],
-            'phone' => ['required', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', new InternationalPhone()],
             'email' => ['nullable', 'email', 'max:150', Rule::unique('service_providers', 'email')->ignore($provider?->id)],
             'categories' => ['required', 'array', 'min:1'],
             'categories.*' => [Rule::in(array_keys(ServiceProvider::CATEGORIES))],

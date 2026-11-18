@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\PropertyManager;
 
+use App\Rules\InternationalPhone;
+use App\Support\Phone;
 use App\Http\Controllers\Controller;
 use App\Mail\TenantAccountCreated;
 use App\Models\Property;
@@ -202,6 +204,7 @@ class TenantController extends Controller
     {
         $this->authorizeTenantAccess();
 
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
 
@@ -213,11 +216,11 @@ class TenantController extends Controller
                 'unique:tenants,email',
             ],
 
-            'phone' => ['required', 'string', 'max:30'],
-            'alternative_phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', new InternationalPhone()],
+            'alternative_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'address' => ['nullable', 'string', 'max:2000'],
             'emergency_contact_name' => ['nullable', 'string', 'max:150'],
-            'emergency_contact_phone' => ['nullable', 'string', 'max:30'],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
 
             'status' => [
                 'required',
@@ -334,6 +337,7 @@ class TenantController extends Controller
     {
         $tenant = $this->scopedTenant($tenant);
 
+        Phone::normalizeRequest($request, ['phone', 'alternative_phone', 'emergency_contact_phone']);
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:150'],
 
@@ -345,11 +349,11 @@ class TenantController extends Controller
                 Rule::unique('users', 'email')->ignore($tenant->user_id),
             ],
 
-            'phone' => ['required', 'string', 'max:30'],
-            'alternative_phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['required', 'string', 'max:30', new InternationalPhone()],
+            'alternative_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
             'address' => ['nullable', 'string', 'max:2000'],
             'emergency_contact_name' => ['nullable', 'string', 'max:150'],
-            'emergency_contact_phone' => ['nullable', 'string', 'max:30'],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:30', new InternationalPhone()],
 
             'status' => [
                 'required',

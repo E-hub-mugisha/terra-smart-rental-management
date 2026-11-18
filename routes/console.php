@@ -16,3 +16,8 @@ Schedule::command('rent-invoices:generate')
 Schedule::command('notifications:send-reminders')
     ->dailyAt('08:00')
     ->withoutOverlapping();
+
+// Subscription contracts: expiry, renewals, invoices and reminders.
+Schedule::command('subscriptions:run')
+    ->dailyAt('06:30')
+    ->withoutOverlapping();

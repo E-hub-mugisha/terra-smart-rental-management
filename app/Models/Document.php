@@ -25,8 +25,15 @@ class Document extends Model
         'insurance' => 'Insurance',
         'permit' => 'Permit / licence',
         'utility' => 'Utility document',
+        'tenancy_contract' => 'Tenancy contract (PDF)',
+        'owner_contract' => 'Owner agreement (PDF)',
+        'management_agreement' => 'Management agreement (PDF)',
+        'subscription_agreement' => 'Subscription agreement (PDF)',
         'other' => 'Other',
     ];
+
+    /** Contract categories: PDF only, uploaded by staff, never sent for KYC review. */
+    public const CONTRACT_CATEGORIES = ['tenancy_contract', 'owner_contract', 'management_agreement', 'subscription_agreement', 'lease_contract'];
 
     /** Categories that count as identity documents for KYC. */
     public const KYC_ID_CATEGORIES = ['national_id', 'passport'];
@@ -35,8 +42,10 @@ class Document extends Model
     public const OWNER_TYPES = [
         'property' => [Property::class, ['title_deed', 'insurance', 'permit', 'utility', 'other']],
         'unit' => [Unit::class, ['utility', 'insurance', 'other']],
-        'tenant' => [Tenant::class, ['national_id', 'passport', 'proof_of_income', 'employment_letter', 'reference_letter', 'other']],
+        'tenant' => [Tenant::class, ['tenancy_contract', 'national_id', 'passport', 'proof_of_income', 'employment_letter', 'reference_letter', 'other']],
         'lease' => [Lease::class, ['lease_contract', 'insurance', 'other']],
+        'owner' => [PropertyOwner::class, ['owner_contract', 'management_agreement', 'subscription_agreement', 'national_id', 'passport', 'title_deed', 'other']],
+        'subscription' => [SubscriptionContract::class, ['subscription_agreement', 'other']],
     ];
 
     protected $fillable = [
@@ -59,6 +68,11 @@ class Document extends Model
     public function getCategoryLabelAttribute(): string
     {
         return self::CATEGORIES[$this->category] ?? ucfirst(str_replace('_', ' ', $this->category));
+    }
+
+    public function getIsContractAttribute(): bool
+    {
+        return in_array($this->category, self::CONTRACT_CATEGORIES, true);
     }
 
     public function getOwnerKeyAttribute(): ?string

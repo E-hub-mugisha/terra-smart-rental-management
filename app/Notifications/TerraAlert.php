@@ -108,6 +108,9 @@ class TerraAlert extends Notification implements ShouldQueue
             'vacancy' => 'bi-door-open',
             'inspection' => 'bi-clipboard-check',
             'document' => 'bi-file-earmark-lock',
+            'subscription' => 'bi-patch-check',
+            'registration' => 'bi-person-plus',
+            'call' => 'bi-camera-video',
         ][$category] ?? 'bi-bell';
     }
 }

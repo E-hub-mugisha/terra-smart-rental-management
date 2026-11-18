@@ -8,7 +8,7 @@
     <input type="text" name="company_name" class="form-control form-control-sm" placeholder="Company / trade name" required maxlength="150" value="{{ old('company_name', $p?->company_name) }}" aria-label="Company name">
     <input type="text" name="contact_name" class="form-control form-control-sm" placeholder="Contact person" maxlength="150" value="{{ old('contact_name', $p?->contact_name) }}" aria-label="Contact person">
     <div class="d-flex gap-2">
-        <input type="tel" name="phone" class="form-control form-control-sm" placeholder="Phone" required maxlength="30" value="{{ old('phone', $p?->phone) }}" aria-label="Phone">
+        <input type="tel" name="phone" data-intl-phone class="form-control form-control-sm" placeholder="Phone" required maxlength="30" value="{{ old('phone', $p?->phone) }}" aria-label="Phone">
         <input type="text" name="district" class="form-control form-control-sm" placeholder="District" maxlength="100" value="{{ old('district', $p?->district) }}" aria-label="District">
     </div>
     <input type="email" name="email" class="form-control form-control-sm @error('email') is-invalid @enderror" placeholder="Email (needed for a login)" maxlength="150" value="{{ old('email', $p?->email) }}" aria-label="Email">

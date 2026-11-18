@@ -445,6 +445,7 @@
                     <input
                         id="phone"
                         name="phone"
+                        data-intl-phone
                         type="tel"
                         inputmode="tel"
                         class="form-control @error('phone') is-invalid @enderror"
@@ -658,6 +659,7 @@
                     @enderror
                 </div>
 
+                @unless($registrationOnly ?? false)
                 <div class="col-md-6">
                     <label for="status" class="form-label">
                         Account status <span class="mf-required">*</span>
@@ -686,6 +688,7 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
+                @endunless
             </div>
         </div>
     </section>
@@ -729,7 +732,7 @@
         </div>
 
         <div class="mf-footer-actions d-flex flex-wrap gap-2">
-            <a href="{{ route('admin.managers.index') }}" class="mf-btn mf-btn-secondary">
+            <a href="{{ $cancelUrl ?? route('admin.managers.index') }}" class="mf-btn mf-btn-secondary">
                 <i class="bi bi-x-lg"></i>
                 Cancel
             </a>

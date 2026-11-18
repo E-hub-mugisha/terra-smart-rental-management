@@ -122,6 +122,7 @@ class ContactDirectory
             'manager' => 'Property managers',
             'owner' => 'Property owners',
             'tenant' => 'Tenants',
+            'field_staff' => 'Field staff',
             default => 'Other users',
         };
     }

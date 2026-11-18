@@ -44,6 +44,17 @@ class DemoSeederTest extends TestCase
         $this->post(route('login'), ['email' => 'tenant.aline@' . TerraDemoSeeder::DOMAIN, 'password' => TerraDemoSeeder::DEMO_PASSWORD])
             ->assertRedirect(route('dashboard'));
 
+        // Subscriptions, field staff and E.164 phones.
+        $this->assertSame(8, \App\Models\SubscriptionContract::count());
+        $this->assertGreaterThan(0, \App\Models\SubscriptionInvoice::overdue()->count());
+        $this->assertSame(0, \App\Models\SubscriptionInvoice::whereColumn('amount_paid', '>', 'amount')->count());
+        $this->assertSame(2, \App\Models\FieldStaff::count());
+        $this->assertTrue(\App\Models\PropertyOwner::where('phone', 'not like', '+%')->doesntExist());
+        auth()->logout();
+        $this->post(route('login'), ['email' => 'field@' . TerraDemoSeeder::DOMAIN, 'password' => TerraDemoSeeder::DEMO_PASSWORD])
+            ->assertRedirect(route('dashboard'));
+        auth()->logout();
+
         // Running again does nothing.
         $this->seed(TerraDemoSeeder::class);
         $this->assertSame(7, Property::count());

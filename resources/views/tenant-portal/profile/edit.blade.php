@@ -147,7 +147,7 @@
 
                             <div class="col-md-6">
                                 <label for="phone" class="form-label">Phone number <span class="text-danger">*</span></label>
-                                <input type="tel" id="phone" name="phone"
+                                <input type="tel" id="phone" name="phone" data-intl-phone
                                        class="form-control @error('phone') is-invalid @enderror"
                                        value="{{ old('phone', $tenant->phone) }}"
                                        maxlength="30" required>
