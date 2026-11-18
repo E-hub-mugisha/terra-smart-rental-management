@@ -15,7 +15,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Global helpers such as upload_url(). Also listed in composer.json "files",
+        // but loaded here too so they work even when vendor/ was installed or
+        // copied without regenerating Composer's autoloader.
+        require_once app_path('helpers.php');
     }
 
     /**
