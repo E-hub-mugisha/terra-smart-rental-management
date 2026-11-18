@@ -137,6 +137,8 @@ class BusinessRolesTest extends TestCase
         \Illuminate\Notifications\DatabaseNotification::query()->delete();
 
         $this->actingAs($this->managerUser)->post(route('maintenance.assign', $request), ['service_provider_id' => $provider->id])->assertRedirect();
+        // Regression: the manager maintenance page used to link to route names that do not exist.
+        $this->actingAs($this->managerUser)->get(route('property-manager.maintenance-requests.show', $request))->assertOk()->assertSee('FixIt Plumbing');
         $request->refresh();
         $this->assertSame($provider->id, $request->service_provider_id);
         $this->assertSame($tech->id, $request->assigned_to);

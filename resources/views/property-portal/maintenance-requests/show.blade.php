@@ -7,7 +7,7 @@
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <a href="{{ route('property-manager.maintenance.index') }}"
+            <a href="{{ route('property-manager.maintenance-requests.index') }}"
                class="text-decoration-none text-muted small">
                 <i class="bi bi-arrow-left me-1"></i> Back to Maintenance
             </a>
@@ -254,7 +254,7 @@
 
                 <div class="card-body">
                     <form method="POST"
-                          action="{{ route('property-manager.maintenance.status', $maintenanceRequest->id) }}">
+                          action="{{ route('property-manager.maintenance-requests.status', $maintenanceRequest->id) }}">
                         @csrf
                         @method('PATCH')
 

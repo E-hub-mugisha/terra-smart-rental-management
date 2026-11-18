@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Terra Property Management System — Training &amp; User Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..800;1,8..60,400..600&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #19265d; --navy-deep: #111b45; --orange: #D05208; --ink: #1f2636; --mute: #5f6880; --line: #e3e7ef; --soft: #f5f7fb; --green: #147847; }
+  @page { size: A4; margin: 18mm 17mm 20mm; @bottom-left { content: "Terra Property Management System · Training & User Guide"; font: 8.5pt "Source Serif 4", Georgia, serif; color: #8a91a3; } @bottom-right { content: counter(page); font: 9pt "Source Serif 4", Georgia, serif; color: #8a91a3; } }
+  @page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Source Serif 4", Georgia, serif; font-optical-sizing: auto; color: var(--ink); font-size: 10.6pt; line-height: 1.5; }
+  h1, h2, h3, h4 { color: var(--navy); line-height: 1.2; margin: 0; }
+  h1 { font-size: 24pt; font-weight: 800; letter-spacing: -.01em; }
+  h2 { font-size: 15pt; font-weight: 700; margin: 18pt 0 6pt; }
+  h3 { font-size: 12pt; font-weight: 700; margin: 12pt 0 4pt; }
+  p { margin: 0 0 7pt; }
+  ul, ol { margin: 0 0 8pt; padding-left: 16pt; }
+  li { margin-bottom: 2.5pt; }
+  strong { color: #111827; }
+  code, .kbd { font-family: ui-monospace, Consolas, monospace; font-size: 9pt; background: var(--soft); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; }
+  a { color: var(--navy); }
+
+  /* Cover */
+  .cover { page: cover; height: 297mm; position: relative; color: #fff; background: linear-gradient(160deg, var(--navy-deep) 0%, var(--navy) 55%, #26357a 100%); padding: 34mm 22mm; overflow: hidden; }
+  .cover .brand { font-size: 13pt; letter-spacing: .25em; font-weight: 700; color: #ffd9c2; }
+  .cover h1 { color: #fff; font-size: 38pt; margin-top: 26mm; max-width: 150mm; }
+  .cover .sub { font-size: 15pt; color: #dfe4f5; margin-top: 8mm; max-width: 140mm; font-style: italic; }
+  .cover .rule { width: 60mm; height: 4px; background: var(--orange); margin: 12mm 0; }
+  .cover .meta { position: absolute; left: 22mm; bottom: 26mm; max-width: 72mm; font-size: 10.5pt; color: #c9d0ea; line-height: 1.7; }
+  .cover .hills { position: absolute; left: 0; right: 0; bottom: 0; height: 70mm; opacity: .22; }
+  .cover .shot { position: absolute; right: -32mm; top: 146mm; width: 118mm; border-radius: 6px; box-shadow: 0 20px 50px rgba(0,0,0,.45); border: 6px solid #fff; transform: rotate(-3deg); }
+
+  /* Sections */
+  .section { break-before: page; }
+  .section-head { display: flex; align-items: baseline; gap: 10pt; border-bottom: 2px solid var(--navy); padding-bottom: 6pt; margin-bottom: 10pt; }
+  .section-head .num { font-size: 26pt; font-weight: 800; color: var(--orange); line-height: 1; }
+  .lead { font-size: 11.5pt; color: #2b3348; }
+  .muted { color: var(--mute); }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
+  .card { border: 1px solid var(--line); border-radius: 6px; padding: 9pt 11pt; background: #fff; break-inside: avoid; }
+  .card h4 { font-size: 10.5pt; margin-bottom: 4pt; }
+  .tip, .warn, .note { border-radius: 5px; padding: 8pt 10pt; margin: 8pt 0; break-inside: avoid; font-size: 10pt; }
+  .tip { background: #e8f7ee; border-left: 4px solid var(--green); }
+  .warn { background: #fff3e8; border-left: 4px solid var(--orange); }
+  .note { background: #eef1fb; border-left: 4px solid var(--navy); }
+  .tip strong, .warn strong, .note strong { display: block; margin-bottom: 2pt; }
+
+  figure { margin: 8pt 0 12pt; break-inside: avoid; }
+  figure .frame { border: 1px solid #cfd5e2; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 10px rgba(25,38,93,.08); }
+  figure .frame .bar { height: 14px; background: #eef0f5; border-bottom: 1px solid #dde2ec; position: relative; }
+  figure .frame .bar::before { content: ""; position: absolute; left: 7px; top: 4px; width: 6px; height: 6px; border-radius: 50%; background: #e46a5e; box-shadow: 10px 0 0 #e9b949, 20px 0 0 #5fbf63; }
+  figure img { display: block; width: 100%; }
+  figure img.crop { height: 95mm; object-fit: cover; object-position: top; }
+  figure img.crop-l { height: 120mm; object-fit: cover; object-position: top; }
+  figcaption { font-size: 9pt; color: var(--mute); margin-top: 4pt; font-style: italic; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; font-size: 9.6pt; break-inside: auto; }
+  th { background: var(--navy); color: #fff; text-align: left; font-weight: 600; padding: 5pt 7pt; }
+  td { border-bottom: 1px solid var(--line); padding: 5pt 7pt; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfd; }
+  tr { break-inside: avoid; }
+  .compact td, .compact th { padding: 3.5pt 6pt; font-size: 9.2pt; }
+
+  .flow { display: flex; flex-wrap: wrap; gap: 5pt; align-items: center; margin: 8pt 0 12pt; }
+  .flow span { background: var(--navy); color: #fff; padding: 5pt 9pt; border-radius: 4px; font-size: 9.4pt; font-weight: 600; }
+  .flow span.o { background: var(--orange); }
+  .flow span.g { background: var(--green); }
+  .flow i { color: var(--orange); font-style: normal; font-weight: 700; }
+
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps li { counter-increment: s; position: relative; padding-left: 24pt; margin-bottom: 5pt; }
+  .steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 16pt; height: 16pt; border-radius: 50%; background: var(--orange); color: #fff; font-size: 8.5pt; font-weight: 700; text-align: center; line-height: 16pt; }
+  .badge { display: inline-block; padding: 0 6pt; border-radius: 9pt; font-size: 8.6pt; font-weight: 600; background: var(--soft); border: 1px solid var(--line); white-space: nowrap; }
+  .b-green { background: #e8f7ee; color: #147847; border-color: #bfe6cd; }
+  .b-amber { background: #fff3dc; color: #8f5a08; border-color: #f1d9a6; }
+  .b-blue { background: #e7f4fd; color: #116a9c; border-color: #b9def4; }
+  .b-red { background: #fff1f0; color: #b42318; border-color: #f4c7c3; }
+
+  .toc { columns: 2; column-gap: 18pt; font-size: 10.5pt; }
+  .toc div { display: flex; gap: 6pt; break-inside: avoid; padding: 3pt 0; border-bottom: 1px dotted #cfd5e2; }
+  .toc b { color: var(--orange); width: 16pt; }
+  .exercise { border: 1.5px solid var(--navy); border-radius: 6px; padding: 7pt 10pt; margin: 6pt 0; break-inside: avoid; }
+  .exercise h4 { margin-bottom: 4pt; }
+  .exercise .who { font-size: 9pt; color: var(--mute); margin-bottom: 5pt; }
+  .exercise .result { font-size: 9.6pt; color: var(--green); margin-top: 4pt; }
+  .keep { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COVER ============================ -->
+<section class="cover">
+  <div class="brand">TERRA · REAL ESTATE LTD</div>
+  <h1>Terra Property Management System</h1>
+  <div class="sub">Training &amp; user guide for administrators, landlords, property managers, tenants and service partners</div>
+  <div class="rule"></div>
+  <img class="shot" src="img/public-property.jpg" alt="">
+  <svg class="hills" viewBox="0 0 800 200" preserveAspectRatio="none"><path d="M0 120 Q100 60 200 110 T400 100 T600 90 T800 110 V200 H0Z" fill="#ffffff"/><path d="M0 150 Q120 100 260 150 T520 140 T800 150 V200 H0Z" fill="#ffffff"/></svg>
+  <div class="meta">
+    Version 1.0 · November 2026<br>
+    Covers the web platform and the screens used in day-to-day operations<br>
+    Screens shown use the Rwandan demo dataset (fictitious people and properties)
+  </div>
+</section>
+
+<!-- ============================ CONTENTS ============================ -->
+<section class="section" style="break-before: page;">
+  <div class="section-head"><h1>Contents</h1></div>
+  <div class="toc">
+    <div><b>1</b>Getting started</div>
+    <div><b>2</b>The rental lifecycle at a glance</div>
+    <div><b>3</b>Terra administrators</div>
+    <div><b>4</b>Landlords &amp; property managers</div>
+    <div><b>5</b>Leases from application to activation</div>
+    <div><b>6</b>Rent, payments, receipts &amp; ledger</div>
+    <div><b>7</b>Maintenance &amp; service providers</div>
+    <div><b>8</b>Move-in &amp; move-out inspections</div>
+    <div><b>9</b>Communication &amp; notifications</div>
+    <div><b>10</b>Tenants</div>
+    <div><b>11</b>Accountants, agents &amp; technicians</div>
+    <div><b>12</b>Reports, maps &amp; documents</div>
+    <div><b>13</b>Security, privacy &amp; good practice</div>
+    <div><b>14</b>Hands-on training exercises</div>
+    <div><b>15</b>Quick reference &amp; troubleshooting</div>
+    <div><b>A</b>Appendix: preparing a demo environment</div>
+  </div>
+
+  <h2>About this guide</h2>
+  <p>Terra brings the whole rental relationship into one place: listing a property, choosing a tenant, signing the lease, collecting rent, fixing problems, renewing and finally moving out. This guide explains each part of the platform from the point of view of the person who uses it, with real screens from the system.</p>
+  <p>Use it in three ways:</p>
+  <ul>
+    <li><strong>As a training course</strong> — read sections 1–2, then the section for your role, then complete the exercises in section 14 with the demo accounts.</li>
+    <li><strong>As a reference</strong> — section 15 lists every status, alert and common question.</li>
+    <li><strong>For demonstrations</strong> — the demo accounts are prepared so every workflow has something to show.</li>
+  </ul>
+  <div class="note"><strong>About the screenshots</strong>All names, phone numbers, ID numbers, properties and amounts in this guide come from the demo dataset. They are realistic for Rwanda but fictitious. Property photos are illustrations marked “Demo image”.</div>
+</section>
+
+<!-- ============================ 1 GETTING STARTED ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">1</span><h1>Getting started</h1></div>
+  <p class="lead">Everyone uses the same web address. What you see after signing in depends on your role.</p>
+
+  <h2>Who uses Terra</h2>
+  <table>
+    <tr><th style="width:24%">Role</th><th>What they do in Terra</th></tr>
+    <tr><td><strong>Terra administrator</strong></td><td>Runs the platform: users and roles, all properties, verification of service providers, audit log, platform monitoring.</td></tr>
+    <tr><td><strong>Property owner (landlord)</strong></td><td>Sees and manages their own properties, tenants, leases, rent, expenses, maintenance and reports.</td></tr>
+    <tr><td><strong>Property manager</strong></td><td>Manages properties assigned by Terra on behalf of owners — the main day-to-day operator.</td></tr>
+    <tr><td><strong>Tenant</strong></td><td>Applies for homes, accepts the lease, pays rent, reports problems, talks to the manager, keeps receipts.</td></tr>
+    <tr><td><strong>Accountant / finance officer</strong></td><td>Read-only access to rent ledgers, payments, expenses, receipts and financial reports for assigned properties.</td></tr>
+    <tr><td><strong>Real estate agent</strong></td><td>Markets assigned properties, follows applications, sees commissions earned.</td></tr>
+    <tr><td><strong>Service provider / technician</strong></td><td>Receives maintenance jobs, schedules visits, records the work and the cost.</td></tr>
+  </table>
+
+  <h2>Signing in</h2>
+  <ol class="steps">
+    <li>Open the Terra web address and choose <strong>Sign in</strong> (top right).</li>
+    <li>Enter your email and password. New owners, managers and tenants created by staff receive their sign-in details by email; change the password after the first sign-in.</li>
+    <li>If <em>two-step sign-in</em> is on for your account, Terra emails you a 6-digit code — enter it to finish signing in (see section 13).</li>
+    <li>You land on your own dashboard. The left menu shows only what your role can use.</li>
+  </ol>
+
+  <h2>Finding your way around</h2>
+  <div class="cols">
+    <div class="card"><h4>Left menu</h4>Grouped by task (e.g. <em>Tenancy</em>, <em>Rent &amp; Reporting</em>, <em>Communication &amp; Care</em>, <em>Tools</em>). The current page is highlighted in orange.</div>
+    <div class="card"><h4>Top bar</h4><strong>Quick search</strong> (Ctrl&nbsp;K) to jump to any page, the language switch (EN / RW / FR), the <strong>messages</strong> icon and the <strong>bell</strong> for alerts, and <strong>Quick actions</strong>.</div>
+    <div class="card"><h4>Language</h4>Choose English, Kinyarwanda or French from the top bar or <em>Security &amp; Language</em>. Your choice is remembered on every device.</div>
+    <div class="card"><h4>Phones &amp; tablets</h4>Pages adapt to phone screens. The menu folds behind the ☰ button.</div>
+  </div>
+
+  <h2>Demo accounts</h2>
+  <p>On a demo or training server, sign in with these accounts. The password for all of them is <code>Terra@Demo2026</code>.</p>
+  <table>
+    <tr><th>Account</th><th>Role</th><th>What it is set up to show</th></tr>
+    <tr><td><code>admin@terra-demo.test</code></td><td>Administrator</td><td>Platform monitor, audit log, users, all properties</td></tr>
+    <tr><td><code>manager@terra-demo.test</code></td><td>Property manager</td><td>Kacyiru Heights &amp; Nyarutarama Villas — renewals, maintenance, messages</td></tr>
+    <tr><td><code>manager.grace@terra-demo.test</code></td><td>Property manager</td><td>Kimihurura &amp; Remera Plaza — a lease ready to activate</td></tr>
+    <tr><td><code>manager.bosco@terra-demo.test</code></td><td>Property manager</td><td>Kicukiro, Musanze &amp; Rubavu — completed move-out with deposit settlement</td></tr>
+    <tr><td><code>owner@terra-demo.test</code></td><td>Owner</td><td>Kayitesi Diane — Kimihurura &amp; Rubavu portfolio</td></tr>
+    <tr><td><code>tenant.aline@terra-demo.test</code></td><td>Tenant</td><td>Overdue invoice to pay, a repair to confirm, messages</td></tr>
+    <tr><td><code>tenant.kevin@terra-demo.test</code></td><td>Tenant</td><td>A lease waiting for his acceptance</td></tr>
+    <tr><td><code>tenant.brian@terra-demo.test</code></td><td>Tenant</td><td>A move-in inspection to confirm</td></tr>
+    <tr><td><code>accountant@terra-demo.test</code></td><td>Accountant</td><td>Finance workspace and reports</td></tr>
+    <tr><td><code>agent@terra-demo.test</code></td><td>Agent</td><td>Assigned properties and commissions</td></tr>
+    <tr><td><code>technician@terra-demo.test</code></td><td>Technician</td><td>Kigali Plumbing Services — assigned jobs</td></tr>
+  </table>
+  <div class="warn"><strong>Demo only</strong>Never load the demo dataset on the live platform. Demo accounts use the reserved <code>.test</code> domain and cannot receive email.</div>
+</section>
+
+<!-- ============================ 2 LIFECYCLE ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">2</span><h1>The rental lifecycle at a glance</h1></div>
+  <p class="lead">Terra follows a rental from the first listing to the final deposit refund. Each step happens in the platform, and each hand-over between people triggers an alert.</p>
+  <div class="flow">
+    <span>Register property</span><i>→</i><span>Add buildings &amp; units</span><i>→</i><span>Publish listing</span><i>→</i><span>Tenant applies</span><i>→</i><span>Approve &amp; draft lease</span><i>→</i><span class="o">Tenant accepts</span><i>→</i><span>Deposit &amp; first rent paid</span><i>→</i><span>Move-in inspection</span><i>→</i><span class="g">Lease active</span><i>→</i><span>Monthly rent &amp; receipts</span><i>→</i><span>Maintenance</span><i>→</i><span>Renewal</span><i>→</i><span>Move-out inspection</span><i>→</i><span class="g">Deposit settled</span>
+  </div>
+  <table>
+    <tr><th style="width:25%">Step</th><th style="width:22%">Who</th><th>Where in Terra</th></tr>
+    <tr><td>Register property &amp; units</td><td>Admin, owner, manager</td><td><em>Managed / Assigned Properties</em> → property page → buildings, floors, units</td></tr>
+    <tr><td>Listing &amp; discovery</td><td>Public</td><td>Public <em>Properties</em> page, property page with unit grid, <em>Map</em></td></tr>
+    <tr><td>Application</td><td>Tenant → manager</td><td>Unit page → <em>Apply</em>; manager reviews under <em>Applications</em></td></tr>
+    <tr><td>Lease &amp; contract</td><td>Manager → tenant</td><td>Lease page → <em>Lease workflow</em>, <em>Generate contract</em>; tenant accepts under <em>My Lease</em></td></tr>
+    <tr><td>Deposit, rent, receipts</td><td>Tenant, manager, accountant</td><td>Invoices → <em>Pay now</em>; <em>Rent ledger</em>; receipts</td></tr>
+    <tr><td>Move-in / move-out</td><td>Manager, tenant</td><td><em>Inspections</em></td></tr>
+    <tr><td>Maintenance</td><td>Tenant → manager → technician</td><td><em>Maintenance Requests</em>, <em>Service Providers</em>, technician <em>My jobs</em></td></tr>
+    <tr><td>Renewal / notice</td><td>Tenant ↔ manager</td><td>Lease page → <em>Tenancy</em> panel</td></tr>
+  </table>
+  <div class="note"><strong>Terra does not hold tenants’ money</strong>Online payments go from the tenant’s Mobile Money straight to the landlord’s or manager’s own merchant account. Terra records the confirmed payment, issues the receipt and updates the ledger.</div>
+</section>
+
+<!-- ============================ 3 ADMIN ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">3</span><h1>Terra administrators</h1></div>
+  <p class="lead">Administrators keep the platform healthy and trustworthy. Start each day on the dashboard.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:88mm" src="img/admin-dashboard.jpg" alt=""></div>
+    <figcaption>Admin dashboard: the Platform monitor shows alerts, active and expiring leases, open maintenance, today’s online payments and items waiting for verification.</figcaption></figure>
+  <h3>Reading the platform monitor</h3>
+  <ul>
+    <li><strong>Red alerts</strong> need action today — for example an <em>emergency</em> maintenance request, or emails stuck in the queue (ask IT to check the queue worker).</li>
+    <li><strong>Blue notes</strong> are information, such as “payments are in test mode” on a training server.</li>
+    <li>Each tile opens the matching list: leases expiring in 60 days, payments and documents waiting for verification.</li>
+  </ul>
+  <h3>Everyday administration</h3>
+  <div class="cols">
+    <div class="card"><h4>Users &amp; roles</h4><em>All Users</em>: create accounts and set the role (manager, tenant, accountant, agent, technician). Owners and managers have their own pages with extra details.</div>
+    <div class="card"><h4>Assigning work</h4>Assign managers on the property form. Assign accountants and agents under <em>Tools → Agents &amp; Accountants</em>.</div>
+    <div class="card"><h4>Verification</h4>Verify service providers (<em>Service Providers</em> → Verify) and check tenant ID documents (<em>Documents</em> → Verify / Reject).</div>
+    <div class="card"><h4>Audit log</h4><em>People &amp; Access → Audit Log</em> records every change, sign-in and failed sign-in, with who, when and from where.</div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">A property as everyone sees it</h2>
+  <p>Each property has one profile page. The public sees it on the Terra website; administrators and managers see the same layout at the top of the property page, with editing tools underneath.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:100mm" src="img/admin-property.jpg" alt=""></div>
+    <figcaption>Property page for staff: photo gallery, summary, “From RWF … / month”, the unit grid coloured by status, and the selected unit’s card. Below are buildings, floors, units and documents.</figcaption></figure>
+  <ul>
+    <li>Click any unit tile to see its details on the right. Green = available, grey = occupied, blue = reserved, amber = under maintenance.</li>
+    <li><strong>Edit property</strong> opens the form: name, location (province → village, GPS coordinates), UPI, amenities, utilities, photos.</li>
+    <li><strong>Public page</strong> shows exactly what prospective tenants see.</li>
+  </ul>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:70mm" src="img/admin-audit.jpg" alt=""></div>
+    <figcaption>Audit log: filter by person, event, record type or date. Updates show the old value crossed out and the new value in green.</figcaption></figure>
+</section>
+
+<!-- ============================ 4 MANAGERS ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">4</span><h1>Landlords &amp; property managers</h1></div>
+  <p class="lead">Owners and managers use the same workspace. Owners see the properties they own; managers see the properties Terra assigned to them.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:56mm" src="img/manager-dashboard.jpg" alt=""></div>
+    <figcaption>Operations dashboard: occupancy, rent collected, outstanding balances and what needs attention.</figcaption></figure>
+  <h3>A typical day</h3>
+  <ol class="steps">
+    <li>Check the <strong>bell</strong> and <strong>messages</strong> — new applications, maintenance requests, accepted leases, renewal requests.</li>
+    <li>Handle <strong>maintenance</strong>: assign new requests to a service provider (section 7).</li>
+    <li>Review <strong>applications</strong> and move leases forward (section 5).</li>
+    <li>Look at <strong>outstanding rent</strong> (<em>Reports → Outstanding rent</em>) and contact tenants in arrears. Terra already sends automatic reminders.</li>
+    <li>Record <strong>expenses</strong> (security, cleaning, REG electricity, WASAC water, repairs) so reports show true net income.</li>
+  </ol>
+  <h3>Registering a property</h3>
+  <ol class="steps">
+    <li>Owners use <em>My Properties → New property</em>; administrators use <em>Managed Properties → New property</em>. Managers work on the properties assigned to them. Enter the name, type, location down to cell and village, and GPS coordinates (these place it on the map).</li>
+    <li>Add the <strong>UPI</strong>, amenities (parking, security, backup power…) and utilities. Upload clear photos — the first is the cover.</li>
+    <li>On the property page add <strong>buildings</strong>, <strong>floors</strong> and <strong>units</strong>. For each unit: number, type, bedrooms, bathrooms, size, rent, deposit, meters, inventory, <em>key features</em> (one per line) and photos.</li>
+    <li>When the property is active, units marked <em>Available</em> appear on the public website straight away.</li>
+  </ol>
+  <div class="tip"><strong>Tip — key features sell units</strong>Short lines such as “Balcony with city view” or “Borehole water backup” appear on the public unit card. Three or four is ideal.</div>
+</section>
+
+<!-- ============================ 5 LEASES ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">5</span><h1>Leases from application to activation</h1></div>
+  <p class="lead">Every lease follows the same five stages. The <strong>Lease workflow</strong> panel on the lease page always shows the next step.</p>
+  <div class="flow">
+    <span>Draft</span><i>→ Send to tenant →</i><span class="o">Awaiting tenant acceptance</span><i>→ Tenant accepts →</i><span>Awaiting activation</span><i>→ Activate →</i><span class="g">Active</span>
+  </div>
+  <table>
+    <tr><th style="width:23%">Stage</th><th>What happens</th><th style="width:27%">Who acts</th></tr>
+    <tr><td><span class="badge">Draft</span></td><td>Created when an application is approved. Terms can be edited. The tenant cannot see it yet.</td><td>Manager: check terms, generate the contract, <strong>Send to tenant</strong></td></tr>
+    <tr><td><span class="badge b-amber">Awaiting tenant acceptance</span></td><td>Terms are locked, the unit is reserved and the tenant is notified. <strong>Recall</strong> returns it to draft if something must change.</td><td>Tenant: review and accept in <em>My Lease</em></td></tr>
+    <tr><td><span class="badge b-blue">Awaiting activation</span></td><td>The tenant has accepted. Generate the deposit and first-rent invoices; the tenant pays; record move-in.</td><td>Manager &amp; tenant</td></tr>
+    <tr><td><span class="badge b-green">Active</span></td><td>Activated once both invoices are paid, move-in is confirmed and the start date has arrived. The unit becomes <em>occupied</em>.</td><td>Monthly rent runs automatically</td></tr>
+    <tr><td><span class="badge b-red">Terminated / expired</span></td><td>Ended early (with reason) or reached its end date.</td><td>Manager; then move-out inspection</td></tr>
+  </table>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:84mm" src="img/manager-lease-activation.jpg" alt=""></div>
+    <figcaption>A lease awaiting activation. The Lease workflow panel (right) ticks off each requirement and says what to do next; Activate is enabled only when everything is ready.</figcaption></figure>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">Generating the lease contract</h2>
+  <ol class="steps">
+    <li>On the lease page, open <strong>Tenancy → Generate contract</strong>.</li>
+    <li>Choose a template (the default is the <em>Standard residential lease</em>), the notice period and any special conditions.</li>
+    <li>Terra fills in names, ID number, unit, rent, deposit and dates. Edit, add or remove clauses while it is a draft.</li>
+    <li><strong>Save &amp; finalise</strong>. The tenant can now read it from their lease page and accept it. Print it for signatures if a paper copy is needed and store the signed scan under <em>Documents</em>.</li>
+  </ol>
+  <div class="warn"><strong>Legal review</strong>Have Terra’s legal adviser review templates against current Rwandan law before using them with real tenants. Managers can create templates for their own properties under <em>Tools → Lease Templates</em>.</div>
+
+  <h2>Renewals and move-out notices</h2>
+  <div class="cols">
+    <div class="card"><h4>Renewal</h4>The tenant asks to renew (6, 12, 24 or 36 months) — or the manager offers first. The manager sends the new end date and rent; when the tenant accepts, the lease is extended automatically.</div>
+    <div class="card"><h4>Move-out notice</h4>The tenant gives a move-out date from their lease page. The manager acknowledges it and plans the move-out inspection (section 8).</div>
+  </div>
+  <p>Terra reminds both sides <strong>60, 30 and 7 days</strong> before a lease ends.</p>
+
+  <h2>Reviewing applications</h2>
+  <ol class="steps">
+    <li><em>Applications</em> lists new requests. Open one to see the applicant, move-in date, occupants, offered rent and employment.</li>
+    <li>Check the tenant’s ID documents (<em>Documents</em>, filtered to the tenant) before approving.</li>
+    <li><strong>Approve</strong> creates a draft lease and reserves the unit; <strong>Reject</strong> records the reason and tells the applicant.</li>
+  </ol>
+</section>
+
+<!-- ============================ 6 RENT ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">6</span><h1>Rent, payments, receipts &amp; ledger</h1></div>
+  <p class="lead">Invoices are created every month automatically. Tenants pay online with Mobile Money or by bank; managers can also record payments received another way.</p>
+  <h3>How a tenant pays online</h3>
+  <ol class="steps">
+    <li>The tenant opens the invoice and taps <strong>Pay now</strong>.</li>
+    <li>They confirm the amount (part-payments are allowed) and their Mobile Money number.</li>
+    <li>A prompt appears on their phone; they approve it with their PIN.</li>
+    <li>Terra records the payment, applies it to the invoice, emails the receipt and alerts the manager.</li>
+  </ol>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:78mm" src="img/tenant-pay.jpg" alt=""></div>
+    <figcaption>Paying an invoice online. On training servers the yellow “Test mode” note appears and no money moves.</figcaption></figure>
+  <h3>Recording a payment received offline</h3>
+  <p><em>Rent Payments → Record payment</em>: choose the lease, amount, method (cash, bank transfer, Mobile Money), reference and date. It starts as <span class="badge b-amber">pending</span>; <strong>Confirm</strong> it once the money is verified, then <strong>Allocate</strong> it to the invoice(s).</p>
+  <div class="tip"><strong>Receipts</strong>Every confirmed payment has a receipt that can be printed, saved as PDF, or shared by link (for example on WhatsApp). The link works for 30 days.</div>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">The rent ledger</h2>
+  <p>Each lease has a ledger that both the tenant and the landlord can see: every invoice is a debit, every confirmed payment a credit, with the running balance. Export it to Excel or print it as PDF.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:100mm" src="img/tenant-ledger.jpg" alt=""></div>
+    <figcaption>Rent ledger for a tenant: totals at the top, a “Pay” shortcut for unpaid invoices, and receipt links on each payment.</figcaption></figure>
+  <h3>Automatic reminders</h3>
+  <table>
+    <tr><th>When</th><th>Tenant receives</th><th>Owner &amp; managers receive</th></tr>
+    <tr><td>New invoice issued</td><td>Invoice amount and due date</td><td>—</td></tr>
+    <tr><td>3 days before due</td><td>“Rent due in 3 days”</td><td>—</td></tr>
+    <tr><td>Due date</td><td>“Rent is due today”</td><td>—</td></tr>
+    <tr><td>1, 3, 7, 14, 30 days late</td><td>“Rent overdue”</td><td>Overdue alert on day 1 and day 7</td></tr>
+    <tr><td>Payment confirmed</td><td>“Payment successful” + receipt</td><td>“Rent received”</td></tr>
+  </table>
+</section>
+
+<!-- ============================ 7 MAINTENANCE ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">7</span><h1>Maintenance &amp; service providers</h1></div>
+  <div class="flow"><span>Submitted</span><i>→</i><span>Assigned</span><i>→</i><span>Scheduled / In progress</span><i>→</i><span class="o">Resolved</span><i>→ tenant confirms →</i><span class="g">Closed</span></div>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:100mm" src="img/manager-maintenance.jpg" alt=""></div>
+    <figcaption>A maintenance request seen by the manager. The Service provider panel lists providers; ★ marks those offering this type of work, ✓ those verified by Terra.</figcaption></figure>
+  <ol class="steps">
+    <li>The tenant reports the problem with a description, priority and photo. The manager is alerted (red for emergencies).</li>
+    <li>The manager <strong>assigns a service provider</strong>, optionally with a visit time. The technician and tenant are both told, including the technician’s phone number.</li>
+    <li>The technician updates the job (scheduled, in progress, on hold, resolved) and records what was done and the cost.</li>
+    <li>The tenant confirms the repair and rates it 1–5 — or reopens it if the problem remains.</li>
+  </ol>
+  <div class="tip"><strong>Build your network</strong><em>Tools → Service Providers</em>: add plumbers, electricians, cleaners and others with their categories. Tick “Give them a technician login” so they can receive and update jobs themselves.</div>
+</section>
+
+<!-- ============================ 8 INSPECTIONS ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">8</span><h1>Move-in &amp; move-out inspections</h1></div>
+  <p class="lead">A careful move-in record protects both sides and makes the deposit refund quick and fair.</p>
+  <h3>Move-in</h3>
+  <ol class="steps">
+    <li>From the lease page choose <strong>Start move-in inspection</strong>. Terra builds a room-by-room checklist from the unit (bedrooms, bathrooms) and its inventory.</li>
+    <li>Walk through the unit on a phone. Rate each item (Excellent → Missing), add notes, take photos with the camera, record meter readings and keys.</li>
+    <li><strong>Save &amp; send to tenant</strong>. The tenant confirms the report — or disagrees and says why, and the manager updates and resends it.</li>
+    <li>Tenants without a Terra login sign the printed report; the manager records “confirmed in person”.</li>
+  </ol>
+  <h3>Move-out and deposit settlement</h3>
+  <p>The move-out inspection uses the same checklist and shows each item side by side with its move-in condition. Add a deduction next to any item that is worse; Terra calculates the refund. Once the tenant confirms, record the refund with its Mobile Money or bank reference.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:110mm" src="img/manager-inspection-moveout.jpg" alt=""></div>
+    <figcaption>A completed move-out: two items worse than at move-in, RWF 75,000 deducted, RWF 505,000 refunded with the MTN MoMo reference.</figcaption></figure>
+</section>
+
+<!-- ============================ 9 COMMUNICATION ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">9</span><h1>Communication &amp; notifications</h1></div>
+  <p class="lead">Messages replace scattered WhatsApp threads: every conversation is kept with the property and unit it concerns.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:68mm" src="img/manager-messages.jpg" alt=""></div>
+    <figcaption>Messages: the inbox on the left, the conversation on the right, linked to Kacyiru Heights, Unit A201.</figcaption></figure>
+  <div class="cols">
+    <div class="card"><h4>Direct messages</h4><em>New message</em>: choose the person (tenants can only reach their own landlord, managers and Terra support), a subject, and attach photos or documents.</div>
+    <div class="card"><h4>Announcements</h4><em>New announcement</em>: choose a property and every current tenant receives it — water cuts, security notices, drills. Tenants can read but not reply.</div>
+  </div>
+  <h3>Notifications</h3>
+  <p>The bell shows unread alerts; <em>Notifications</em> lists them all with filters (rent, payments, leases &amp; inspections, maintenance, applications, documents, messages). Alerts are also emailed unless the person turns email off. SMS is ready to switch on once Terra signs a gateway contract.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:50mm" src="img/tenant-notifications.jpg" alt=""></div>
+    <figcaption>A tenant’s notification centre, with the email preference on the right.</figcaption></figure>
+</section>
+
+<!-- ============================ 10 TENANTS ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">10</span><h1>Tenants</h1></div>
+  <p class="lead">Tenants manage their whole tenancy from a phone: lease, rent, receipts, repairs and messages.</p>
+  <h3>Finding a home</h3>
+  <p>The public website lists properties with photos, prices and available units, and a map of Rwanda for searching by location.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:58mm" src="img/public-map.jpg" alt=""></div>
+    <figcaption>Map of rentals: green pins have units available. Click a pin for the photo, starting rent and a link to the property.</figcaption></figure>
+  <h3>Applying and accepting the lease</h3>
+  <ol class="steps">
+    <li>Open a unit and choose <strong>Apply</strong>. Create an account or sign in, then fill in contact, tenancy and offer details.</li>
+    <li>Add your ID under <em>Documents → Identity verification</em>. Landlords need a verified ID before signing.</li>
+    <li>When the lease is ready you get an alert. Open <em>My Lease</em>, read the terms (and the contract), tick the box and <strong>Accept</strong>.</li>
+    <li>Pay the deposit and first month’s rent from your invoices. The manager confirms your move-in and the lease becomes active.</li>
+  </ol>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:54mm" src="img/tenant-lease-accept.jpg" alt=""></div>
+    <figcaption>A lease waiting for the tenant’s acceptance.</figcaption></figure>
+</section>
+
+<section class="section">
+  <h2 style="margin-top:0">Living in the home</h2>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:74mm" src="img/tenant-dashboard.jpg" alt=""></div>
+    <figcaption>Tenant dashboard: current home, balance, next payment and recent requests.</figcaption></figure>
+  <div class="cols">
+    <div class="card"><h4>Pay rent</h4><em>Rent Invoices</em> → open the invoice → <strong>Pay now</strong>. Receipts are kept under <em>Payments</em>.</div>
+    <div class="card"><h4>Report a problem</h4><em>Maintenance Requests → New</em>: describe it, set the priority, add a photo. Follow progress and confirm the repair at the end.</div>
+    <div class="card"><h4>Renew or give notice</h4>On your lease page, use <em>Request lease renewal</em> or <em>Give move-out notice</em>.</div>
+    <div class="card"><h4>Talk to the manager</h4><em>Messages → New message</em>. Announcements about your building also arrive here.</div>
+  </div>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:70mm" src="img/tenant-maintenance.jpg" alt=""></div>
+    <figcaption>When a repair is marked resolved, the tenant confirms it and gives a rating — or reports that it is still a problem.</figcaption></figure>
+</section>
+
+<!-- ============================ 11 OTHER ROLES ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">11</span><h1>Accountants, agents &amp; technicians</h1></div>
+  <h3>Accountant / finance officer</h3>
+  <p>The <em>Finance</em> workspace shows this month’s billed and collected rent, collection rate, outstanding and overdue amounts, expenses and net income for the properties assigned to the accountant, plus lists of payments, invoices and expenses with receipts and ledgers. Access is read-only.</p>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:68mm" src="img/accountant-finance.jpg" alt=""></div><figcaption>Finance overview for an accountant.</figcaption></figure>
+  <div class="cols">
+    <div class="keep">
+      <h3>Real estate agent</h3>
+      <p>Agents see their assigned properties with available units and share links (copy or WhatsApp), the applications for those properties, and their commissions. Managers record commissions — by default the agent’s rate times one month’s rent — and mark them paid with a reference.</p>
+    </div>
+    <div class="keep">
+      <h3>Service provider / technician</h3>
+      <p><em>My jobs</em> lists assigned work, most urgent first, with the address, map link and tenant phone number. Open a job to set a visit time, mark it in progress or on hold, and finish with what was done and the cost.</p>
+    </div>
+  </div>
+  <div class="cols">
+    <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:52mm" src="img/agent-dashboard.jpg" alt=""></div><figcaption>Agent dashboard.</figcaption></figure>
+    <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:52mm" src="img/technician-jobs.jpg" alt=""></div><figcaption>Technician job list.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============================ 12 REPORTS ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">12</span><h1>Reports, maps &amp; documents</h1></div>
+  <h3>Reports</h3>
+  <p><em>Tools → Reports</em> has twelve reports in four groups. Choose a property and dates, then export to <strong>Excel</strong> or <strong>PDF</strong>.</p>
+  <table>
+    <tr><th style="width:22%">Group</th><th>Reports</th></tr>
+    <tr><td>Property</td><td>Occupancy &amp; vacancy · Tenant list · Property performance</td></tr>
+    <tr><td>Financial</td><td>Rent collection by month · Outstanding rent · Income, expenses &amp; net income</td></tr>
+    <tr><td>Lease</td><td>Active leases · Expiring leases (90 days) · Renewals &amp; terminations</td></tr>
+    <tr><td>Maintenance</td><td>Open &amp; completed requests · Costs by property · Technician performance</td></tr>
+  </table>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:72mm" src="img/manager-reports.jpg" alt=""></div><figcaption>Property performance report: billed, collected, collection rate, expenses, net income and occupancy per property.</figcaption></figure>
+  <div class="cols">
+    <div class="card"><h4>Portfolio map</h4><em>Tools → Portfolio Map</em> shows your properties coloured by occupancy. Add GPS coordinates on the property form for properties that are missing.</div>
+    <div class="card"><h4>Documents</h4>Title deeds, signed contracts, insurance and tenant IDs are stored privately. Only people connected to that property, lease or tenant can open them.</div>
+  </div>
+</section>
+
+<!-- ============================ 13 SECURITY ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">13</span><h1>Security, privacy &amp; good practice</h1></div>
+  <div class="cols">
+    <div class="card"><h4>Two-step sign-in</h4><em>Security &amp; Language → Two-step sign-in → Turn on</em>. After the password, a 6-digit code is emailed. Required practice for administrators, owners, managers and accountants.</div>
+    <div class="card"><h4>Only what you need</h4>Every person sees only the properties, tenants and documents connected to them. Tenants never see other tenants’ information.</div>
+    <div class="card"><h4>Personal data</h4>ID numbers, phone numbers and documents are personal data under Rwanda’s data protection law. Don’t download or share them outside Terra without a reason.</div>
+    <div class="card"><h4>Audit trail</h4>Changes are recorded with the person and time. Don’t share accounts — everyone needs their own login.</div>
+  </div>
+  <figure><div class="frame"><div class="bar"></div><img class="crop" style="height:62mm" src="img/security.jpg" alt=""></div><figcaption>Security &amp; Language: language, two-step sign-in and API tokens for the mobile app.</figcaption></figure>
+  <h3>Good-practice checklist</h3>
+  <ul>
+    <li>Verify a tenant’s ID and run the move-in inspection <em>before</em> activating a lease.</li>
+    <li>Confirm offline payments only after checking the money has arrived.</li>
+    <li>Record expenses every month so net income in reports is accurate.</li>
+    <li>Use messages and announcements instead of private WhatsApp groups, so there is a shared history.</li>
+    <li>Sign out on shared computers.</li>
+  </ul>
+</section>
+
+<!-- ============================ 14 EXERCISES ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">14</span><h1>Hands-on training exercises</h1></div>
+  <p class="lead">Use the demo accounts (password <code>Terra@Demo2026</code>). Do them in order — some continue from the one before. Each takes 5–10 minutes.</p>
+
+  <div class="exercise"><h4>Exercise 1 — Explore the portfolio</h4><div class="who">Account: manager@terra-demo.test</div>
+    <ol><li>Open <em>Assigned Properties → Kacyiru Heights Apartments</em>. Click three unit tiles and compare their cards.</li><li>Open <em>Tools → Portfolio Map</em> and find Nyarutarama Villas.</li><li>Open <em>Reports → Income, expenses &amp; net income</em> and export it to Excel.</li></ol>
+    <div class="result">Expected: you can say how many units are free at Kacyiru Heights and what the portfolio earned this year.</div></div>
+
+  <div class="exercise"><h4>Exercise 2 — Pay rent and check the ledger</h4><div class="who">Account: tenant.aline@terra-demo.test</div>
+    <ol><li>Open the bell — there is an overdue rent alert. Open the invoice and choose <strong>Pay now</strong>.</li><li>Keep the amount, confirm the phone number, choose <strong>Pay</strong>, then press <strong>Approve</strong> in the test-mode box.</li><li>Open the receipt, then the <em>Rent ledger</em>.</li></ol>
+    <div class="result">Expected: the invoice shows Paid, the ledger balance falls to zero and a receipt is available.</div></div>
+
+  <div class="exercise"><h4>Exercise 3 — Confirm a repair</h4><div class="who">Account: tenant.aline@terra-demo.test</div>
+    <ol><li>Open <em>Maintenance Requests → Water heater not heating</em>.</li><li>In “Is it fixed?” give a rating and choose <strong>Yes, it’s fixed</strong>.</li></ol>
+    <div class="result">Expected: the request is Closed and the manager receives “Repair confirmed by tenant”.</div></div>
+
+  <div class="exercise"><h4>Exercise 4 — Assign an emergency job</h4><div class="who">Account: manager@terra-demo.test, then technician@terra-demo.test</div>
+    <ol><li>Open the emergency request <em>Bedroom socket sparking</em> and reassign it to <em>Kigali Plumbing Services</em> (for practice) with a visit time.</li><li>Sign in as the technician, open the job, set it to <em>Resolved</em> with a note and cost.</li></ol>
+    <div class="result">Expected: the tenant is told the job is resolved and is asked to confirm.</div></div>
+
+  <div class="exercise"><h4>Exercise 5 — Accept a lease</h4><div class="who">Account: tenant.kevin@terra-demo.test, then manager@terra-demo.test</div>
+    <ol><li>As Kevin, open <em>My Lease</em>, read the contract, tick the box and <strong>Accept</strong>.</li><li>As the manager, open the lease: the workflow now says to generate the first invoices.</li></ol>
+    <div class="result">Expected: the lease moves to “Awaiting activation”; the manager receives “Lease accepted by tenant”.</div></div>
+</section>
+
+<section>
+  <div class="exercise"><h4>Exercise 6 — Activate a lease</h4><div class="who">Account: manager.grace@terra-demo.test</div>
+    <ol><li>Open <em>Leases</em> → the lease for Unit 301, Kimihurura (Awaiting activation). The deposit is paid; first rent is not.</li><li>Record a payment for the first-rent invoice (<em>Rent Payments → Record payment</em>), confirm it and allocate it.</li><li>Back on the lease: <strong>Confirm move-in</strong>, then <strong>Activate lease</strong>.</li></ol>
+    <div class="result">Expected: the lease is Active and Unit 301 shows as occupied on the property page.</div></div>
+
+  <div class="exercise"><h4>Exercise 7 — Renew a lease</h4><div class="who">Account: manager@terra-demo.test</div>
+    <ol><li>Open the lease for Unit A301 (Kacyiru Heights). In the Tenancy panel there is a renewal request for 12 months.</li><li>Send an offer with a new end date and rent.</li></ol>
+    <div class="result">Expected: the request changes to “Offer sent” and the tenant is notified.</div></div>
+
+  <div class="exercise"><h4>Exercise 8 — Move-out review</h4><div class="who">Account: manager.bosco@terra-demo.test</div>
+    <ol><li>Open <em>Inspections</em> → the completed move-out at Musanze Volcano View 201.</li><li>Find the two items worse than at move-in and check the refund. Use <strong>Print / PDF</strong>.</li></ol>
+    <div class="result">Expected: you can explain the RWF 75,000 deduction to the tenant from the evidence.</div></div>
+
+  <div class="exercise"><h4>Exercise 9 — Send an announcement</h4><div class="who">Account: manager.grace@terra-demo.test</div>
+    <ol><li><em>Messages → New announcement</em>: choose Remera Business Plaza and announce a short power interruption.</li><li>Sign in as any Remera tenant (see <em>Tenants</em>) — or check the conversation’s recipient count.</li></ol>
+    <div class="result">Expected: every current tenant of the plaza receives the announcement and cannot reply to it.</div></div>
+
+  <div class="exercise"><h4>Exercise 10 — Administrator checks</h4><div class="who">Account: admin@terra-demo.test</div>
+    <ol><li>Read the Platform monitor alerts. Open <em>Audit Log</em> and filter by Lease.</li><li>Verify a pending tenant document under <em>Documents</em>.</li><li>Turn on two-step sign-in for your account under <em>Security &amp; Language</em>.</li></ol>
+    <div class="result">Expected: you can say who changed a lease and when, and the document shows Verified.</div></div>
+</section>
+
+<!-- ============================ 15 QUICK REFERENCE ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">15</span><h1>Quick reference &amp; troubleshooting</h1></div>
+  <div class="cols">
+    <div>
+      <h3 style="margin-top:0">Unit statuses</h3>
+      <table class="compact"><tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td><span class="badge b-green">Available</span></td><td>Free and listed publicly</td></tr>
+        <tr><td><span class="badge b-blue">Reserved</span></td><td>Held for a lease being signed</td></tr>
+        <tr><td><span class="badge">Occupied</span></td><td>Active lease</td></tr>
+        <tr><td><span class="badge b-amber">Under maintenance</span></td><td>Not rentable for now</td></tr>
+        <tr><td><span class="badge">Vacant / Inactive</span></td><td>Empty but not listed / retired</td></tr></table>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Invoice statuses</h3>
+      <table class="compact"><tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td><span class="badge">Unpaid</span></td><td>Issued, not yet due</td></tr>
+        <tr><td><span class="badge b-red">Overdue</span></td><td>Past due with a balance</td></tr>
+        <tr><td><span class="badge b-amber">Partially paid</span></td><td>Part received</td></tr>
+        <tr><td><span class="badge b-green">Paid</span></td><td>Fully settled</td></tr></table>
+    </div>
+  </div>
+  <div class="cols">
+    <div>
+      <h3>Maintenance statuses</h3>
+      <table class="compact"><tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td>Submitted / Open</td><td>Waiting for the manager</td></tr>
+        <tr><td>Scheduled</td><td>Visit booked</td></tr>
+        <tr><td>In progress / On hold</td><td>Being worked on / paused</td></tr>
+        <tr><td>Resolved</td><td>Fixed — waiting for tenant</td></tr>
+        <tr><td>Closed / Rejected</td><td>Confirmed fixed / declined</td></tr></table>
+    </div>
+    <div>
+      <h3>Inspection statuses</h3>
+      <table class="compact"><tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td>Draft</td><td>Being recorded</td></tr>
+        <tr><td>Awaiting tenant</td><td>Sent for confirmation</td></tr>
+        <tr><td>Disputed</td><td>Tenant disagreed — update &amp; resend</td></tr>
+        <tr><td>Completed</td><td>Confirmed by the tenant</td></tr></table>
+    </div>
+  </div>
+
+  <h3>Common questions</h3>
+  <table class="compact">
+    <tr><th style="width:38%">Problem</th><th>What to do</th></tr>
+    <tr><td>“Activate lease” is greyed out</td><td>Look at the Lease workflow checklist: invoices must be generated and paid, move-in confirmed, and the start date reached.</td></tr>
+    <tr><td>The tenant cannot see the lease</td><td>It is still a draft. Press <strong>Send to tenant</strong>.</td></tr>
+    <tr><td>I need to change terms after sending</td><td>Use <strong>Recall to draft</strong> (only before the tenant accepts), edit, then send again.</td></tr>
+    <tr><td>A payment shows “pending”</td><td>Offline payments need <strong>Confirm</strong> after you check the money arrived, then <strong>Allocate</strong>.</td></tr>
+    <tr><td>Online payment “not completed”</td><td>The tenant declined or did not approve in time. No money was taken — they can try again.</td></tr>
+    <tr><td>Nobody is receiving emails</td><td>Ask IT to check the background queue worker (the admin monitor warns when emails are stuck).</td></tr>
+    <tr><td>A property is missing from the map</td><td>Add latitude and longitude on the property form.</td></tr>
+    <tr><td>I forgot my password</td><td>Use <em>Forgot password</em> on the sign-in page.</td></tr>
+  </table>
+</section>
+
+<!-- ============================ APPENDIX ============================ -->
+<section class="section">
+  <div class="section-head"><span class="num">A</span><h1>Appendix: preparing a demo environment</h1></div>
+  <p class="lead">For IT staff preparing a training or review server. Never run these steps on the live platform.</p>
+  <ol class="steps">
+    <li>Create a separate demo database and point the demo server’s <code>.env</code> at it. Keep <code>PAYMENT_PROVIDER=sandbox</code>.</li>
+    <li>Run <code>php artisan migrate</code>, then <code>php artisan storage:link</code>.</li>
+    <li>Load the demo data: <code>php artisan db:seed --class=TerraDemoSeeder</code>. It prints the demo accounts when finished (about 20 seconds).</li>
+    <li>To reset after a training session: <code>php artisan migrate:fresh</code> and seed again.</li>
+  </ol>
+  <h3>What the demo dataset contains</h3>
+  <table>
+    <tr><th style="width:32%">Item</th><th>Details</th></tr>
+    <tr><td>Properties</td><td>7 properties, 68 units: Kacyiru Heights, Kimihurura Garden Residences, Nyarutarama Villas, Kicukiro Sunrise, Remera Business Plaza (shops &amp; offices), Musanze Volcano View, Rubavu Lakeside</td></tr>
+    <tr><td>People</td><td>Administrator, 5 owners (individuals and companies), 3 managers, accountant, agent, 6 service providers (3 with technician logins), about 60 tenants including 7 businesses</td></tr>
+    <tr><td>Tenancies</td><td>55 active leases, one at each other stage (draft, awaiting tenant, awaiting activation, terminated), 7 ending within 60 days</td></tr>
+    <tr><td>Money</td><td>Up to 18 months of invoices and payments (MTN MoMo, Airtel Money, Bank of Kigali, Equity, I&amp;M, BPR, cash), some arrears, 6 months of expenses</td></tr>
+    <tr><td>Operations</td><td>Maintenance requests at every stage, inspections including a settled move-out, contracts, renewal requests, a move-out notice, messages, announcements, notifications, documents, agent commissions</td></tr>
+  </table>
+  <div class="warn"><strong>Safety built in</strong>The seeder refuses to run in production unless <code>ALLOW_DEMO_SEED=true</code> is set, refuses to run twice, and sends no emails, SMS or notifications while loading.</div>
+</section>
+
+</body>
+</html>

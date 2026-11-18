@@ -511,14 +511,14 @@ $depositPaid = (float) $completedDepositPayments >= (float) $lease->deposit_amou
         </div>
 
         <div class="col-xl-4">
-            @include('leases._tenancy-panel', ['lease' => $lease])
-            @include('inspections._lease-panel', ['lease' => $lease])
             @include('leases._workflow-panel', ['lease' => $lease, 'method' => 'PATCH', 'routes' => [
                 'send' => 'property-manager.leases.send-for-signature', 'recall' => 'property-manager.leases.recall',
                 'invoices' => 'property-manager.leases.generate-required-invoices', 'moveIn' => 'property-manager.leases.confirm-move-in',
                 'activate' => 'property-manager.leases.activate', 'edit' => 'property-manager.leases.edit',
             ]])
 
+            @include('leases._tenancy-panel', ['lease' => $lease])
+            @include('inspections._lease-panel', ['lease' => $lease])
             @if($isActive)
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3">
