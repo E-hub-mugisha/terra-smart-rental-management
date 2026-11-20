@@ -33,8 +33,8 @@
             @if($digits)<a href="tel:+{{ $digits }}" class="sx-btn sx-btn-outline"><i class="bi bi-telephone"></i> Call</a>@endif
             <a href="{{ route('messages.create', ['to' => $member->user_id]) }}" class="sx-btn sx-btn-outline"><i class="bi bi-chat-dots"></i> Message</a>
             <a href="{{ route('admin.field-staff.edit', $member) }}" class="sx-btn sx-btn-outline"><i class="bi bi-pencil"></i> Edit</a>
-            <form method="POST" action="{{ route('admin.field-staff.reset-password', $member) }}" class="m-0" onsubmit="return confirm('Generate a new password and email it?');">@csrf
-                <button class="sx-btn sx-btn-outline"><i class="bi bi-key"></i> Reset password</button></form>
+            <form method="POST" action="{{ route('admin.field-staff.resend-credentials', $member) }}" class="m-0" onsubmit="return confirm('Send {{ $member->user->name }} new login details by email? Their current password will stop working.');">@csrf
+                <button class="sx-btn sx-btn-outline"><i class="bi bi-envelope-arrow-up"></i> Resend credentials</button></form>
             <form method="POST" action="{{ route('admin.field-staff.toggle', $member) }}" class="m-0">@csrf
                 <button class="sx-btn {{ $member->isActive() ? 'sx-btn-danger' : 'sx-btn-success' }}"><i class="bi {{ $member->isActive() ? 'bi-pause-circle' : 'bi-play-circle' }}"></i> {{ $member->isActive() ? 'Suspend' : 'Reactivate' }}</button></form>
         </div>
@@ -91,6 +91,37 @@
         </div>
     </div>
     <div class="col-xl-4">
+        @php $lastLogin = $activity->firstWhere('event', 'login'); @endphp
+        <div class="sx-card mb-3" id="credentials">
+            <div class="sx-card-head"><h2><i class="bi bi-key me-1"></i> Login credentials</h2></div>
+            <div class="sx-card-body">
+                <label class="form-label small sx-muted mb-1" for="fsUsername">Username (sign-in email)</label>
+                <div class="input-group input-group-sm mb-3">
+                    <input type="text" id="fsUsername" class="form-control font-monospace" value="{{ $member->user->email }}" readonly>
+                    <button class="btn btn-outline-secondary" type="button" data-copy-field="#fsUsername" aria-label="Copy username"><i class="bi bi-clipboard"></i></button>
+                </div>
+
+                <label class="form-label small sx-muted mb-1">Password</label>
+                <div class="small mb-3 p-2 rounded" style="background:var(--terra-soft,#f5f7fb)">
+                    <i class="bi bi-shield-lock"></i> Stored encrypted — nobody, including admins, can read it.
+                    To give the staff member a password, resend credentials or set a new one; it is shown to you once.
+                </div>
+
+                <dl class="sx-dl mb-3">
+                    <dt>Last sign-in</dt><dd>{{ $lastLogin?->created_at?->format('d M Y H:i') ?? 'Never signed in' }}</dd>
+                    <dt>Account</dt><dd>{{ $member->isActive() ? 'Can sign in' : 'Suspended — cannot sign in' }}</dd>
+                </dl>
+
+                <div class="d-grid gap-2">
+                    <form method="POST" action="{{ route('admin.field-staff.resend-credentials', $member) }}" class="d-grid" onsubmit="return confirm('Send {{ $member->user->name }} new login details by email? Their current password will stop working.');">
+                        @csrf
+                        <button class="sx-btn sx-btn-primary justify-content-center"><i class="bi bi-envelope-arrow-up"></i> Resend credentials by email</button>
+                    </form>
+                    <button type="button" class="sx-btn sx-btn-outline justify-content-center" data-bs-toggle="modal" data-bs-target="#setPasswordModal"><i class="bi bi-pencil-square"></i> Set password manually</button>
+                </div>
+            </div>
+        </div>
+
         <div class="sx-card">
             <div class="sx-card-head"><h2>Recent activity</h2></div>
             <div class="sx-card-body">
@@ -111,4 +142,47 @@
         </div>
     </div>
 </div>
+
+{{-- Set password --}}
+<div class="modal fade" id="setPasswordModal" tabindex="-1" aria-labelledby="setPasswordLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" action="{{ route('admin.field-staff.password', $member) }}" class="modal-content">
+            @csrf @method('PUT')
+            <div class="modal-header">
+                <h5 class="modal-title" id="setPasswordLabel">Set a password for {{ $member->user->name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label" for="spPassword">New password</label>
+                @include('admin.field-staff._password-input', ['id' => 'spPassword', 'name' => 'password', 'required' => true])
+                <div class="form-check mt-3">
+                    <input type="hidden" name="send_email" value="0">
+                    <input class="form-check-input" type="checkbox" name="send_email" value="1" id="spEmail" checked>
+                    <label class="form-check-label" for="spEmail">Email the new login details to {{ $member->user->email }}</label>
+                </div>
+                <p class="small sx-muted mt-2 mb-0">The current password stops working immediately. You will see the new password once after saving.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="sx-btn sx-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <button class="sx-btn sx-btn-primary"><i class="bi bi-check2-circle"></i> Save password</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.querySelectorAll('[data-copy-field]').forEach(function (b) {
+    b.addEventListener('click', function () {
+        var v = document.querySelector(b.dataset.copyField).value;
+        if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(v);
+        b.querySelector('i').className = 'bi bi-check2';
+        setTimeout(function () { b.querySelector('i').className = 'bi bi-clipboard'; }, 1500);
+    });
+});
+@if($errors->has('password'))
+document.addEventListener('DOMContentLoaded', function () { if (window.bootstrap) new bootstrap.Modal(document.getElementById('setPasswordModal')).show(); });
+@endif
+</script>
+@endpush

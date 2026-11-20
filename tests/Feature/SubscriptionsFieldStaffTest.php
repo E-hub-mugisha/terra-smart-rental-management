@@ -150,6 +150,57 @@ class SubscriptionsFieldStaffTest extends TestCase
         $this->actingAs($staffUser->fresh())->get(route('field-staff.dashboard'))->assertRedirect(route('login'));
     }
 
+    public function test_admin_sees_resends_and_sets_field_staff_credentials(): void
+    {
+        // Admin sets the password and chooses not to email it: details are shown once.
+        $this->actingAs($this->admin)->post(route('admin.field-staff.store'), [
+            'name' => 'Grace Field', 'email' => 'grace.field@example.com', 'phone' => '0788 555 111', 'status' => 'active',
+            'password_mode' => 'manual', 'password' => 'Kigali2026x', 'send_email' => '0',
+        ])->assertRedirect()->assertSessionHas('issued_credentials', fn ($c) => $c['username'] === 'grace.field@example.com' && $c['password'] === 'Kigali2026x' && $c['emailed'] === false);
+        Mail::assertNotSent(FieldStaffAccountCreated::class);
+
+        $member = FieldStaff::whereHas('user', fn ($q) => $q->where('email', 'grace.field@example.com'))->firstOrFail();
+
+        // The one-time panel renders with username and password on the next page.
+        $this->actingAs($this->admin)->withSession(['issued_credentials' => ['name' => 'Grace Field', 'username' => 'grace.field@example.com', 'password' => 'Kigali2026x', 'emailed' => false, 'role' => 'field staff', 'login_url' => route('login')]])
+            ->get(route('admin.field-staff.show', $member))->assertOk()
+            ->assertHeader('Cache-Control', 'must-revalidate, no-cache, no-store, private')
+            ->assertSee('Login details for Grace Field')->assertSee('Kigali2026x')->assertSee('Resend credentials by email');
+
+        // ...and the staff member can sign in with it.
+        auth()->logout();
+        $this->post(route('login'), ['email' => 'grace.field@example.com', 'password' => 'Kigali2026x'])->assertRedirect(route('dashboard'));
+        auth()->logout();
+
+        // Resend: a new password is generated, emailed and shown once.
+        $this->actingAs($this->admin)->post(route('admin.field-staff.resend-credentials', $member))
+            ->assertSessionHas('success')->assertSessionHas('issued_credentials', fn ($c) => $c['emailed'] === true && strlen($c['password']) === 12);
+        Mail::assertSent(FieldStaffAccountCreated::class, fn ($m) => $m->hasTo('grace.field@example.com') && $m->isReset);
+        $this->assertFalse(\Illuminate\Support\Facades\Hash::check('Kigali2026x', $member->user->fresh()->password), 'the old password stops working');
+
+        // Set password manually from the profile.
+        $this->actingAs($this->admin)->put(route('admin.field-staff.password', $member), ['password' => 'Musanze2026y', 'send_email' => '0'])
+            ->assertSessionHas('issued_credentials', fn ($c) => $c['password'] === 'Musanze2026y');
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('Musanze2026y', $member->user->fresh()->password));
+        $this->actingAs($this->admin)->put(route('admin.field-staff.password', $member), ['password' => 'short'])->assertSessionHasErrors('password');
+
+        // Editing without choosing a new password keeps the current one.
+        $this->actingAs($this->admin)->put(route('admin.field-staff.update', $member), [
+            'name' => 'Grace Field', 'email' => 'grace.field@example.com', 'phone' => '+250788555111', 'status' => 'active', 'password_mode' => 'keep',
+        ])->assertSessionMissing('issued_credentials');
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('Musanze2026y', $member->user->fresh()->password));
+
+        // Field staff never see the passwords of people they register.
+        $fieldUser = $member->user->fresh();
+        $this->actingAs($fieldUser)->post(route('field-staff.owners.store'), [
+            'owner_type' => 'individual', 'name' => 'Quiet Owner', 'email' => 'quiet.owner@example.com', 'country' => 'Rwanda',
+        ])->assertSessionMissing('issued_credentials');
+
+        // Owner resend by an admin shows the details too.
+        $this->actingAs($this->admin)->post(route('admin.owners.resend-credentials', $this->owner))
+            ->assertSessionHas('issued_credentials', fn ($c) => $c['username'] === $this->ownerUser->email);
+    }
+
     public function test_other_roles_cannot_use_the_field_portal_or_admin_subscriber_pages(): void
     {
         $this->actingAs($this->ownerUser)->get(route('field-staff.dashboard'))->assertForbidden();

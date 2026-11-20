@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: ['payments/callback/*']);
 
         // Per-user language (brief §23).
-        $middleware->web(append: [\App\Http\Middleware\SetLocale::class, \App\Http\Middleware\RestrictFieldStaff::class]);
+        $middleware->web(append: [\App\Http\Middleware\SetLocale::class, \App\Http\Middleware\RestrictFieldStaff::class, \App\Http\Middleware\NoStoreWhenShowingCredentials::class]);
         $middleware->api(append: [\App\Http\Middleware\SetLocale::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

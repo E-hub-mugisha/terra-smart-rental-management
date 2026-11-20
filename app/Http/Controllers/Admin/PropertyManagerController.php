@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\ManagerAccountCreated;
 use App\Models\PropertyManager;
 use App\Models\User;
+use App\Support\IssuedCredentials;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -95,6 +96,7 @@ class PropertyManagerController extends Controller
 
         $manager->load('user:id,name,email');
         $mailSent = $this->sendCredentials($manager, $password);
+        IssuedCredentials::flash($manager->user->name, $manager->user->email, $password, $mailSent, 'manager');
         $this->registered($manager);
 
         return redirect()
@@ -176,12 +178,13 @@ class PropertyManagerController extends Controller
         $manager->user->forceFill(['password' => Hash::make($password)])->save();
 
         $sent = $this->sendCredentials($manager, $password, reset: true);
+        IssuedCredentials::flash($manager->user->name, $manager->user->email, $password, $sent, 'manager');
 
         return back()->with(
             $sent ? 'success' : 'error',
             $sent
                 ? "New credentials were emailed to {$manager->user->email}."
-                : 'The password was reset, but the email could not be sent. Check your mail settings.'
+                : 'The password was reset, but the email could not be sent. Share the login details below directly.'
         );
     }
 

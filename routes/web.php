@@ -779,7 +779,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/{fieldStaff}/edit', 'edit')->name('edit');
         Route::put('/{fieldStaff}', 'update')->name('update');
         Route::post('/{fieldStaff}/toggle', 'toggle')->name('toggle');
-        Route::post('/{fieldStaff}/reset-password', 'resetPassword')->middleware('throttle:5,1')->name('reset-password');
+        Route::post('/{fieldStaff}/resend-credentials', 'resendCredentials')->middleware('throttle:10,1')->name('resend-credentials');
+        Route::put('/{fieldStaff}/password', 'setPassword')->middleware('throttle:10,1')->name('password');
     });
 });
 

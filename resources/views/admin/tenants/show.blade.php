@@ -529,6 +529,14 @@
                 <i class="bi bi-arrow-left me-1"></i> Back to Tenants
             </a>
 
+            @if($tenant->user)
+                <form method="POST" action="{{ route('admin.tenants.resend-credentials', $tenant) }}" class="m-0"
+                      onsubmit="return confirm('Send {{ $tenant->full_name }} new login details by email? Their current password will stop working.');">
+                    @csrf
+                    <button class="btn btn-terra-outline"><i class="bi bi-envelope-arrow-up me-1"></i> Resend credentials</button>
+                </form>
+            @endif
+
             <a href="{{ route('admin.tenants.edit', $tenant) }}"
                class="btn btn-terra">
                 <i class="bi bi-pencil-square me-1"></i> Edit Tenant

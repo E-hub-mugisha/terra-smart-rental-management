@@ -1003,6 +1003,8 @@
                     </div>
                 @endif
 
+                @include('partials.issued-credentials')
+
                 @if (session('warning'))
                     <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm" role="alert">
                         <i class="bi bi-exclamation-triangle me-2"></i>{{ session('warning') }}

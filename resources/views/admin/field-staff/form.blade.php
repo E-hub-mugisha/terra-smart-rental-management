@@ -53,6 +53,32 @@
                     <label class="form-label" for="notes">Notes</label>
                     <textarea id="notes" name="notes" rows="3" maxlength="2000" class="form-control">{{ old('notes', $member->notes) }}</textarea>
                 </div>
+                {{-- Login credentials --}}
+                @php $mode = old('password_mode', $editing ? 'keep' : 'auto'); @endphp
+                <div class="col-12">
+                    <hr class="my-1">
+                    <h3 class="h6 fw-bold mt-2 mb-1"><i class="bi bi-key me-1"></i> Login credentials</h3>
+                    <p class="small sx-muted mb-2">The staff member signs in with <strong>their email address as username</strong> and the password below.</p>
+                    <div class="d-flex flex-wrap gap-3 mb-2" role="radiogroup" aria-label="Password">
+                        @if($editing)
+                            <div class="form-check"><input class="form-check-input" type="radio" name="password_mode" id="pwKeep" value="keep" @checked($mode === 'keep')><label class="form-check-label" for="pwKeep">Keep current password</label></div>
+                        @else
+                            <div class="form-check"><input class="form-check-input" type="radio" name="password_mode" id="pwAuto" value="auto" @checked($mode === 'auto')><label class="form-check-label" for="pwAuto">Generate a secure password</label></div>
+                        @endif
+                        <div class="form-check"><input class="form-check-input" type="radio" name="password_mode" id="pwManual" value="manual" @checked($mode === 'manual')><label class="form-check-label" for="pwManual">{{ $editing ? 'Set a new password' : 'Set the password myself' }}</label></div>
+                    </div>
+                    <div id="pwManualBox" @if($mode !== 'manual') hidden @endif>
+                        <label class="form-label small mb-1" for="fsPassword">Password</label>
+                        @include('admin.field-staff._password-input', ['id' => 'fsPassword', 'name' => 'password'])
+                    </div>
+                    <div class="form-check mt-2" id="pwEmailBox" @if($editing && $mode !== 'manual') hidden @endif>
+                        <input type="hidden" name="send_email" value="0">
+                        <input class="form-check-input" type="checkbox" name="send_email" value="1" id="fsSendEmail" @checked(old('send_email', '1') === '1')>
+                        <label class="form-check-label" for="fsSendEmail">Email the login details to the staff member</label>
+                    </div>
+                    <p class="small sx-muted mt-1 mb-0">After saving, the username and password are shown to you once so you can share them in person.</p>
+                </div>
+
                 <div class="col-12 d-flex justify-content-end gap-2">
                     <a href="{{ route('admin.field-staff.index') }}" class="sx-btn sx-btn-outline">Cancel</a>
                     <button class="sx-btn sx-btn-primary"><i class="bi bi-check2-circle"></i> {{ $editing ? 'Save changes' : 'Create account' }}</button>
@@ -76,3 +102,19 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    var box = document.getElementById('pwManualBox'), email = document.getElementById('pwEmailBox'), editing = {{ $editing ? 'true' : 'false' }};
+    document.querySelectorAll('input[name="password_mode"]').forEach(function (r) {
+        r.addEventListener('change', function () {
+            var manual = r.value === 'manual' && r.checked;
+            box.hidden = !manual;
+            document.getElementById('fsPassword').required = manual;
+            if (editing) email.hidden = !manual;
+        });
+    });
+})();
+</script>
+@endpush

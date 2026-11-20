@@ -44,7 +44,14 @@
                     <td class="sx-num"><strong>{{ $m->owners_month_count + $m->managers_month_count }}</strong></td>
                     <td class="small">{{ $m->last_active_at?->diffForHumans() ?? 'Never' }}</td>
                     <td><span class="sx-pill {{ $m->isActive() ? 'success' : 'danger' }}">{{ \App\Models\FieldStaff::STATUSES[$m->status] ?? $m->status }}</span></td>
-                    <td class="text-end"><a href="{{ route('admin.field-staff.show', $m) }}" class="btn btn-sm btn-light">Open</a></td>
+                    <td class="text-end text-nowrap">
+                        <form method="POST" action="{{ route('admin.field-staff.resend-credentials', $m) }}" class="d-inline" onsubmit="return confirm('Send {{ $m->user?->name }} new login details by email? Their current password will stop working.');">
+                            @csrf
+                            <button class="btn btn-sm btn-light" title="Resend credentials by email" aria-label="Resend credentials to {{ $m->user?->name }}"><i class="bi bi-envelope-arrow-up"></i></button>
+                        </form>
+                        <a href="{{ route('admin.field-staff.show', $m) }}#credentials" class="btn btn-sm btn-light" title="Login credentials" aria-label="Login credentials for {{ $m->user?->name }}"><i class="bi bi-key"></i></a>
+                        <a href="{{ route('admin.field-staff.show', $m) }}" class="btn btn-sm btn-light">Open</a>
+                    </td>
                 </tr>
             @empty
                 <tr><td colspan="9"><div class="sx-empty"><i class="bi bi-person-walking"></i>No field staff yet.</div></td></tr>

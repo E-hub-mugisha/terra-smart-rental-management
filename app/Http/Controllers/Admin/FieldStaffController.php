@@ -10,6 +10,7 @@ use App\Models\PropertyManager;
 use App\Models\PropertyOwner;
 use App\Models\User;
 use App\Rules\InternationalPhone;
+use App\Support\IssuedCredentials;
 use App\Support\Phone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 use Throwable;
 
@@ -68,7 +70,7 @@ class FieldStaffController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
-        $password = $this->generatePassword();
+        $password = $this->chosenPassword($request) ?? IssuedCredentials::generatePassword();
 
         try {
             $member = DB::transaction(function () use ($data, $password, $request) {
@@ -99,11 +101,14 @@ class FieldStaffController extends Controller
             return back()->withInput()->with('error', 'The field staff account could not be created. Nothing was saved.');
         }
 
-        $sent = $this->sendCredentials($member, $password);
+        $emailed = $request->boolean('send_email', true) && $this->sendCredentials($member, $password);
+        IssuedCredentials::flash($member->user->name, $member->user->email, $password, $emailed, 'field staff');
 
-        return redirect()->route('admin.field-staff.show', $member)->with('success', $sent
-            ? "Field staff account created. Credentials were emailed to {$member->user->email}."
-            : 'Field staff account created, but the credentials email could not be sent. Use "Reset password" once mail works.');
+        return redirect()->route('admin.field-staff.show', $member)->with('success', match (true) {
+            $emailed => "Field staff account created. Login details were emailed to {$member->user->email}.",
+            $request->boolean('send_email', true) => 'Field staff account created, but the email could not be sent. Share the login details below directly.',
+            default => 'Field staff account created. Share the login details below with the staff member.',
+        });
     }
 
     public function show(Request $request, FieldStaff $fieldStaff): View
@@ -148,9 +153,14 @@ class FieldStaffController extends Controller
     public function update(Request $request, FieldStaff $fieldStaff): RedirectResponse
     {
         $data = $this->validated($request, $fieldStaff);
+        $newPassword = $this->chosenPassword($request); // only when "set a new password" was chosen
 
-        DB::transaction(function () use ($fieldStaff, $data) {
-            $fieldStaff->user->forceFill(['name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'] ?? null])->save();
+        DB::transaction(function () use ($fieldStaff, $data, $newPassword) {
+            $account = ['name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'] ?? null];
+            if ($newPassword) {
+                $account['password'] = Hash::make($newPassword);
+            }
+            $fieldStaff->user->forceFill($account)->save();
             $fieldStaff->update([
                 'phone' => $data['phone'] ?? null,
                 'region' => $data['region'] ?? null,
@@ -160,7 +170,14 @@ class FieldStaffController extends Controller
             ]);
         });
 
-        return redirect()->route('admin.field-staff.show', $fieldStaff)->with('success', 'Field staff details updated.');
+        $message = 'Field staff details updated.';
+        if ($newPassword) {
+            $emailed = $request->boolean('send_email', true) && $this->sendCredentials($fieldStaff->fresh('user'), $newPassword, true);
+            IssuedCredentials::flash($fieldStaff->user->name, $fieldStaff->user->email, $newPassword, $emailed, 'field staff');
+            $message .= $emailed ? ' The new password was emailed.' : ' The new password is shown below.';
+        }
+
+        return redirect()->route('admin.field-staff.show', $fieldStaff)->with('success', $message);
     }
 
     public function toggle(FieldStaff $fieldStaff): RedirectResponse
@@ -170,21 +187,57 @@ class FieldStaffController extends Controller
         return back()->with('success', $fieldStaff->isActive() ? 'Account reactivated.' : 'Account suspended. The staff member can no longer sign in.');
     }
 
-    public function resetPassword(FieldStaff $fieldStaff): RedirectResponse
+    /**
+     * "Resend credentials": a new password is generated (the old one cannot be
+     * read back), emailed to the staff member and shown once to the admin.
+     */
+    public function resendCredentials(FieldStaff $fieldStaff): RedirectResponse
     {
-        $password = $this->generatePassword();
+        $password = IssuedCredentials::generatePassword();
         $fieldStaff->user->forceFill(['password' => Hash::make($password)])->save();
 
-        return $this->sendCredentials($fieldStaff, $password, true)
-            ? back()->with('success', "A new password was emailed to {$fieldStaff->user->email}.")
-            : back()->with('error', 'The password was reset but the email could not be sent. Check the mail settings and try again.');
+        $emailed = $this->sendCredentials($fieldStaff, $password, true);
+        IssuedCredentials::flash($fieldStaff->user->name, $fieldStaff->user->email, $password, $emailed, 'field staff');
+
+        return $emailed
+            ? back()->with('success', "New login details were emailed to {$fieldStaff->user->email}.")
+            : back()->with('error', 'A new password was set, but the email could not be sent. Share the login details below directly.');
+    }
+
+    /** The admin chooses the password (or generates one) and decides whether to email it. */
+    public function setPassword(Request $request, FieldStaff $fieldStaff): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string', Password::min(8)->letters()->numbers(), 'max:72'],
+            'send_email' => ['nullable', 'boolean'],
+        ]);
+
+        $password = (string) $request->input('password');
+        $fieldStaff->user->forceFill(['password' => Hash::make($password)])->save();
+
+        $emailed = $request->boolean('send_email', true) && $this->sendCredentials($fieldStaff, $password, true);
+        IssuedCredentials::flash($fieldStaff->user->name, $fieldStaff->user->email, $password, $emailed, 'field staff');
+
+        return back()->with('success', $emailed ? 'Password changed and emailed to the staff member.' : 'Password changed. Share the login details below.');
     }
 
     /* ------------------------------------------------------------------ */
 
+    /** The password typed by the admin when "set password manually" is chosen, otherwise null. */
+    private function chosenPassword(Request $request): ?string
+    {
+        return $request->input('password_mode') === 'manual' ? (string) $request->input('password') : null;
+    }
+
     private function validated(Request $request, ?FieldStaff $member = null): array
     {
         Phone::normalizeRequest($request, ['phone']);
+
+        $request->validate([
+            'password_mode' => ['nullable', Rule::in(['auto', 'manual', 'keep'])],
+            'password' => ['nullable', 'required_if:password_mode,manual', 'string', Password::min(8)->letters()->numbers(), 'max:72'],
+            'send_email' => ['nullable', 'boolean'],
+        ], ['password.required_if' => 'Type the password, or choose to generate one automatically.']);
 
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -217,14 +270,4 @@ class FieldStaffController extends Controller
         }
     }
 
-    private function generatePassword(): string
-    {
-        $alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
-        $password = '';
-        for ($i = 0; $i < 12; $i++) {
-            $password .= $alphabet[random_int(0, strlen($alphabet) - 1)];
-        }
-
-        return $password;
-    }
 }

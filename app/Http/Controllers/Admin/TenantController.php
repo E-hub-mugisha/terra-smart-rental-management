@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\TenantAccountCreated;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\IssuedCredentials;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -206,13 +207,16 @@ class TenantController extends Controller
 
         $tenant->user->forceFill(['password' => Hash::make($password)])->save();
 
-        if ($this->sendCredentials($tenant, $password, reset: true)) {
+        $sent = $this->sendCredentials($tenant, $password, reset: true);
+        IssuedCredentials::flash($tenant->full_name ?? $tenant->user->name, $tenant->user->email, $password, $sent, 'tenant');
+
+        if ($sent) {
             return back()->with('success', "New credentials were emailed to {$tenant->email}.");
         }
 
         return back()
             ->with('error', 'The password was reset, but the email could not be sent. '
-                . 'Check your mail settings, then try again.');
+                . 'Share the login details below directly.');
     }
 
     private function profileRules(Request $request): array
