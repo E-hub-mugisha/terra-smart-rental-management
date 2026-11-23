@@ -172,6 +172,13 @@ Route::middleware('auth')->group(function () {
             Route::get('/users', [UserController::class, 'index'])
                 ->name('users.index');
 
+            // Permanent delete of demo/test data with everything linked to it.
+            Route::delete('/purge/{type}/{id}', [App\Http\Controllers\Admin\PurgeController::class, 'destroy'])
+                ->whereIn('type', array_keys(App\Services\DataPurge::TYPES))
+                ->whereNumber('id')
+                ->middleware('throttle:30,1')
+                ->name('purge');
+
             Route::post('/users', [UserController::class, 'store'])
                 ->name('users.store');
 
@@ -239,6 +246,11 @@ Route::middleware('auth')->group(function () {
                 'store'
             ])->name('tenant-applications.store');
 
+            Route::delete('/tenant-applications/{tenantApplication}', [
+                TenantApplicationController::class,
+                'destroy'
+            ])->name('tenant-applications.destroy');
+
             Route::post(
                 'tenant-applications/{tenantApplication}/approve',
                 [TenantApplicationController::class, 'approve']
@@ -260,6 +272,9 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/leases/{lease}', [LeaseLifecycleController::class, 'show'])
                 ->name('leases.show');
+
+            Route::delete('/leases/{lease}', [LeaseLifecycleController::class, 'destroy'])
+                ->name('leases.destroy');
 
             Route::post('/leases/{lease}/send-to-tenant', [LeaseLifecycleController::class, 'sendToTenant'])
                 ->name('leases.send-to-tenant');
@@ -294,6 +309,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/payments/{payment}', [RentPaymentController::class, 'show'])
                 ->name('payments.show');
 
+            Route::delete('/payments/{payment}', [RentPaymentController::class, 'destroy'])
+                ->name('payments.destroy');
+
             Route::post('/payments/{payment}/confirm', [RentPaymentController::class, 'confirm'])
                 ->name('payments.confirm');
 
@@ -305,6 +323,9 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/rent-invoices/{rentInvoice}', [RentInvoiceController::class, 'show'])
                 ->name('rent-invoices.show');
+
+            Route::delete('/rent-invoices/{rentInvoice}', [RentInvoiceController::class, 'destroy'])
+                ->name('rent-invoices.destroy');
 
             Route::post(
                 '/rent-invoices/generate',
@@ -676,6 +697,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/service-providers', [App\Http\Controllers\ServiceProviderController::class, 'store'])->name('service-providers.store');
     Route::put('/service-providers/{serviceProvider}', [App\Http\Controllers\ServiceProviderController::class, 'update'])->name('service-providers.update');
     Route::post('/service-providers/{serviceProvider}/verify', [App\Http\Controllers\ServiceProviderController::class, 'verify'])->name('service-providers.verify');
+    Route::delete('/service-providers/{serviceProvider}', [App\Http\Controllers\ServiceProviderController::class, 'destroy'])->name('service-providers.destroy');
     Route::post('/maintenance/{maintenanceRequest}/assign', [App\Http\Controllers\MaintenanceWorkController::class, 'assign'])->name('maintenance.assign');
     Route::post('/maintenance/{maintenanceRequest}/tenant-confirm', [App\Http\Controllers\MaintenanceWorkController::class, 'tenantConfirm'])->name('maintenance.tenant-confirm');
 
@@ -757,6 +779,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             Route::get('/contracts/{contract}', 'show')->name('contracts.show');
             Route::get('/contracts/{contract}/edit', 'edit')->name('contracts.edit');
             Route::put('/contracts/{contract}', 'update')->name('contracts.update');
+            Route::delete('/contracts/{contract}', 'destroy')->name('contracts.destroy');
             Route::post('/contracts/{contract}/transition', 'transition')->name('contracts.transition');
             Route::post('/contracts/{contract}/invoices', 'issueInvoice')->name('contracts.invoices.store');
             Route::post('/contracts/{contract}/payments', 'recordPayment')->name('contracts.payments.store');
@@ -768,6 +791,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
             Route::get('/plans', 'plans')->name('plans');
             Route::post('/plans', 'storePlan')->name('plans.store');
             Route::put('/plans/{plan}', 'updatePlan')->name('plans.update');
+            Route::delete('/plans/{plan}', 'destroyPlan')->name('plans.destroy');
         });
     });
 
@@ -778,6 +802,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         Route::get('/{fieldStaff}', 'show')->name('show');
         Route::get('/{fieldStaff}/edit', 'edit')->name('edit');
         Route::put('/{fieldStaff}', 'update')->name('update');
+        Route::delete('/{fieldStaff}', 'destroy')->name('destroy');
         Route::post('/{fieldStaff}/toggle', 'toggle')->name('toggle');
         Route::post('/{fieldStaff}/resend-credentials', 'resendCredentials')->middleware('throttle:10,1')->name('resend-credentials');
         Route::put('/{fieldStaff}/password', 'setPassword')->middleware('throttle:10,1')->name('password');

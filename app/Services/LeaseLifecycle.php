@@ -84,6 +84,29 @@ class LeaseLifecycle
         });
     }
 
+    /**
+     * Staff: delete a lease that never took effect. Leases that are active,
+     * awaiting activation or have received money are kept for the record.
+     */
+    public function delete(Lease $lease): void
+    {
+        DB::transaction(function () use ($lease) {
+            $locked = $this->lock($lease);
+
+            if (in_array($locked->status, [self::ACTIVE, self::AWAITING_ACTIVATION], true)) {
+                $this->fail('An active or accepted lease cannot be deleted. Terminate it instead.');
+            }
+
+            if ($locked->payments()->exists() || $locked->invoices()->where('amount_paid', '>', 0)->exists()) {
+                $this->fail('This lease has recorded payments, so it cannot be deleted.');
+            }
+
+            $locked->invoices()->get()->each->delete();
+            $locked->delete();
+            $this->releaseUnitIfFree($locked);
+        });
+    }
+
     /** Tenant: accept the offered lease. */
     public function accept(Lease $lease, Tenant $tenant): Lease
     {

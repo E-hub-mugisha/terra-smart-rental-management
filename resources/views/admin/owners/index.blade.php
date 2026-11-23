@@ -599,6 +599,9 @@
                                                 </form>
                                             </li>
                                         @endif
+                                            <li>
+                                                <x-purge-button type="owner" :id="$owner->id" what="this owner, their properties" class="dropdown-item item-danger" />
+                                            </li>
                                     </ul>
                                 </div>
                             </td>

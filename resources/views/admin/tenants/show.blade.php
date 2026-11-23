@@ -541,6 +541,17 @@
                class="btn btn-terra">
                 <i class="bi bi-pencil-square me-1"></i> Edit Tenant
             </a>
+
+            <form method="POST" action="{{ route('admin.tenants.destroy', $tenant) }}" class="m-0"
+                  onsubmit="return confirm('Archive this tenant? Their rental history will be retained.');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-archive me-1"></i> Archive Tenant
+                </button>
+            </form>
+
+            <x-purge-button type="tenant" :id="$tenant->id" what="this tenant, their leases" />
         </div>
     </div>
 

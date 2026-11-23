@@ -76,7 +76,7 @@
 .ls-note.is-warn { color: var(--warn); font-weight: 700; }
 .ls-note.is-bad { color: var(--bad); font-weight: 700; }
 .ls-rent { color: var(--navy); font-weight: 800; white-space: nowrap; }
-.ls-act { display: flex; justify-content: flex-end; }
+.ls-act { display: flex; justify-content: flex-end; gap: 6px; }
 
 .ls-pill { display: inline-flex; align-items: center; gap: 5px; width: fit-content; padding: 3px 9px; border-radius: 999px; background: var(--wash); color: var(--mute); font-size: .7rem; font-weight: 700; white-space: nowrap; }
 .ls-pill::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
@@ -300,6 +300,15 @@
                         <div class="ls-act">
                             <a href="{{ route('admin.leases.show', $lease) }}" class="ls-btn {{ $lease->status === 'pending_activation' ? 'is-primary' : '' }}"
                                aria-label="Manage lease {{ $lease->lease_number }}">Manage</a>
+                            @unless(in_array($lease->status, ['active', 'pending_activation'], true))
+                                <form method="POST" action="{{ route('admin.leases.destroy', $lease) }}" class="d-inline m-0"
+                                      onsubmit="return confirm('Delete this lease? Its unpaid invoices will be deleted too.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="ls-btn text-danger" title="Delete lease"
+                                            aria-label="Delete lease {{ $lease->lease_number }}"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            @endunless
                         </div>
                     </article>
                 @endforeach

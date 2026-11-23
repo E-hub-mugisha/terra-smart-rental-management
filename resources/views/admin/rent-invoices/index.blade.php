@@ -331,6 +331,15 @@
                                     class="btn btn-sm btn-outline-primary">
                                     View
                                 </a>
+                                @if((float) $invoice->amount_paid <= 0)
+                                    <form method="POST" action="{{ route('admin.rent-invoices.destroy', $invoice) }}" class="d-inline"
+                                          onsubmit="return confirm('Delete this invoice?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete invoice"
+                                                aria-label="Delete invoice {{ $invoice->invoice_number }}"><i class="bi bi-trash3"></i></button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                         @empty

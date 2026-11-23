@@ -19,6 +19,15 @@
         @endif
         <a href="{{ route('admin.payments.index') }}"
            class="btn btn-outline-secondary">All Payments</a>
+        @unless($payment->allocations()->exists())
+            <form method="POST" action="{{ route('admin.payments.destroy', $payment) }}" class="d-inline ms-2"
+                  onsubmit="return confirm('Delete this payment record?');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash3 me-1"></i> Delete</button>
+            </form>
+        @endunless
+        <span class="ms-2"><x-purge-button type="payment" :id="$payment->id" what="this payment and its allocations" /></span>
     </div>
 
     @if(session('success'))

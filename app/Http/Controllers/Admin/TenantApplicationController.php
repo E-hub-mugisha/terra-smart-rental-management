@@ -77,6 +77,22 @@ class TenantApplicationController extends Controller
         );
     }
 
+    /**
+     * Delete an application that has not produced a lease.
+     */
+    public function destroy(TenantApplication $tenantApplication)
+    {
+        if ($tenantApplication->lease()->exists()) {
+            return back()->with('error', 'A lease was created from this application, so it cannot be deleted.');
+        }
+
+        $tenantApplication->delete();
+
+        return redirect()
+            ->route('admin.tenant-applications.index')
+            ->with('success', 'Application deleted successfully.');
+    }
+
     public function approve(Request $request, TenantApplication $tenantApplication)
     {
         $validated = $request->validate([

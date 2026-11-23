@@ -194,6 +194,23 @@ class SubscriptionContractController extends Controller
         return back()->with('success', "Invoice {$invoice->invoice_number} voided.");
     }
 
+    /** Delete a contract that has no recorded payments (its unpaid invoices go with it). */
+    public function destroy(SubscriptionContract $contract): RedirectResponse
+    {
+        if ($contract->payments()->exists()) {
+            return back()->with('error', 'Payments have been recorded on this contract, so it cannot be deleted. Terminate it instead.');
+        }
+
+        DB::transaction(function () use ($contract) {
+            $contract->invoices()->delete();
+            $contract->delete();
+        });
+
+        return redirect()
+            ->route('admin.subscriptions.contracts.index')
+            ->with('success', "Contract {$contract->contract_number} deleted.");
+    }
+
     /* ------------------------------------------------------------------ */
 
     private function validated(Request $request, ?SubscriptionContract $contract = null): array

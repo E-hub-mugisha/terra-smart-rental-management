@@ -181,6 +181,17 @@
                 @if($date), submitted {{ $date->format('d M Y') }} @endif
             </p>
         </div>
+        <div class="d-flex flex-wrap gap-2">
+            @unless($app->lease)
+                <form method="POST" action="{{ route('admin.tenant-applications.destroy', $app) }}" class="m-0"
+                      onsubmit="return confirm('Delete this application?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="ta-btn is-bad"><i class="bi bi-trash3"></i> Delete application</button>
+                </form>
+            @endunless
+            <x-purge-button type="application" :id="$app->id" what="this application" />
+        </div>
     </div>
 
     {{-- Flash messages --}}

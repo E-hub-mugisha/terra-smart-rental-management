@@ -37,6 +37,8 @@
                 <button class="sx-btn sx-btn-outline"><i class="bi bi-envelope-arrow-up"></i> Resend credentials</button></form>
             <form method="POST" action="{{ route('admin.field-staff.toggle', $member) }}" class="m-0">@csrf
                 <button class="sx-btn {{ $member->isActive() ? 'sx-btn-danger' : 'sx-btn-success' }}"><i class="bi {{ $member->isActive() ? 'bi-pause-circle' : 'bi-play-circle' }}"></i> {{ $member->isActive() ? 'Suspend' : 'Reactivate' }}</button></form>
+            <form method="POST" action="{{ route('admin.field-staff.destroy', $member) }}" class="m-0" onsubmit="return confirm('Delete this field staff account permanently? Owners and managers they registered keep their accounts, but will no longer show who registered them.');">@csrf @method('DELETE')
+                <button class="sx-btn sx-btn-outline text-danger"><i class="bi bi-trash3"></i> Delete</button></form>
         </div>
     </div>
 </div>

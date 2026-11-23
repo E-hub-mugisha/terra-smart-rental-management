@@ -44,6 +44,12 @@
                 <a href="{{ route('admin.subscriptions.contracts.edit', $contract) }}" class="sx-btn sx-btn-outline"><i class="bi bi-pencil"></i> Edit</a>
                 <button class="sx-btn sx-btn-danger" data-bs-toggle="modal" data-bs-target="#terminateModal"><i class="bi bi-x-octagon"></i> Terminate</button>
             @endif
+            @unless($contract->payments()->exists())
+                <form method="POST" action="{{ route('admin.subscriptions.contracts.destroy', $contract) }}" class="m-0"
+                      onsubmit="return confirm('Delete this contract? Its unpaid invoices will be deleted too.');">@csrf @method('DELETE')
+                    <button class="sx-btn sx-btn-outline text-danger"><i class="bi bi-trash3"></i> Delete</button></form>
+            @endunless
+            <x-purge-button type="contract" :id="$contract->id" what="this contract, its invoices and payments" class="sx-btn sx-btn-danger" />
         </div>
     </div>
     <div class="px-3 pb-3">

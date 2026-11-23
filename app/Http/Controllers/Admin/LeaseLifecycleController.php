@@ -144,6 +144,18 @@ class LeaseLifecycleController extends Controller
 
         return back()->with('success', 'Lease activated successfully. The unit is now marked as occupied.');
     }
+
+    /**
+     * Delete a lease that never took effect, with its unpaid invoices.
+     */
+    public function destroy(Lease $lease)
+    {
+        app(LeaseLifecycle::class)->delete($lease);
+
+        return redirect()
+            ->route('admin.leases.index')
+            ->with('success', 'Lease deleted successfully.');
+    }
     /**
      * Sum allocations belonging to confirmed payments only.
      */

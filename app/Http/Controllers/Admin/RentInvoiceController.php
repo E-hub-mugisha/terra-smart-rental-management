@@ -138,6 +138,22 @@ class RentInvoiceController extends Controller
     }
 
 
+    /**
+     * Delete an invoice that has not received any payment.
+     */
+    public function destroy(RentInvoice $rentInvoice)
+    {
+        if ((float) $rentInvoice->amount_paid > 0 || $rentInvoice->allocations()->exists()) {
+            return back()->with('error', 'This invoice has payments allocated to it, so it cannot be deleted.');
+        }
+
+        $rentInvoice->delete();
+
+        return redirect()
+            ->route('admin.rent-invoices.index')
+            ->with('success', "Invoice {$rentInvoice->invoice_number} deleted.");
+    }
+
     public function generate(Request $request, RentInvoiceGenerator $generator)
     {
         $result = $generator->generateDueInvoices();

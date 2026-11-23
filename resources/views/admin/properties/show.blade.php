@@ -370,12 +370,12 @@ $unitStatuses = \App\Models\Unit::STATUSES;
             <a href="{{ route('admin.properties.index') }}" class="tp-btn"><i class="bi bi-arrow-left"></i> All properties</a>
             <a href="{{ route('admin.properties.edit', $property) }}" class="tp-btn is-primary"><i class="bi bi-pencil-square"></i> Edit property</a>
 
-            @if($property->status !== 'inactive')
             <div class="dropdown">
                 <button type="button" class="tp-btn is-icon" data-bs-toggle="dropdown" aria-expanded="false" aria-label="More actions">
                     <i class="bi bi-three-dots"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end tp-menu">
+                    @if($property->status !== 'inactive')
                     <li>
                         <form method="POST" action="{{ route('admin.properties.destroy', $property) }}"
                               onsubmit="return confirm('Deactivate this property? Its records will be kept.')">
@@ -383,9 +383,13 @@ $unitStatuses = \App\Models\Unit::STATUSES;
                             <button type="submit" class="dropdown-item is-danger"><i class="bi bi-pause-circle"></i> Deactivate property</button>
                         </form>
                     </li>
+                    @endif
+                    <li>
+                        <x-purge-button type="property" :id="$property->id" what="this property, its buildings, units"
+                                        class="dropdown-item is-danger" />
+                    </li>
                 </ul>
             </div>
-            @endif
         </div>
     </div>
 

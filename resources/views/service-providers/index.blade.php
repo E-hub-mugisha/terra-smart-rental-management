@@ -47,6 +47,10 @@
                                     <form method="POST" action="{{ route('service-providers.verify', $p) }}">@csrf
                                         <input type="hidden" name="action" value="{{ $p->status === 'active' ? 'suspend' : 'activate' }}">
                                         <button class="btn btn-sm btn-light text-{{ $p->status === 'active' ? 'danger' : 'success' }}">{{ $p->status === 'active' ? 'Suspend' : 'Reactivate' }}</button></form>
+                                    <form method="POST" action="{{ route('service-providers.destroy', $p) }}"
+                                          onsubmit="return confirm('Delete this service provider permanently? Their technician login is removed too. Their jobs stay on record, unassigned.');">
+                                        @csrf @method('DELETE')
+                                        <button class="btn btn-sm btn-outline-danger" title="Delete provider" aria-label="Delete {{ $p->company_name }}"><i class="bi bi-trash3"></i></button></form>
                                 @endif
                             </div>
                         </div>

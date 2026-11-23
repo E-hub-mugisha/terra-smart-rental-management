@@ -188,6 +188,31 @@ class FieldStaffController extends Controller
     }
 
     /**
+     * Remove the staff member's login. Owners and managers they registered
+     * keep their accounts.
+     */
+    public function destroy(FieldStaff $fieldStaff): RedirectResponse
+    {
+        $name = $fieldStaff->user?->name ?? $fieldStaff->staff_number;
+
+        try {
+            DB::transaction(function () use ($fieldStaff) {
+                $user = $fieldStaff->user;
+                $fieldStaff->delete();
+                $user?->delete();
+            });
+        } catch (\Illuminate\Database\QueryException $exception) {
+            report($exception);
+
+            return back()->with('error', 'This account could not be deleted because other records depend on it. Suspend it instead.');
+        }
+
+        return redirect()
+            ->route('admin.field-staff.index')
+            ->with('success', "Field staff account for {$name} deleted.");
+    }
+
+    /**
      * "Resend credentials": a new password is generated (the old one cannot be
      * read back), emailed to the staff member and shown once to the admin.
      */

@@ -264,6 +264,43 @@ class SubscriptionsFieldStaffTest extends TestCase
         Carbon::setTestNow();
     }
 
+    public function test_admin_deletes_plans_contracts_and_field_staff_unless_history_depends_on_them(): void
+    {
+        $plan = SubscriptionPlan::create(['name' => 'Growth', 'code' => 'growth', 'billing_cycle' => 'monthly', 'price' => 50000, 'currency' => 'RWF']);
+        $unused = SubscriptionPlan::create(['name' => 'Spare', 'code' => 'spare', 'billing_cycle' => 'monthly', 'price' => 1000, 'currency' => 'RWF']);
+
+        // Unpaid contract: deleted together with its invoices.
+        $unpaid = $this->contract(['subscription_plan_id' => $plan->id]);
+        $this->actingAs($this->admin)->post(route('admin.subscriptions.contracts.transition', $unpaid), ['action' => 'activate']);
+        $this->assertGreaterThan(0, $unpaid->invoices()->count());
+        $this->actingAs($this->admin)->delete(route('admin.subscriptions.contracts.destroy', $unpaid))
+            ->assertRedirect(route('admin.subscriptions.contracts.index'));
+        $this->assertSoftDeleted($unpaid);
+        $this->assertSame(0, SubscriptionInvoice::where('subscription_contract_id', $unpaid->id)->count());
+
+        // Paid contract: kept.
+        $paid = $this->contract();
+        $this->actingAs($this->admin)->post(route('admin.subscriptions.contracts.transition', $paid), ['action' => 'activate']);
+        $this->actingAs($this->admin)->post(route('admin.subscriptions.contracts.payments.store', $paid), ['amount' => 1000, 'method' => 'mobile_money', 'reference' => 'X1']);
+        $this->actingAs($this->admin)->delete(route('admin.subscriptions.contracts.destroy', $paid))->assertSessionHas('error');
+        $this->assertNotSoftDeleted($paid);
+
+        // A plan referenced by any contract (even a deleted one) is kept; an unused one goes.
+        $this->actingAs($this->admin)->delete(route('admin.subscriptions.plans.destroy', $plan))->assertSessionHas('error');
+        $this->assertModelExists($plan);
+        $this->actingAs($this->admin)->delete(route('admin.subscriptions.plans.destroy', $unused))->assertSessionHas('success');
+        $this->assertModelMissing($unused);
+
+        // Field staff: login removed; owners they registered stay.
+        $staffUser = $this->fieldStaff();
+        $this->owner->update(['created_by' => $staffUser->id]);
+        $member = FieldStaff::where('user_id', $staffUser->id)->firstOrFail();
+        $this->actingAs($this->admin)->delete(route('admin.field-staff.destroy', $member))->assertRedirect(route('admin.field-staff.index'));
+        $this->assertModelMissing($member);
+        $this->assertModelMissing($staffUser);
+        $this->assertModelExists($this->owner);
+    }
+
     public function test_daily_run_expires_or_renews_contracts(): void
     {
         $expiring = $this->contract(['status' => 'active', 'start_date' => today()->subYear(), 'end_date' => today()->subDay(), 'amount' => 0]);

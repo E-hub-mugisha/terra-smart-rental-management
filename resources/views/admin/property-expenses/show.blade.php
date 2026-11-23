@@ -432,6 +432,9 @@
                             <i class="bi bi-trash3 me-1"></i>Delete expense
                         </button>
                     </form>
+                    <div class="d-grid mt-2">
+                        <x-purge-button type="expense" :id="$propertyExpense->id" what="this expense" class="btn btn-danger w-100" />
+                    </div>
                 </div>
             </div>
         </div>

@@ -370,6 +370,11 @@
                             </button>
                         </li>
                     @endif
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <x-purge-button type="owner" :id="$owner->id" what="this owner, their properties"
+                                        class="dropdown-item item-danger" />
+                    </li>
                 </ul>
             </div>
         </div>

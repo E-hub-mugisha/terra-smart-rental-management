@@ -186,6 +186,28 @@ class RentPaymentController extends Controller
             ->with('success', 'Payment confirmed. You can now allocate it to invoices.');
     }
 
+    /**
+     * Delete a payment that has not been allocated to any invoice.
+     */
+    public function destroy(RentPayment $payment)
+    {
+        DB::transaction(function () use ($payment) {
+            $locked = RentPayment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->allocations()->exists()) {
+                throw ValidationException::withMessages([
+                    'payment' => 'This payment is allocated to invoices, so it cannot be deleted.',
+                ]);
+            }
+
+            $locked->delete();
+        });
+
+        return redirect()
+            ->route('admin.payments.index')
+            ->with('success', 'Payment deleted successfully.');
+    }
+
     public function allocate(Request $request, RentPayment $payment)
     {
         $validated = $request->validate([

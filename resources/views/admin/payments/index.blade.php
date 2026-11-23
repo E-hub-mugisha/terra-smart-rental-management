@@ -142,6 +142,15 @@
                                    class="btn btn-sm btn-outline-primary">
                                     View
                                 </a>
+                                @if($payment->status !== 'confirmed')
+                                    <form method="POST" action="{{ route('admin.payments.destroy', $payment) }}" class="d-inline"
+                                          onsubmit="return confirm('Delete this payment record?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete payment"
+                                                aria-label="Delete payment {{ $payment->payment_number }}"><i class="bi bi-trash3"></i></button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

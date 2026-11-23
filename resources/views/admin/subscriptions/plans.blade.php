@@ -33,6 +33,11 @@
                                     @include('admin.subscriptions._plan-fields', ['plan' => $plan, 'prefix' => 'p' . $plan->id])
                                     <div class="col-12 d-grid"><button class="sx-btn sx-btn-primary justify-content-center">Save</button></div>
                                 </form>
+                                <form method="POST" action="{{ route('admin.subscriptions.plans.destroy', $plan) }}" class="d-grid mt-2"
+                                      onsubmit="return confirm('Delete this plan? Plans used by contracts cannot be deleted; retire them instead.');">
+                                    @csrf @method('DELETE')
+                                    <button class="sx-btn sx-btn-outline text-danger justify-content-center"><i class="bi bi-trash3"></i> Delete plan</button>
+                                </form>
                             </details>
                         </div>
                     </div>

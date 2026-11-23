@@ -22,7 +22,13 @@ class InvoiceBalance
         $invoice->update([
             'amount_paid' => $paid,
             'balance_due' => $balance,
-            'status' => $balance <= 0 ? 'paid' : ($paid > 0 ? 'partially_paid' : $invoice->status),
+            'status' => match (true) {
+                $balance <= 0 => 'paid',
+                $paid > 0 => 'partially_paid',
+                // Money was taken back off the invoice: it is open again.
+                in_array($invoice->status, ['paid', 'partially_paid'], true) => 'unpaid',
+                default => $invoice->status,
+            },
         ]);
     }
 }

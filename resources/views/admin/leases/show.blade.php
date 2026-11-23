@@ -48,6 +48,8 @@
 .ls-btn.is-ghost-ok:hover { background: var(--ok-bg); color: var(--ok); border-color: #b7e3c8; }
 .ls-btn.is-xs { min-height: 26px; padding: 3px 9px; font-size: .72rem; border-radius: 7px; }
 .ls-btn:disabled { opacity: .6; pointer-events: none; }
+.ls-btn.is-bad { color: var(--bad); border-color: var(--bad-line); }
+.ls-btn.is-bad:hover { background: var(--bad-bg); color: var(--bad); border-color: #eab7b2; }
 
 .ls-alert { display: flex; gap: 9px; align-items: flex-start; margin-bottom: 14px; padding: 10px 13px; border-radius: 10px; font-weight: 600; }
 .ls-alert.is-ok { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-line); }
@@ -214,6 +216,17 @@
                     $lease->unit ? 'Unit ' . $lease->unit->unit_number : null,
                 ])->filter()->implode(', ') }}
             </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            @if(! in_array($status, ['active', 'pending_activation'], true) && ! $lease->payments()->exists())
+                <form method="POST" action="{{ route('admin.leases.destroy', $lease) }}" class="m-0"
+                      onsubmit="return confirm('Delete this lease? Its unpaid invoices will be deleted too.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="ls-btn is-bad"><i class="bi bi-trash3"></i> Delete lease</button>
+                </form>
+            @endif
+            <x-purge-button type="lease" :id="$lease->id" what="this lease, its invoices and payments" class="btn btn-danger btn-sm" />
         </div>
     </div>
 

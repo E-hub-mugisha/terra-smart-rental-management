@@ -51,6 +51,11 @@
                         </form>
                         <a href="{{ route('admin.field-staff.show', $m) }}#credentials" class="btn btn-sm btn-light" title="Login credentials" aria-label="Login credentials for {{ $m->user?->name }}"><i class="bi bi-key"></i></a>
                         <a href="{{ route('admin.field-staff.show', $m) }}" class="btn btn-sm btn-light">Open</a>
+                        <form method="POST" action="{{ route('admin.field-staff.destroy', $m) }}" class="d-inline" onsubmit="return confirm('Delete this field staff account permanently? Owners and managers they registered keep their accounts.');">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-sm btn-light text-danger" title="Delete account" aria-label="Delete field staff {{ $m->user?->name }}"><i class="bi bi-trash3"></i></button>
+                        </form>
                     </td>
                 </tr>
             @empty

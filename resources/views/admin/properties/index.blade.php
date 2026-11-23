@@ -527,6 +527,9 @@
                                             </form>
                                         </li>
                                     @endif
+                                        <li>
+                                            <x-purge-button type="property" :id="$property->id" what="this property, its buildings, units" class="dropdown-item is-danger" />
+                                        </li>
                                 </ul>
                             </div>
                         </div>

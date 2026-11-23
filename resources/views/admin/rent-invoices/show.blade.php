@@ -23,6 +23,15 @@
                class="btn btn-primary">
                 <i class="bi bi-wallet2 me-1"></i> Rent Payments
             </a>
+            @if((float) $rentInvoice->amount_paid <= 0 && ! $rentInvoice->allocations()->exists())
+                <form method="POST" action="{{ route('admin.rent-invoices.destroy', $rentInvoice) }}" class="m-0"
+                      onsubmit="return confirm('Delete this invoice? This cannot be undone from the admin panel.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash3 me-1"></i> Delete</button>
+                </form>
+            @endif
+            <x-purge-button type="invoice" :id="$rentInvoice->id" what="this invoice and the payments applied to it" />
         </div>
     </div>
 

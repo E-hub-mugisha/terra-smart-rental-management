@@ -588,6 +588,9 @@
                                                 </form>
                                             </li>
                                         @endif
+                                            <li>
+                                                <x-purge-button type="manager" :id="$manager->id" what="this manager and their login" class="dropdown-item item-danger" />
+                                            </li>
                                     </ul>
                                 </div>
                             </td>

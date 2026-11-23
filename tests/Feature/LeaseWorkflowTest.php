@@ -180,6 +180,56 @@ class LeaseWorkflowTest extends TestCase
 
     /* ------------------------------------------------------------------ */
 
+    public function test_admin_deletes_unpaid_records_but_not_paid_ones(): void
+    {
+        // A sent-but-unpaid lease can be deleted; its invoices go with it and the unit is freed.
+        $lease = $this->draft();
+        $this->actingAs($this->admin)->post(route('admin.leases.send-to-tenant', $lease));
+        RentInvoice::forceCreate([
+            'lease_id' => $lease->id, 'tenant_id' => $lease->tenant_id, 'unit_id' => $lease->unit_id, 'invoice_number' => 'INV-X',
+            'billing_period_start' => now()->toDateString(), 'billing_period_end' => now()->addMonth()->toDateString(),
+            'issue_date' => now()->toDateString(), 'due_date' => now()->toDateString(),
+            'subtotal' => 1000, 'total_amount' => 1000, 'balance_due' => 1000,
+        ]);
+        $this->assertSame('reserved', $this->unit->fresh()->status);
+
+        $this->actingAs($this->admin)->delete(route('admin.leases.destroy', $lease))->assertRedirect(route('admin.leases.index'));
+        $this->assertSoftDeleted($lease);
+        $this->assertSame(0, RentInvoice::where('lease_id', $lease->id)->count());
+        $this->assertSame('available', $this->unit->fresh()->status);
+
+        // Once money is allocated, invoice, payment and lease are all kept.
+        $paid = $this->draft(['lease_number' => 'L-2']);
+        $this->actingAs($this->admin)->post(route('admin.leases.send-to-tenant', $paid));
+        $this->actingAs($this->tenantUser)->post(route('tenant-portal.leases.accept', $paid), ['accept_terms' => 1]);
+        $this->actingAs($this->admin)->post(route('admin.leases.generate-required-invoices', $paid));
+        $this->pay($paid, 'deposit');
+        $invoice = RentInvoice::where('lease_id', $paid->id)->where('invoice_type', 'deposit')->firstOrFail();
+        $payment = RentPayment::where('lease_id', $paid->id)->firstOrFail();
+
+        $this->actingAs($this->admin)->delete(route('admin.leases.destroy', $paid))->assertSessionHasErrors('lease');
+        $this->actingAs($this->admin)->delete(route('admin.rent-invoices.destroy', $invoice))->assertSessionHas('error');
+        $this->actingAs($this->admin)->delete(route('admin.payments.destroy', $payment))->assertSessionHasErrors('payment');
+        $this->assertNotSoftDeleted($paid);
+        $this->assertNotSoftDeleted($invoice);
+        $this->assertNotSoftDeleted($payment);
+
+        // An unpaid invoice on its own can be deleted.
+        $rent = RentInvoice::where('lease_id', $paid->id)->where('invoice_type', 'rent')->firstOrFail();
+        $this->actingAs($this->admin)->delete(route('admin.rent-invoices.destroy', $rent))->assertRedirect(route('admin.rent-invoices.index'));
+        $this->assertSoftDeleted($rent);
+
+        // Applications that produced a lease are kept; others can be deleted.
+        $application = TenantApplication::forceCreate([
+            'tenant_id' => $this->tenant->id, 'unit_id' => $this->unit->id, 'application_number' => 'APP-1', 'application_date' => now()->toDateString(), 'status' => 'pending',
+        ]);
+        $this->actingAs($this->admin)->delete(route('admin.tenant-applications.destroy', $application))->assertRedirect(route('admin.tenant-applications.index'));
+        $this->assertSoftDeleted($application);
+
+        // Non-admins cannot delete.
+        $this->actingAs($this->managerUser)->delete(route('admin.leases.destroy', $paid))->assertForbidden();
+    }
+
     private function draft(array $overrides = []): Lease
     {
         return Lease::forceCreate($overrides + [

@@ -1109,6 +1109,9 @@
                                             </button>
                                         </form>
                                     </li>
+                                    <li>
+                                        <x-purge-button type="tenant" :id="$tenant->id" what="this tenant, their leases" class="dropdown-item item-danger" />
+                                    </li>
                                 </ul>
                             </div>
                         </td>

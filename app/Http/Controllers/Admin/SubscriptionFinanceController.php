@@ -111,6 +111,17 @@ class SubscriptionFinanceController extends Controller
         return back()->with('success', 'Plan updated.');
     }
 
+    public function destroyPlan(SubscriptionPlan $plan): RedirectResponse
+    {
+        if ($plan->contracts()->withTrashed()->exists()) {
+            return back()->with('error', 'This plan is used by subscription contracts. Mark it inactive instead.');
+        }
+
+        $plan->delete();
+
+        return back()->with('success', 'Plan deleted.');
+    }
+
     private function planData(Request $request, ?SubscriptionPlan $plan = null): array
     {
         $data = $request->validate([

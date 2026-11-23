@@ -76,7 +76,7 @@
 .ta-note.is-warn { color: var(--warn); font-weight: 600; }
 .ta-note.is-bad { color: var(--bad); font-weight: 600; }
 .ta-rent { color: var(--navy); font-weight: 800; white-space: nowrap; }
-.ta-act { display: flex; justify-content: flex-end; }
+.ta-act { display: flex; justify-content: flex-end; gap: 6px; }
 
 .ta-pill { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 4px 10px; border-radius: 999px; background: var(--wash); color: var(--mute); font-size: .73rem; font-weight: 700; white-space: nowrap; }
 .ta-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
@@ -309,6 +309,15 @@
                                aria-label="{{ $isOpen ? 'Review' : 'View' }} application {{ $application->application_number }}">
                                 {{ $isOpen ? 'Review' : 'View' }}
                             </a>
+                            @if($application->status !== 'approved')
+                                <form method="POST" action="{{ route('admin.tenant-applications.destroy', $application) }}" class="d-inline m-0"
+                                      onsubmit="return confirm('Delete this application?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="ta-btn is-sm text-danger" title="Delete application"
+                                            aria-label="Delete application {{ $application->application_number }}"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            @endif
                         </div>
                     </article>
                 @endforeach

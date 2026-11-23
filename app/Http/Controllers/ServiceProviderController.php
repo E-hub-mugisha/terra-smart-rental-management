@@ -86,6 +86,38 @@ class ServiceProviderController extends Controller
         return back()->with('success', 'Provider ' . $action . ($action === 'verify' ? 'd' : ($action === 'suspend' ? 'ed' : 'd')) . '.');
     }
 
+    /**
+     * Admin: delete a provider completely, with their technician login.
+     * Their maintenance jobs stay on the property record, unassigned; jobs
+     * still in progress go back to "open" so they can be reassigned.
+     */
+    public function destroy(Request $request, ServiceProvider $serviceProvider)
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        $name = $serviceProvider->company_name;
+
+        DB::transaction(function () use ($serviceProvider) {
+            \App\Models\MaintenanceRequest::withTrashed()
+                ->where('service_provider_id', $serviceProvider->id)
+                ->whereIn('status', ['scheduled', 'in_progress'])
+                ->update(['status' => 'open']);
+
+            \App\Models\MaintenanceRequest::withTrashed()
+                ->where('service_provider_id', $serviceProvider->id)
+                ->update(['service_provider_id' => null, 'assigned_to' => null]);
+
+            $login = $serviceProvider->user;
+            $serviceProvider->delete();
+
+            // The technician login exists only for this provider.
+            if ($login && $login->role === 'technician' && ! ServiceProvider::where('user_id', $login->id)->exists()) {
+                $login->delete();
+            }
+        });
+
+        return redirect()->route('service-providers.index')->with('success', "{$name} was deleted.");
+    }
+
     private function createLogin(ServiceProvider $provider): void
     {
         $user = User::where('email', $provider->email)->first();
