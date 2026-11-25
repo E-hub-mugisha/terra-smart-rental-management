@@ -23,6 +23,7 @@ class PurgeController extends Controller
         'payment' => 'admin.payments.index',
         'expense' => 'admin.property-expenses.index',
         'contract' => 'admin.subscriptions.contracts.index',
+        'employee' => 'hr.employees.index',
     ];
 
     public function destroy(Request $request, string $type, int $id, DataPurge $purge): RedirectResponse

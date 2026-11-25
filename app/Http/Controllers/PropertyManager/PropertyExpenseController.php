@@ -113,6 +113,7 @@ class PropertyExpenseController extends Controller
             'taxes' => 'Taxes',
             'management_fee' => 'Management Fee',
             'landscaping' => 'Landscaping',
+            'Salaries' => 'Salaries',
             'other' => 'Other',
         ];
     }

@@ -78,6 +78,9 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\Inspection::class,
             \App\Models\Document::class,
             \App\Models\PaymentIntent::class,
+            \App\Models\Employee::class,
+            \App\Models\LeaveRequest::class,
+            \App\Models\PayrollRun::class,
         ] as $model) {
             $model::observe(\App\Observers\AuditObserver::class);
         }

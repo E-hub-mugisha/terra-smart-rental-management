@@ -698,6 +698,35 @@ Route::middleware('auth')->group(function () {
     Route::put('/service-providers/{serviceProvider}', [App\Http\Controllers\ServiceProviderController::class, 'update'])->name('service-providers.update');
     Route::post('/service-providers/{serviceProvider}/verify', [App\Http\Controllers\ServiceProviderController::class, 'verify'])->name('service-providers.verify');
     Route::delete('/service-providers/{serviceProvider}', [App\Http\Controllers\ServiceProviderController::class, 'destroy'])->name('service-providers.destroy');
+
+    // HR: property staff (owners/managers/admins) and Terra's own staff (admins).
+    Route::prefix('hr')->name('hr.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Hr\DashboardController::class, 'index'])->name('dashboard');
+        Route::resource('employees', App\Http\Controllers\Hr\EmployeeController::class);
+
+        Route::get('/attendance', [App\Http\Controllers\Hr\AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [App\Http\Controllers\Hr\AttendanceController::class, 'store'])->name('attendance.store');
+
+        Route::controller(App\Http\Controllers\Hr\LeaveController::class)->prefix('leave')->name('leave.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store')->name('store');
+            Route::post('/{leave}/decide', 'decide')->name('decide');
+            Route::delete('/{leave}', 'destroy')->name('destroy');
+        });
+
+        Route::controller(App\Http\Controllers\Hr\PayrollController::class)->prefix('payroll')->name('payroll.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{run}', 'show')->name('show');
+            Route::put('/{run}', 'update')->name('update');
+            Route::delete('/{run}/payslips/{payslip}', 'removeLine')->name('payslips.destroy');
+            Route::post('/{run}/approve', 'approve')->name('approve');
+            Route::post('/{run}/reopen', 'reopen')->name('reopen');
+            Route::post('/{run}/pay', 'pay')->name('pay');
+            Route::delete('/{run}', 'destroy')->name('destroy');
+        });
+        Route::get('/payslips/{payslip}', [App\Http\Controllers\Hr\PayrollController::class, 'payslip'])->name('payslips.show');
+    });
     Route::post('/maintenance/{maintenanceRequest}/assign', [App\Http\Controllers\MaintenanceWorkController::class, 'assign'])->name('maintenance.assign');
     Route::post('/maintenance/{maintenanceRequest}/tenant-confirm', [App\Http\Controllers\MaintenanceWorkController::class, 'tenantConfirm'])->name('maintenance.tenant-confirm');
 

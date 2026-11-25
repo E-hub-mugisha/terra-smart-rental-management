@@ -24,6 +24,7 @@ class PropertyExpenseController extends Controller
             'Management Fees',
             'Gardening',
             'Supplies',
+            'Salaries',
             'Other',
         ];
     }

@@ -606,6 +606,15 @@
                 ['label' => 'Lease Templates', 'icon' => 'bi-file-earmark-ruled', 'routes' => ['lease-templates.index'], 'active' => ['lease-templates.*', 'contracts.*']],
                 ['label' => 'Agents & Accountants', 'icon' => 'bi-people', 'routes' => ['property-roles.index'], 'active' => ['property-roles.*']],
             ]]]);
+
+            // HR: property staff, and Terra's own staff for admins.
+            array_splice($navigation, max(count($navigation) - 1, 1), 0, [['heading' => 'HR', 'items' => [
+                ['label' => 'HR Overview', 'icon' => 'bi-person-workspace', 'routes' => ['hr.dashboard'], 'active' => ['hr.dashboard']],
+                ['label' => 'Employees', 'icon' => 'bi-person-badge', 'routes' => ['hr.employees.index'], 'active' => ['hr.employees.*']],
+                ['label' => 'Attendance', 'icon' => 'bi-calendar-check', 'routes' => ['hr.attendance.index'], 'active' => ['hr.attendance.*']],
+                ['label' => 'Leave', 'icon' => 'bi-airplane', 'routes' => ['hr.leave.index'], 'active' => ['hr.leave.*']],
+                ['label' => 'Payroll', 'icon' => 'bi-cash-coin', 'routes' => ['hr.payroll.index'], 'active' => ['hr.payroll.*', 'hr.payslips.*']],
+            ]]]);
         }
         if ($role === 'real_estate_agent') {
             $navigation[0]['items'][] = ['label' => 'Commissions', 'icon' => 'bi-cash-coin', 'routes' => ['agent.commissions.index'], 'active' => ['agent.commissions.*']];

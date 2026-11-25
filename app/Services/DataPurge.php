@@ -67,6 +67,7 @@ class DataPurge
         'payment' => RentPayment::class,
         'expense' => PropertyExpense::class,
         'contract' => SubscriptionContract::class,
+        'employee' => \App\Models\Employee::class,
     ];
 
     private int $actorId;
@@ -91,6 +92,7 @@ class DataPurge
                 $record instanceof RentPayment => $this->payments($ids),
                 $record instanceof PropertyExpense => $this->wipe(PropertyExpense::class, 'id', $ids),
                 $record instanceof SubscriptionContract => $this->contracts($ids),
+                $record instanceof \App\Models\Employee => $this->employees($ids),
             };
         });
 
@@ -173,6 +175,8 @@ class DataPurge
         }
 
         $this->buildings($this->ids(Building::class, 'property_id', $ids));
+        $this->wipe(\App\Models\PayrollRun::class, 'property_id', $ids);
+        $this->employees($this->ids(\App\Models\Employee::class, 'property_id', $ids));
         $this->wipe(PropertyManagerAssignment::class, 'property_id', $ids);
         $this->wipe(PropertyExpense::class, 'property_id', $ids);
         $this->wipe(PropertyImage::class, 'property_id', $ids);
@@ -306,6 +310,26 @@ class DataPurge
         $requestIds = $this->ids(MaintenanceRequest::class, $column, $ids);
         $this->wipe(MaintenanceRequestActivity::class, 'maintenance_request_id', $requestIds);
         $this->wipe(MaintenanceRequest::class, 'id', $requestIds);
+    }
+
+    /* ------------------------------- HR ------------------------------- */
+
+    /** Employees with their payslips (runs are recalculated), leave and attendance. */
+    private function employees(array $ids): void
+    {
+        if (! $ids) {
+            return;
+        }
+
+        $runIds = $this->ids(\App\Models\Payslip::class, 'employee_id', $ids, 'payroll_run_id');
+        $this->wipe(\App\Models\Payslip::class, 'employee_id', $ids);
+        \App\Models\PayrollRun::whereIn('id', $runIds)->get()->each(function ($run) {
+            $run->payslips()->exists() ? $run->refreshTotals() : $run->delete();
+        });
+
+        $this->wipe(\App\Models\LeaveRequest::class, 'employee_id', $ids);
+        $this->wipe(\App\Models\Attendance::class, 'employee_id', $ids);
+        $this->wipe(\App\Models\Employee::class, 'id', $ids);
     }
 
     /* -------------------------- Subscriptions ------------------------- */
