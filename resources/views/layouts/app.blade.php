@@ -430,6 +430,7 @@
                 ['label' => 'Tenants', 'icon' => 'bi-person-vcard', 'routes' => ['admin.tenants.index'], 'active' => ['admin.tenants.*']],
                 ['label' => 'Field Staff', 'icon' => 'bi-person-walking', 'routes' => ['admin.field-staff.index'], 'active' => ['admin.field-staff.*']],
                 ['label' => 'Audit Log', 'icon' => 'bi-shield-check', 'routes' => ['admin.audit-logs.index'], 'active' => ['admin.audit-logs.*']],
+                ['label' => 'Database Updates', 'icon' => 'bi-database-gear', 'routes' => ['admin.system.migrations'], 'active' => ['admin.system.migrations*']],
             ]],
             ['heading' => 'Subscribers & Billing', 'items' => [
                 ['label' => 'Subscribers', 'icon' => 'bi-person-check', 'routes' => ['admin.subscribers.index'], 'active' => ['admin.subscribers.*']],

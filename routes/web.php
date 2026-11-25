@@ -824,6 +824,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         });
     });
 
+    // Database updates from the browser (servers without a terminal).
+    Route::get('/system/migrations', [App\Http\Controllers\Admin\MigrationController::class, 'index'])->name('system.migrations');
+    Route::post('/system/migrations', [App\Http\Controllers\Admin\MigrationController::class, 'run'])
+        ->middleware('throttle:5,1')->name('system.migrations.run');
+
     Route::controller(App\Http\Controllers\Admin\FieldStaffController::class)->prefix('field-staff')->name('field-staff.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
