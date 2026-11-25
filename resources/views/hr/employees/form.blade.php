@@ -25,6 +25,29 @@
             <div class="sx-card mb-3">
                 <div class="sx-card-head"><h2>Person</h2></div>
                 <div class="sx-card-body row g-3">
+                    @if($accounts->isNotEmpty())
+                        <div class="col-12">
+                            <label for="user_id" class="form-label">Platform account <span class="sx-muted">(optional)</span></label>
+                            <select id="user_id" name="user_id" class="form-select @error('user_id') is-invalid @enderror" data-account-picker>
+                                <option value="">Not a platform user (e.g. caretaker, guard, cleaner)</option>
+                                @foreach(Employee::LINKABLE_ROLES as $role => $roleLabel)
+                                    @php $group = $accounts->filter(fn ($a) => $a['user']->role === $role); @endphp
+                                    @if($group->isNotEmpty())
+                                        <optgroup label="{{ \Illuminate\Support\Str::plural($roleLabel) }}">
+                                            @foreach($group as $a)
+                                                <option value="{{ $a['user']->id }}" @selected((string) $val('user_id') === (string) $a['user']->id)
+                                                        data-name="{{ $a['user']->name }}" data-email="{{ $a['user']->email }}" data-phone="{{ $a['user']->contactPhone() }}"
+                                                        data-job="{{ $roleLabel }}" data-employer="{{ $role === 'field_staff' ? '' : ($a['employer'] ?? '') }}">
+                                                    {{ $a['user']->name }} · {{ $a['user']->email }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
+                                @endforeach
+                            </select>
+                            <div class="form-text">Link a property manager, accountant, agent or field staff member to put them on payroll. Their name, email and phone are filled in from their account.</div>
+                        </div>
+                    @endif
                     <div class="col-md-6">
                         <label for="full_name" class="form-label">Full name</label>
                         <input id="full_name" name="full_name" required maxlength="150" class="form-control @error('full_name') is-invalid @enderror" value="{{ $val('full_name') }}">
@@ -166,4 +189,31 @@
         </div>
     </div>
 </form>
+
+@push('scripts')
+<script>
+    // Picking a platform account fills in the person's details (only empty fields, or ones still showing the previous account's values).
+    (function () {
+        var picker = document.querySelector('[data-account-picker]');
+        if (!picker) { return; }
+        var fields = { name: 'full_name', email: 'email', phone: 'phone', job: 'job_title' };
+        var previous = picker.selectedOptions[0] ? Object.assign({}, picker.selectedOptions[0].dataset) : {};
+        picker.addEventListener('change', function () {
+            var data = picker.selectedOptions[0] ? picker.selectedOptions[0].dataset : {};
+            Object.keys(fields).forEach(function (key) {
+                var input = document.getElementById(fields[key]);
+                if (input && data[key] !== undefined && (input.value === '' || input.value === (previous[key] || ''))) {
+                    input.value = data[key];
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+            var employer = document.getElementById('property_id');
+            if (employer && data.employer !== undefined && Array.prototype.some.call(employer.options, function (o) { return o.value === data.employer; })) {
+                employer.value = data.employer;
+            }
+            previous = Object.assign({}, data);
+        });
+    })();
+</script>
+@endpush
 @endsection

@@ -25,6 +25,7 @@
                     <strong style="color:var(--terra-navy,#19265d)">{{ $employee->employee_number }}</strong>
                     <span class="sx-pill {{ $employee->status_tone }}">{{ $employee->status_label }}</span>
                     <span class="sx-pill secondary">{{ Employee::EMPLOYMENT_TYPES[$employee->employment_type] ?? $employee->employment_type }}</span>
+                    @if($employee->account_role_label)<span class="sx-pill info"><i class="bi bi-person-check"></i> {{ $employee->account_role_label }} · has login</span>@endif
                 </div>
                 <div class="small sx-muted">Since {{ $employee->hire_date->format('d M Y') }}{{ $employee->end_date ? ' until ' . $employee->end_date->format('d M Y') : '' }}</div>
             </div>
@@ -57,6 +58,7 @@
             <div class="sx-card-body">
                 <dl class="sx-dl">
                     <dt>Employer</dt><dd>{{ $employee->employer_label }}</dd>
+                    @if($employee->user)<dt>Platform account</dt><dd>{{ $employee->user->email }} ({{ $employee->account_role_label }})</dd>@endif
                     <dt>Job</dt><dd>{{ $employee->job_title }}{{ $employee->department ? ' · ' . $employee->department : '' }}</dd>
                     <dt>Phone</dt><dd>{{ $employee->phone ? Phone::display($employee->phone) : '—' }}</dd>
                     <dt>Email</dt><dd>{{ $employee->email ?: '—' }}</dd>

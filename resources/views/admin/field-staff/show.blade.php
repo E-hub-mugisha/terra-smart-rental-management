@@ -33,6 +33,7 @@
             @if($digits)<a href="tel:+{{ $digits }}" class="sx-btn sx-btn-outline"><i class="bi bi-telephone"></i> Call</a>@endif
             <a href="{{ route('messages.create', ['to' => $member->user_id]) }}" class="sx-btn sx-btn-outline"><i class="bi bi-chat-dots"></i> Message</a>
             <a href="{{ route('admin.field-staff.edit', $member) }}" class="sx-btn sx-btn-outline"><i class="bi bi-pencil"></i> Edit</a>
+            <x-hr-add-button :user="$member->user" class="sx-btn sx-btn-outline" />
             <form method="POST" action="{{ route('admin.field-staff.resend-credentials', $member) }}" class="m-0" onsubmit="return confirm('Send {{ $member->user->name }} new login details by email? Their current password will stop working.');">@csrf
                 <button class="sx-btn sx-btn-outline"><i class="bi bi-envelope-arrow-up"></i> Resend credentials</button></form>
             <form method="POST" action="{{ route('admin.field-staff.toggle', $member) }}" class="m-0">@csrf

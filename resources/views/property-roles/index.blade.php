@@ -19,9 +19,10 @@
                                 <td><span class="badge rounded-pill {{ $a->role === 'agent' ? 'text-bg-info' : 'text-bg-secondary' }}">{{ $a->role === 'agent' ? 'Agent' : 'Accountant' }}</span></td>
                                 <td>{{ $a->property?->name }}</td>
                                 <td>{{ $a->commission_rate !== null ? rtrim(rtrim(number_format((float) $a->commission_rate, 2), '0'), '.') . '%' : '—' }}</td>
-                                <td class="text-end">
+                                <td class="text-end text-nowrap">
+                                    <x-hr-add-button :user="$a->user" :property-id="$a->property_id" class="btn btn-sm btn-light me-2" />
                                     @if($isAdmin)
-                                        <form method="POST" action="{{ route('property-roles.destroy', $a) }}" onsubmit="return confirm('Remove this assignment?')">@csrf @method('DELETE')
+                                        <form method="POST" action="{{ route('property-roles.destroy', $a) }}" class="d-inline" onsubmit="return confirm('Remove this assignment?')">@csrf @method('DELETE')
                                             <button class="btn btn-sm btn-link text-danger p-0">Remove</button></form>
                                     @endif
                                 </td>

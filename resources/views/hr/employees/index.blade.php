@@ -9,6 +9,27 @@
 @section('content')
 @include('hr._nav')
 
+@if($notYetEmployees->isNotEmpty())
+    <div class="sx-card mb-3">
+        <div class="sx-card-head">
+            <h2><i class="bi bi-person-plus me-1"></i> Team members not yet on HR</h2>
+            <span class="small sx-muted">Property managers, accountants, agents{{ auth()->user()->isAdmin() ? ' and field staff' : '' }} you work with</span>
+        </div>
+        <div class="sx-card-body d-flex flex-wrap gap-2">
+            @foreach($notYetEmployees as $row)
+                @php $u = $row['user']; @endphp
+                <div class="d-flex align-items-center gap-2 border rounded-3 px-2 py-1">
+                    <div class="small">
+                        <strong>{{ $u->name }}</strong>
+                        <div class="sx-muted">{{ Employee::LINKABLE_ROLES[$u->role] ?? $u->role }}{{ $u->role === 'field_staff' ? ' · Terra' : (isset($employers[$row['employer']]) ? ' · ' . $employers[$row['employer']] : '') }}</div>
+                    </div>
+                    <a href="{{ route('hr.employees.create', ['user_id' => $u->id, 'property_id' => $row['employer'] ?? '']) }}" class="btn btn-sm btn-light" aria-label="Add {{ $u->name }} to HR"><i class="bi bi-plus-lg"></i> Add</a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+@endif
+
 <div class="sx-card">
     <div class="sx-card-head flex-wrap">
         <form method="GET" class="sx-filters">
@@ -35,6 +56,7 @@
                             <span class="sx-avatar">{{ \Illuminate\Support\Str::of($e->full_name)->explode(' ')->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}</span>
                             <div>
                                 <a href="{{ route('hr.employees.show', $e) }}" class="fw-semibold text-decoration-none">{{ $e->full_name }}</a>
+                                @if($e->account_role_label)<span class="sx-pill info ms-1" title="Also a platform user">{{ $e->account_role_label }} · has login</span>@endif
                                 <div class="sx-muted small">{{ $e->employee_number }}{{ $e->phone ? ' · ' . \App\Support\Phone::display($e->phone) : '' }}</div>
                             </div>
                         </div>

@@ -27,7 +27,7 @@ class EmployeeController extends Controller
         $user = $request->user();
         $this->access->authorize($user);
 
-        $query = Employee::with('property:id,name');
+        $query = Employee::with('property:id,name', 'user:id,role');
         $this->access->applyEmployerFilter($query, $user, $request->query('employer'));
 
         $employees = $query
@@ -42,18 +42,47 @@ class EmployeeController extends Controller
         return view('hr.employees.index', [
             'employees' => $employees,
             'employers' => $this->access->employers($user),
+            'notYetEmployees' => $this->notYetEmployees($user),
         ]);
+    }
+
+    /** Linkable team members who have no HR record yet with their suggested employer. */
+    private function notYetEmployees($user)
+    {
+        $accounts = $this->access->linkableAccounts($user);
+        $linked = Employee::whereIn('user_id', $accounts->keys())->get(['user_id', 'property_id'])
+            ->map(fn ($e) => $e->user_id . ':' . ($e->property_id ?? 'terra'))->flip();
+
+        return $accounts->reject(fn ($row) => $linked->has($row['user']->id . ':' . ($row['employer'] ?? 'terra')))
+            ->values();
     }
 
     public function create(Request $request): View
     {
-        $this->access->authorize($request->user());
+        $user = $request->user();
+        $this->access->authorize($user);
 
-        return view('hr.employees.form', $this->formData($request, new Employee([
+        $employee = new Employee([
             'hire_date' => today(), 'currency' => 'RWF', 'employment_type' => 'permanent',
             'annual_leave_days' => 18, 'status' => 'active',
             'property_id' => $request->integer('property_id') ?: null,
-        ])));
+        ]);
+
+        // "Add to HR" from a team member: prefill from their account.
+        if ($request->filled('user_id')) {
+            $account = $this->access->linkableAccounts($user)->get($request->integer('user_id'));
+            abort_unless($account, 403);
+            $employee->fill([
+                'user_id' => $account['user']->id,
+                'full_name' => $account['user']->name,
+                'email' => $account['user']->email,
+                'phone' => $account['user']->contactPhone(),
+                'job_title' => Employee::LINKABLE_ROLES[$account['user']->role] ?? null,
+                'property_id' => $request->has('property_id') ? ($request->integer('property_id') ?: null) : $account['employer'],
+            ]);
+        }
+
+        return view('hr.employees.form', $this->formData($request, $employee));
     }
 
     public function store(Request $request): RedirectResponse
@@ -61,6 +90,7 @@ class EmployeeController extends Controller
         $this->access->authorize($request->user());
         $data = $this->validated($request);
         $this->access->authorizeEmployer($request->user(), $data['property_id']);
+        $this->checkAccountLink($request, $data);
 
         $employee = Employee::create($data + [
             'employee_number' => Employee::nextNumber(),
@@ -104,6 +134,7 @@ class EmployeeController extends Controller
         $this->access->authorizeEmployee($request->user(), $employee);
         $data = $this->validated($request);
         $this->access->authorizeEmployer($request->user(), $data['property_id']);
+        $this->checkAccountLink($request, $data, $employee);
 
         $employee->update($data);
 
@@ -132,12 +163,50 @@ class EmployeeController extends Controller
         return redirect()->route('hr.employees.index')->with('success', "{$name} was deleted.");
     }
 
+    /**
+     * A linked account must be one the user may add, field staff can only be
+     * Terra staff, and nobody is on the same employer's books twice.
+     */
+    private function checkAccountLink(Request $request, array $data, ?Employee $current = null): void
+    {
+        if (empty($data['user_id'])) {
+            return;
+        }
+
+        $unchanged = $current && (int) $current->user_id === (int) $data['user_id'];
+        $account = $this->access->linkableAccounts($request->user())->get((int) $data['user_id']);
+        if (! $account && ! $unchanged) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['user_id' => 'You can only add managers, accountants and agents who work on your properties.']);
+        }
+
+        $role = $account['user']->role ?? $current?->user?->role;
+        if ($role === 'field_staff' && $data['property_id'] !== null) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['property_id' => 'Field staff work for Terra: choose "Terra (internal staff)" as the employer.']);
+        }
+
+        $duplicate = Employee::where('user_id', $data['user_id'])
+            ->when($data['property_id'], fn ($q) => $q->where('property_id', $data['property_id']), fn ($q) => $q->whereNull('property_id'))
+            ->when($current, fn ($q) => $q->whereKeyNot($current->id))
+            ->exists();
+        if ($duplicate) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['user_id' => 'This person is already an employee of that employer.']);
+        }
+    }
+
     private function formData(Request $request, Employee $employee): array
     {
+        $accounts = $this->access->linkableAccounts($request->user());
+
+        // Keep an existing link visible even if the account is no longer linkable by this user.
+        if ($employee->user_id && ! $accounts->has($employee->user_id) && $employee->user) {
+            $accounts->put($employee->user_id, ['user' => $employee->user, 'property_ids' => [], 'employer' => $employee->property_id]);
+        }
+
         return [
             'employee' => $employee,
             'employers' => $this->access->employers($request->user()),
             'currencies' => self::CURRENCIES,
+            'accounts' => $accounts,
         ];
     }
 
@@ -148,6 +217,7 @@ class EmployeeController extends Controller
         $data = $request->validate([
             // Only admins can employ Terra's own staff (no property).
             'property_id' => [$request->user()->isAdmin() ? 'nullable' : 'required', 'integer', Rule::exists('properties', 'id')],
+            'user_id' => ['nullable', 'integer', Rule::exists('users', 'id')->whereIn('role', array_keys(Employee::LINKABLE_ROLES))],
             'full_name' => ['required', 'string', 'max:150'],
             'job_title' => ['required', 'string', 'max:100'],
             'department' => ['nullable', 'string', 'max:100'],
@@ -172,6 +242,7 @@ class EmployeeController extends Controller
         ], [], ['property_id' => 'employer']);
 
         $data['property_id'] = $data['property_id'] ?? null;
+        $data['user_id'] = $data['user_id'] ?? null;
 
         return $data;
     }

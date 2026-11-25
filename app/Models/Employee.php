@@ -33,7 +33,7 @@ class Employee extends Model
     public const JOB_TITLES = ['Caretaker', 'Security guard', 'Cleaner', 'Gardener', 'Electrician', 'Plumber', 'Receptionist', 'Accountant', 'Property officer'];
 
     protected $fillable = [
-        'employee_number', 'property_id', 'full_name', 'job_title', 'department', 'phone', 'email', 'national_id',
+        'employee_number', 'property_id', 'user_id', 'full_name', 'job_title', 'department', 'phone', 'email', 'national_id',
         'gender', 'date_of_birth', 'hire_date', 'end_date', 'employment_type', 'base_salary', 'currency',
         'payment_method', 'bank_name', 'account_number', 'emergency_contact_name', 'emergency_contact_phone',
         'annual_leave_days', 'status', 'notes', 'created_by',
@@ -50,7 +50,17 @@ class Employee extends Model
         ];
     }
 
+    /** Platform roles that can also be employees, with the job title suggested for each. */
+    public const LINKABLE_ROLES = [
+        'manager' => 'Property manager',
+        'accountant' => 'Accountant',
+        'agent' => 'Real estate agent',
+        'field_staff' => 'Field staff',
+    ];
+
     public function property(): BelongsTo { return $this->belongsTo(Property::class); }
+    /** The login account, when this employee is also a platform user. */
+    public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
     public function attendance(): HasMany { return $this->hasMany(Attendance::class); }
     public function leaveRequests(): HasMany { return $this->hasMany(LeaveRequest::class); }
@@ -75,6 +85,12 @@ class Employee extends Model
     public function getEmployerLabelAttribute(): string
     {
         return $this->property?->name ?? 'Terra (internal staff)';
+    }
+
+    /** e.g. "Accountant" for a linked accountant account; null when not linked. */
+    public function getAccountRoleLabelAttribute(): ?string
+    {
+        return $this->user ? (self::LINKABLE_ROLES[$this->user->role] ?? ucfirst(str_replace('_', ' ', $this->user->role))) : null;
     }
 
     public function getStatusLabelAttribute(): string

@@ -243,6 +243,74 @@ class HrModuleTest extends TestCase
         $this->actingAs($this->ownerA)->get(route('hr.dashboard'))->assertOk()->assertSee('Payroll');
     }
 
+    public function test_platform_users_can_be_added_as_employees(): void
+    {
+        // A manager and an accountant on property A, an agent on property B, and a field staff member.
+        $managerUser = User::factory()->create(['role' => 'manager', 'name' => 'Mary Manager']);
+        $manager = \App\Models\PropertyManager::forceCreate(['user_id' => $managerUser->id, 'manager_number' => 'M1', 'phone' => '+250788555111', 'status' => 'active', 'created_by' => $this->admin->id]);
+        \App\Models\PropertyManagerAssignment::forceCreate(['property_id' => $this->propertyA->id, 'property_manager_id' => $manager->id, 'start_date' => '2026-01-01', 'status' => 'active', 'assigned_by' => $this->admin->id]);
+        $accountant = User::factory()->create(['role' => 'accountant', 'name' => 'Alex Accountant']);
+        \App\Models\PropertyUserRole::create(['property_id' => $this->propertyA->id, 'user_id' => $accountant->id, 'role' => 'accountant', 'assigned_by' => $this->admin->id]);
+        $agent = User::factory()->create(['role' => 'agent', 'name' => 'Agnes Agent']);
+        \App\Models\PropertyUserRole::create(['property_id' => $this->propertyB->id, 'user_id' => $agent->id, 'role' => 'agent', 'assigned_by' => $this->admin->id]);
+        $fieldUser = User::factory()->create(['role' => 'field_staff', 'name' => 'Fred Field']);
+        \App\Models\FieldStaff::create(['user_id' => $fieldUser->id, 'staff_number' => 'FS-1', 'status' => 'active', 'phone' => '+250788000111']);
+
+        // Owner A is offered their own manager and accountant only.
+        $this->actingAs($this->ownerA)->get(route('hr.employees.index'))->assertOk()
+            ->assertSee('Team members not yet on HR')->assertSee('Mary Manager')->assertSee('Alex Accountant')
+            ->assertDontSee('Agnes Agent')->assertDontSee('Fred Field');
+
+        // "Add" prefills the form from the account.
+        $this->actingAs($this->ownerA)->get(route('hr.employees.create', ['user_id' => $managerUser->id]))->assertOk()
+            ->assertSee('value="Mary Manager"', false)->assertSee('value="Property manager"', false)->assertSee('+250788555111');
+        $this->actingAs($this->ownerA)->get(route('hr.employees.create', ['user_id' => $agent->id]))->assertForbidden();
+
+        $base = ['job_title' => 'Accountant', 'hire_date' => '2026-02-01', 'employment_type' => 'permanent', 'base_salary' => 400000,
+            'currency' => 'RWF', 'annual_leave_days' => 18, 'status' => 'active'];
+
+        $this->actingAs($this->ownerA)->post(route('hr.employees.store'), $base + ['user_id' => $accountant->id, 'property_id' => $this->propertyA->id, 'full_name' => 'Alex Accountant'])
+            ->assertRedirect();
+        $linked = Employee::where('user_id', $accountant->id)->firstOrFail();
+        $this->assertSame($this->propertyA->id, $linked->property_id);
+
+        // Not twice for the same employer; not someone else's agent; not field staff.
+        $this->actingAs($this->ownerA)->post(route('hr.employees.store'), $base + ['user_id' => $accountant->id, 'property_id' => $this->propertyA->id, 'full_name' => 'Again'])
+            ->assertSessionHasErrors('user_id');
+        $this->actingAs($this->ownerA)->post(route('hr.employees.store'), $base + ['user_id' => $agent->id, 'property_id' => $this->propertyA->id, 'full_name' => 'Agnes'])
+            ->assertSessionHasErrors('user_id');
+        $this->actingAs($this->ownerA)->post(route('hr.employees.store'), $base + ['user_id' => $fieldUser->id, 'property_id' => $this->propertyA->id, 'full_name' => 'Fred'])
+            ->assertSessionHasErrors('user_id');
+        // Tenants and owners cannot be linked at all.
+        $this->actingAs($this->admin)->post(route('hr.employees.store'), $base + ['user_id' => $this->ownerA->id, 'full_name' => 'Owner'])
+            ->assertSessionHasErrors('user_id');
+
+        // The list now shows the badge, and the accountant is no longer pending.
+        $this->actingAs($this->ownerA)->get(route('hr.employees.index'))->assertOk()->assertSee('Accountant · has login');
+        $this->assertFalse(collect(app(\App\Services\Hr\HrAccess::class)->linkableAccounts($this->ownerA))->has($agent->id));
+
+        // Field staff: admins add them as Terra staff only.
+        $this->actingAs($this->admin)->post(route('hr.employees.store'), $base + ['user_id' => $fieldUser->id, 'property_id' => $this->propertyA->id, 'full_name' => 'Fred Field'])
+            ->assertSessionHasErrors('property_id');
+        $this->actingAs($this->admin)->post(route('hr.employees.store'), $base + ['user_id' => $fieldUser->id, 'full_name' => 'Fred Field', 'job_title' => 'Field staff'])
+            ->assertRedirect();
+        $this->assertNull(Employee::where('user_id', $fieldUser->id)->value('property_id'));
+
+        // Linked staff go on payroll like everyone else.
+        $this->actingAs($this->ownerA)->post(route('hr.payroll.store'), ['property_id' => $this->propertyA->id, 'month' => '2026-11', 'currency' => 'RWF']);
+        $this->assertTrue(PayrollRun::where('property_id', $this->propertyA->id)->firstOrFail()->payslips()->where('employee_id', $linked->id)->exists());
+
+        // Shortcut buttons on the profiles.
+        $this->actingAs($this->admin)->get(route('admin.field-staff.show', \App\Models\FieldStaff::where('user_id', $fieldUser->id)->first()))
+            ->assertOk()->assertSee('HR record');
+        $this->actingAs($this->admin)->get(route('admin.managers.show', $manager))->assertOk()->assertSee('Add to HR');
+        $this->actingAs($this->admin)->get(route('property-roles.index'))->assertOk()->assertSee('HR record')->assertSee('Add to HR');
+
+        // Deleting the login keeps the employee and their payslips.
+        $accountant->delete();
+        $this->assertNull($linked->fresh()->user_id);
+    }
+
     public function test_purging_a_property_removes_its_hr_data(): void
     {
         $e = $this->employee($this->propertyA);

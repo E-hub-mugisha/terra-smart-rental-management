@@ -355,6 +355,10 @@
                         </button>
                     </li>
                     <li>
+                        <x-hr-add-button :user="$manager->user" class="dropdown-item"
+                            :property-id="\App\Models\PropertyManagerAssignment::where('property_manager_id', $manager->id)->where('status', 'active')->whereNull('end_date')->value('property_id')" />
+                    </li>
+                    <li>
                         <button type="button" class="dropdown-item" onclick="window.print()">
                             <i class="bi bi-printer"></i> Print profile
                         </button>
